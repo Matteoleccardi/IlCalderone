@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_scope.html" import scope_fields with context %}
+{% block title %}Raccolte · Il Calderone{% endblock %}
+{% block content %}
+<h1>Raccolte</h1>
+<p class="muted">Gruppi di ricette con un nome: «Cena di Natale», «Pranzi veloci», «Menù d'autunno»…</p>
+<div class="cards">
+{% for c in collections %}
+  <article><a href="/raccolte/{{ c.id }}"><strong>{{ c.name }}</strong></a> <span class="badge">{{ VISIBILITY[c.visibility] }}</span>
+    <br><span class="muted">{{ c.items|length }} ricette · {{ c.owner.label }}</span></article>
+{% else %}
+  <p>Nessuna raccolta per ora.</p>
+{% endfor %}
+</div>
+<h3>Nuova raccolta</h3>
+<form method="post" action="/raccolte">
+  <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+  <label>Nome <input name="name" placeholder="es. Cena di Natale" required></label>
+  <label>Descrizione <input name="description" placeholder="facoltativa"></label>
+  {{ scope_fields(VISIBILITY) }}
+  <button>Crea raccolta</button>
+</form>
+{% endblock %}

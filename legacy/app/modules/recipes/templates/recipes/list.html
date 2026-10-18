@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Ricette · Il Calderone{% endblock %}
+{% block content %}
+<hgroup><h1>Ricette</h1><p>{{ recipes|length }} ricett{{ "a" if recipes|length == 1 else "e" }}{% if q %} per «{{ q }}»{% endif %}</p></hgroup>
+<form method="get" class="row" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Cerca per titolo, ingrediente o tag">
+  <label style="flex:0 0 auto"><input type="checkbox" name="mine" value="true" {% if mine %}checked{% endif %}> solo mie</label>
+  <button>Cerca</button>
+</form>
+<p><a href="/ricette/nuova" role="button">+ Nuova ricetta</a> <a href="/ricette/importa" role="button" class="secondary outline">Importa JSON</a> <a href="/ricette/esporta.json" class="secondary">Esporta le mie (JSON)</a></p>
+<table>
+  <tbody>
+  {% for r in recipes %}
+  <tr>
+    <td>{% if r.photo %}<img src="/media/{{ r.photo }}" alt="" class="thumb">{% endif %}<a href="/ricette/{{ r.id }}">{{ r.title }}</a>
+      <span class="badge">{{ VISIBILITY[r.visibility] }}</span></td>
+    <td class="muted">{% if r.time_minutes %}{{ r.time_minutes }} min · {% endif %}{{ r.servings }} porz. · {{ r.owner.label }}</td>
+  </tr>
+  {% else %}
+  <tr><td>Nessuna ricetta. <a href="/ricette/nuova">Scrivine una</a> o importa il ricettario di partenza.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

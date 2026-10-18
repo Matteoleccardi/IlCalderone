@@ -1,0 +1,13 @@
+<article>
+  <header><strong>Raccolte</strong></header>
+  {% if ctx.in_collections %}<p>In: {% for c in ctx.in_collections %}<a href="/raccolte/{{ c.id }}">{{ c.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if ctx.my_collections %}
+  <form method="post" action="/raccolte/aggiungi" class="row">
+    <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+    <input type="hidden" name="recipe_id" value="{{ r.id }}">
+    <input type="hidden" name="back" value="/ricette/{{ r.id }}">
+    <select name="cid">{% for c in ctx.my_collections %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+    <button class="secondary">Aggiungi a raccolta</button>
+  </form>
+  {% else %}<p class="muted"><a href="/raccolte">Crea una raccolta</a> per raggruppare le ricette.</p>{% endif %}
+</article>

@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Il Calderone recipe (calderone-recipe/1)",
+  "description": "One recipe. Exchange files (import/export) contain the content fields; files in data/recipes/ add owner, visibility, household, timestamps and the version number. Files in data/history/<id>/ are earlier versions with the same shape.",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "title",
+    "servings",
+    "ingredients",
+    "steps"
+  ],
+  "properties": {
+    "format": {
+      "const": "calderone-recipe/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8,64}$",
+      "description": "Stable id, 32 hex chars. Re-importing the same id is skipped."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "servings": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "time_minutes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      }
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "qty",
+          "unit"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "qty": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Quantity for `servings` people; null = q.b. (to taste)."
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "g, ml, p. (pieces), tbs (every spoon; 1 teaspoon = 1/3 tbs), spicchi, foglie, cm, q.b. …"
+          },
+          "optional": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 5000
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "taken_from": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Where the recipe comes from (book, site, grandma…); optional. Shown as \"Source: <creator> · from <taken_from>\". Files before v0.3 called it \"source\" (still accepted on import)."
+    },
+    "source": {
+      "type": "string",
+      "description": "Deprecated name of taken_from."
+    },
+    "photo": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "File name inside data/media/ (usually <id>.jpg)."
+    },
+    "photo_data": {
+      "type": "string",
+      "pattern": "^data:image/",
+      "description": "Exchange files only: the photo embedded as a data: URI."
+    },
+    "parents": {
+      "type": "array",
+      "description": "Variant graph: edges parent -> this recipe. The graph must stay acyclic.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "variant",
+              "adaptation",
+              "inspired"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "owner": {
+      "type": "string",
+      "description": "User id (storage only)."
+    },
+    "visibility": {
+      "enum": [
+        "private",
+        "household",
+        "shared"
+      ]
+    },
+    "household": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rev": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Version number, +1 at every in-place edit (storage only). Earlier versions are in data/history/<id>/<rev>.json."
+    },
+    "updated_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "User id of whoever made the last edit (storage only)."
+    }
+  }
+}

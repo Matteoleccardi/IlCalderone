@@ -1,0 +1,87 @@
+{
+  "format": "calderone-recipe/1",
+  "id": "b2f1c6d3e4a5b6c7d8e9f0a1b2c3d4e5",
+  "title": "Spaghetti aglio, olio e pangrattato tostato",
+  "servings": 2,
+  "time_minutes": 20,
+  "category": "Primo",
+  "tags": [
+    "veloce",
+    "dispensa"
+  ],
+  "ingredients": [
+    {
+      "name": "Spaghetti",
+      "qty": 180,
+      "unit": "g",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Aglio",
+      "qty": 2,
+      "unit": "spicchi",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Olio extravergine di oliva",
+      "qty": 4,
+      "unit": "tbs",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Peperoncino",
+      "qty": 1,
+      "unit": "p.",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Pangrattato",
+      "qty": 30,
+      "unit": "g",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Limoni",
+      "qty": 0.5,
+      "unit": "p.",
+      "optional": true,
+      "note": "solo la scorza"
+    },
+    {
+      "name": "Sale",
+      "qty": null,
+      "unit": "q.b.",
+      "optional": false,
+      "note": ""
+    }
+  ],
+  "steps": [
+    {
+      "title": "Tostate il pangrattato",
+      "text": "In una padella tostate il pangrattato con un cucchiaio d'olio finché è dorato, poi mettetelo da parte."
+    },
+    {
+      "title": "Cuocete la pasta",
+      "text": "Cuocete gli spaghetti in abbondante acqua salata; intanto scaldate l'olio rimasto con aglio e peperoncino."
+    },
+    {
+      "title": "Unite e servite",
+      "text": "Saltate la pasta nel condimento con poca acqua di cottura e servite coperta di pangrattato e scorza di limone."
+    }
+  ],
+  "notes": "La «mollica» tostata è il formaggio dei poveri del Sud Italia.",
+  "taken_from": "",
+  "photo": null,
+  "parents": [
+    {
+      "id": "a1e0b5c2d3f4a5b6c7d8e9f0a1b2c3d4",
+      "kind": "variant",
+      "note": "con pangrattato al posto del prezzemolo"
+    }
+  ]
+}

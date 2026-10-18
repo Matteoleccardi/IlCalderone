@@ -1,0 +1,141 @@
+@if (recipe(); as r) {
+  <article class="recipe">
+    <header class="recipe-head">
+      @if (r.photo) {
+        <img class="hero-photo" [src]="api.photoUrl(r.id, r.updated)" [alt]="'recipe.photo_alt' | t: { title: r.title }" />
+      }
+      <div>
+        <h1>{{ r.title }}</h1>
+        <p class="meta">
+          @if (r.time_minutes) { <span>⏱ {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
+          @if (r.category) { <span>{{ r.category }}</span> }
+          <app-visibility [value]="r.visibility" />
+          @if (r.visibility === 'household') { <span>{{ households.name(r.household) }}</span> }
+          @if (r.rev > 1 && r.updated_by !== r.owner) {
+            <span class="muted">{{ 'recipe.edited_by' | t: { name: r.updated_by_name ?? ('common.deleted_user' | t) } }}</span>
+          }
+        </p>
+        @if (r.tags.length) {
+          <p class="tags">
+            @for (t of r.tags; track t) { <a class="tag" [routerLink]="['/ricette']" [queryParams]="{ q: t }">#{{ t }}</a> }
+          </p>
+        }
+        <div class="actions">
+          @if (r.can_edit) {
+            <a class="button primary" [routerLink]="['/ricette', r.id, 'modifica']">{{ 'common.edit' | t }}</a>
+          }
+          <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t">⑂ {{ 'recipe.make_variant' | t }}</button>
+          <a class="button" [href]="api.url('recipes/' + r.id + '/json')" download>{{ 'recipe.download_json' | t }}</a>
+          @if (r.rev > 1) {
+            <a class="button" [routerLink]="['/ricette', r.id, 'cronologia']">{{ 'history.link' | t: { n: r.rev } }}</a>
+          }
+          @if (r.is_owner) {
+            <button type="button" class="danger" (click)="remove()">{{ 'common.delete' | t }}</button>
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="recipe-body">
+      <section class="ingredients card">
+        <div class="servings">
+          <h2>{{ 'recipe.ingredients' | t }}</h2>
+          <div class="stepper" role="group" [attr.aria-label]="'recipe.servings_title' | t">
+            <button type="button" (click)="changeServings(-1)" [attr.aria-label]="'recipe.one_less' | t">−</button>
+            <span aria-live="polite">{{ 'recipe.people' | t: { n: servings() } }}</span>
+            <button type="button" (click)="changeServings(1)" [attr.aria-label]="'recipe.one_more' | t">+</button>
+          </div>
+        </div>
+        @if (servings() !== r.servings) {
+          <p class="muted small">{{ 'recipe.rescaled' | t: { from: r.servings, n: servings() } }}
+            <button type="button" class="link" (click)="servings.set(r.servings)">{{ 'recipe.reset' | t }}</button></p>
+        }
+        <table class="ing">
+          <tbody>
+            @for (i of scaled(); track $index) {
+              <tr [class.optional]="i.optional">
+                <td>{{ i.name }}
+                  @if (i.optional) { <span class="muted small">({{ 'recipe.optional' | t }})</span> }
+                  @if (i.note) { <span class="muted small">— {{ i.note }}</span> }
+                </td>
+                <td class="num">{{ i.qty === null ? '' : (i.qty | qty) }}</td>
+                <td>{{ i.unit | unit }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="steps">
+        <h2>{{ 'recipe.steps' | t }}</h2>
+        <ol>
+          @for (s of r.steps; track $index) {
+            <li>
+              @if (s.title) { <strong>{{ s.title }}</strong> }
+              <p>{{ s.text }}</p>
+            </li>
+          }
+        </ol>
+        @if (r.notes) {
+          <h2>{{ 'recipe.notes' | t }}</h2>
+          <p class="pre">{{ r.notes }}</p>
+        }
+        <p class="muted small source">
+          {{ 'recipe.source' | t: { name: r.owner_name ?? ('common.deleted_user' | t) } }}
+          @if (r.taken_from) { · {{ 'recipe.taken_from' | t: { from: r.taken_from } }} }
+        </p>
+      </section>
+    </div>
+
+    <section class="card graph">
+      <h2>{{ 'recipe.variants' | t }}</h2>
+      @if (r.parents_info.length) {
+        <p>{{ 'recipe.derives_from' | t }}
+          @for (p of r.parents_info; track p.id) {
+            <span class="chip">
+              <a [routerLink]="['/ricette', p.id]">{{ p.title }}</a> <span class="muted small">({{ 'kind.' + p.kind | t }})</span>
+              @if (r.is_owner) { <button type="button" class="link" (click)="unlink(p.id)" [title]="'recipe.unlink' | t">✕</button> }
+            </span>
+          }
+        </p>
+      }
+      @if (r.children_info.length) {
+        <p>{{ 'recipe.children' | t }}
+          @for (c of r.children_info; track c.id) {
+            <span class="chip"><a [routerLink]="['/ricette', c.id]">{{ c.title }}</a></span>
+          }
+        </p>
+      }
+      @if (!r.parents_info.length && !r.children_info.length) {
+        <p class="muted">{{ 'recipe.no_variants' | t }}</p>
+      }
+      @if (r.is_owner) {
+        @if (!linking()) {
+          <button type="button" class="link" (click)="startLinking()">{{ 'recipe.link_parent' | t }}</button>
+        } @else {
+          <form class="row" (ngSubmit)="link()">
+            <label>{{ 'recipe.parent' | t }}
+              <select name="parent" [(ngModel)]="linkParent" required>
+                <option value="" disabled>{{ 'common.choose' | t }}</option>
+                @for (c of candidates(); track c.id) { <option [value]="c.id">{{ c.title }}</option> }
+              </select>
+            </label>
+            <label>{{ 'recipe.relation' | t }}
+              <select name="kind" [(ngModel)]="linkKind">
+                @for (k of kinds; track k) { <option [value]="k">{{ 'kind.' + k | t }}</option> }
+              </select>
+            </label>
+            <button type="submit">{{ 'recipe.link' | t }}</button>
+            <button type="button" class="link" (click)="linking.set(false)">{{ 'common.cancel' | t }}</button>
+          </form>
+        }
+      }
+    </section>
+
+    @for (p of panels(); track $index) {
+      <ng-container *ngComponentOutlet="p; inputs: { recipe: r }" />
+    }
+  </article>
+} @else {
+  <p class="muted">{{ 'common.loading' | t }}</p>
+}

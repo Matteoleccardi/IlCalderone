@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/collections/<id>.json (calderone-collection/1)",
+  "type": "object",
+  "required": ["format", "id", "name", "owner", "visibility", "items"],
+  "properties": {
+    "format": {"const": "calderone-collection/1"},
+    "id": {"type": "string"},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "owner": {"type": "string"},
+    "visibility": {"enum": ["private", "household", "shared"]},
+    "household": {"type": ["string", "null"]},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["recipe"],
+        "properties": {"recipe": {"type": "string"}, "note": {"type": "string"}, "added": {"type": "string"}}
+      }
+    },
+    "created": {"type": "string"},
+    "updated": {"type": "string"}
+  }
+}

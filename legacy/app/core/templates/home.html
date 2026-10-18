@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ciao {{ user.label }}!</h1>
+<p>Cosa bolle in pentola oggi?</p>
+<div class="cards">
+  {% for label, url in nav %}
+  <article><a href="{{ url }}"><strong>{{ label }}</strong></a></article>
+  {% endfor %}
+  <article><a href="/famiglie"><strong>Famiglie</strong></a><br><span class="muted">Condividi ricette e raccolte con chi vive con te.</span></article>
+</div>
+{% endblock %}

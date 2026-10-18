@@ -1,0 +1,40 @@
+<a class="skip" href="#main">{{ 'app.skip' | t }}</a>
+<header class="topbar">
+  <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
+    <span class="logo" aria-hidden="true">🍲</span> Il Calderone
+  </a>
+  @if (session.user(); as u) {
+    <nav [attr.aria-label]="'app.nav_label' | t">
+      @for (n of nav(); track n.path) {
+        <a [routerLink]="n.path" routerLinkActive="active">{{ n.label | t }}</a>
+      }
+    </nav>
+    <div class="who">
+      <a routerLink="/account" routerLinkActive="active" [title]="'account.title' | t">{{ u.display }}</a>
+      <button type="button" class="link" (click)="logout()">{{ 'app.logout' | t }}</button>
+    </div>
+  }
+</header>
+
+<main id="main">
+  <router-outlet />
+</main>
+
+<footer class="foot">
+  <span>Il Calderone {{ session.state()?.version }}</span>
+  <label class="lang">
+    <span class="sr-only">{{ 'app.language' | t }}</span>
+    <select [value]="i18n.lang" (change)="setLang($any($event.target).value)" [attr.aria-label]="'app.language' | t">
+      @for (l of langs; track l.code) { <option [value]="l.code" [selected]="l.code === i18n.lang">{{ l.name }}</option> }
+    </select>
+  </label>
+</footer>
+
+<div class="toasts" aria-live="polite">
+  @for (t of notify.toasts(); track t.id) {
+    <div class="toast" [class.error]="t.kind === 'error'" role="status">
+      <span>{{ t.text }}</span>
+      <button type="button" class="link" (click)="notify.dismiss(t.id)" [attr.aria-label]="'app.close' | t">✕</button>
+    </div>
+  }
+</div>

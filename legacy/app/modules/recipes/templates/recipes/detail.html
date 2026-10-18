@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ r.title }} · Il Calderone{% endblock %}
+{% block content %}
+<article>
+  <header>
+    <hgroup>
+      <h1>{{ r.title }}</h1>
+      <p>{% if r.time_minutes %}⏱ {{ r.time_minutes }} minuti · {% endif %}{{ r.category }} · di {{ r.owner.label }}
+        <span class="badge">{{ VISIBILITY[r.visibility] }}{% if r.visibility == "household" and r.household %}: {{ r.household.name }}{% endif %}</span>
+        {% for t in r.tag_list %}<span class="badge">#{{ t }}</span>{% endfor %}</p>
+    </hgroup>
+  </header>
+  {% if r.photo %}<img src="/media/{{ r.photo }}" alt="{{ r.title }}" class="recipe-photo">{% endif %}
+
+  <div class="grid">
+    <section>
+      <h3>Ingredienti</h3>
+      <form method="get" class="row">
+        <label>Porzioni <input type="number" name="porzioni" min="1" max="100" value="{{ servings }}"></label>
+        <button class="secondary small">Ricalcola</button>
+      </form>
+      <table class="ingredients"><tbody>
+        {% for i in r.ingredients %}
+        <tr><td>{{ (i.qty * factor if i.qty is not none else none)|qty(i.unit) }}</td>
+            <td>{{ i.name }}{% if i.optional %} <span class="muted">(facoltativo)</span>{% endif %}{% if i.note %} <span class="muted">— {{ i.note }}</span>{% endif %}</td></tr>
+        {% endfor %}
+      </tbody></table>
+    </section>
+    <section>
+      <h3>Preparazione</h3>
+      <ol class="steps">
+        {% for s in r.steps %}<li>{% if s.title %}<strong>{{ s.title }}</strong><br>{% endif %}{{ s.text }}</li>{% endfor %}
+      </ol>
+      {% if r.notes %}<h4>Note</h4><p>{{ r.notes }}</p>{% endif %}
+    </section>
+  </div>
+
+  {% if parents or children %}
+  <section>
+    <h3>Varianti</h3>
+    {% if parents %}<p>Deriva da: {% for p, k in parents %}<a href="/ricette/{{ p.id }}">{{ p.title }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+    {% if children %}<p>Varianti: {% for c, k in children %}<a href="/ricette/{{ c.id }}">{{ c.title }}</a> <span class="muted">({{ c.owner.label }})</span>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  </section>
+  {% endif %}
+
+  <footer>
+    {% if can_edit %}<a href="/ricette/{{ r.id }}/modifica" role="button">Modifica</a>{% endif %}
+    <form method="post" action="/ricette/{{ r.id }}/variante" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+      <button class="secondary">Crea una variante</button>
+    </form>
+    <a href="/ricette/{{ r.id }}/json" class="secondary">JSON</a>
+    {% if can_edit %}
+    <form method="post" action="/ricette/{{ r.id }}/elimina" class="inline" onsubmit="return confirm('Eliminare questa ricetta?')">
+      <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+      <button class="secondary outline">Elimina</button>
+    </form>
+    {% endif %}
+  </footer>
+</article>
+{% for p in panels %}{% with ctx = p.ctx %}{% include p.template %}{% endwith %}{% endfor %}
+{% endblock %}

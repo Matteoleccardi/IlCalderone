@@ -1,0 +1,35 @@
+{
+  "name": "ilcalderone-web",
+  "version": "0.2.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build && node scripts/publish.mjs",
+    "watch": "ng build --watch --configuration development",
+    "test": "node scripts/check-i18n.mjs && ng test --watch=false",
+    "test:watch": "ng test",
+    "api": "php -S 127.0.0.1:8080 -t ../public ../public/api/router-dev.php",
+    "check-i18n": "node scripts/check-i18n.mjs"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.27",
+    "@angular/cli": "^21.2.27",
+    "@angular/compiler-cli": "^21.2.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  },
+  "license": "MIT"
+}

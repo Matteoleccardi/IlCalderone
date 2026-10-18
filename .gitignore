@@ -1,0 +1,31 @@
+# Private data (accounts, recipes, photos, sessions) — never commit
+public/data/*
+!public/data/.htaccess
+!public/data/index.php
+public/api/config.local.php
+
+# Angular build output published into public/ (rebuild with: cd web && npm run build)
+public/*.js
+public/*.css
+public/*.html
+public/*.svg
+public/*.ico
+public/media/
+public/.build-manifest.json
+public/3rdpartylicenses.txt
+public/prerendered-routes.json
+
+# Personal starter recipes transcribed from a commercial app: not redistributable
+seed/
+
+# Old v0.1 data
+legacy/data/
+
+# Tooling
+node_modules/
+web/dist/
+web/.angular/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store

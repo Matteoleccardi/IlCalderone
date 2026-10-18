@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Famiglie · Il Calderone{% endblock %}
+{% block content %}
+<h1>Famiglie</h1>
+<p class="muted">Una famiglia è un gruppo di persone che condividono ricette e raccolte (e in futuro menù, dispensa e lista della spesa).</p>
+{% for m in user.memberships %}
+<article>
+  <header><strong>{{ m.household.name }}</strong> <span class="badge">{{ "proprietario" if m.role == "owner" else "membro" }}</span></header>
+  <ul>
+    {% for mm in m.household.memberships %}
+    <li>{{ mm.user.label }} <span class="muted">@{{ mm.user.username }}</span>
+      {% if (m.role == "owner" and mm.user_id != user.id) or mm.user_id == user.id %}
+      <form method="post" action="/famiglie/{{ m.household_id }}/membri/{{ mm.user_id }}/rimuovi" class="inline">
+        <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+        <button class="secondary outline small">{{ "esci" if mm.user_id == user.id else "rimuovi" }}</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if m.role == "owner" %}
+  <form method="post" action="/famiglie/{{ m.household_id }}/membri" class="row">
+    <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+    <input name="username" placeholder="nome utente da aggiungere" required>
+    <button>Aggiungi</button>
+  </form>
+  {% endif %}
+</article>
+{% else %}
+<p>Non fai ancora parte di nessuna famiglia.</p>
+{% endfor %}
+<h3>Nuova famiglia</h3>
+<form method="post" action="/famiglie" class="row">
+  <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+  <input name="name" placeholder="es. Casa Rossi" required>
+  <button>Crea</button>
+</form>
+{% endblock %}

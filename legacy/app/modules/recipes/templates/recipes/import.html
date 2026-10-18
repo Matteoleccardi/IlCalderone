@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_scope.html" import scope_fields with context %}
+{% block title %}Importa ricette · Il Calderone{% endblock %}
+{% block content %}
+<h1>Importa ricette (JSON)</h1>
+<p class="muted">Formato <code>calderone-recipe/1</code>: un file per ricetta o un file con una lista. Le ricette già presenti (stesso id) vengono saltate.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+{% if created is defined %}
+<article>
+  <p><strong>{{ created|length }}</strong> ricette importate.</p>
+  <ul>{% for r in created %}<li><a href="/ricette/{{ r.id }}">{{ r.title }}</a></li>{% endfor %}</ul>
+  {% if msgs %}<ul class="muted">{% for m in msgs %}<li>{{ m }}</li>{% endfor %}</ul>{% endif %}
+</article>
+{% endif %}
+<form method="post" enctype="multipart/form-data" action="/ricette/importa">
+  <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+  <input type="file" name="files" accept="application/json,.json" multiple required>
+  {{ scope_fields(VISIBILITY) }}
+  <button>Importa</button>
+</form>
+{% endblock %}

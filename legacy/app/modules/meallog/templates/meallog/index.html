@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Cosa ho mangiato? · Il Calderone{% endblock %}
+{% block content %}
+<h1>Cosa ho mangiato?</h1>
+<form method="post" action="/diario/aggiungi">
+  <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+  <div class="grid">
+    <label>Giorno <input type="date" name="day" value="{{ today.isoformat() }}"></label>
+    <label>Pasto <select name="meal">{% for k, v in MEALS.items() %}<option value="{{ k }}" {% if k == "cena" %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+    <label>Porzioni <input name="servings" inputmode="decimal" placeholder="facoltativo"></label>
+  </div>
+  <div class="grid">
+    <label>Ricetta <select name="recipe_id"><option value="">— nessuna (scrivi sotto) —</option>{% for r in recipes %}<option value="{{ r.id }}">{{ r.title }}</option>{% endfor %}</select></label>
+    <label>Oppure scrivi <input name="text" placeholder="es. Pizza margherita da Gino"></label>
+  </div>
+  <label>Nota <input name="note" placeholder="facoltativa"></label>
+  <button>Annota</button>
+</form>
+
+{% if top %}
+<article><header><strong>Le più mangiate negli ultimi 90 giorni</strong></header>
+  <ol>{% for r, n in top %}<li><a href="/ricette/{{ r.id }}">{{ r.title }}</a> <span class="muted">× {{ n }}</span></li>{% endfor %}</ol>
+</article>
+{% endif %}
+
+<h3>Ultimi {{ giorni }} giorni</h3>
+{% for day, entries in by_day.items() %}
+  <h5>{{ day.strftime("%d/%m/%Y") }}</h5>
+  <ul>{% for e in entries %}
+    <li><span class="badge">{{ MEALS.get(e.meal, e.meal) }}</span>
+      {% if e.recipe_id %}<a href="/ricette/{{ e.recipe_id }}">{{ e.text }}</a>{% else %}{{ e.text }}{% endif %}
+      {% if e.servings %}<span class="muted">· {{ e.servings|qty }} porz.</span>{% endif %}
+      {% if e.note %}<span class="muted">— {{ e.note }}</span>{% endif %}
+      <form method="post" action="/diario/{{ e.id }}/elimina" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token(request) }}"><button class="secondary outline small">×</button></form>
+    </li>{% endfor %}</ul>
+{% else %}
+  <p class="muted">Ancora niente: annota la cena di stasera!</p>
+{% endfor %}
+<p><a href="/diario?giorni=90">Mostra 90 giorni</a> · <a href="/diario?giorni=365">un anno</a></p>
+{% endblock %}

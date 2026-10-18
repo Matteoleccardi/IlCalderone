@@ -1,0 +1,12 @@
+<article>
+  <header><strong>Cosa ho mangiato?</strong>
+    {% if ctx.times_eaten %}<span class="muted">· mangiata {{ ctx.times_eaten }} volt{{ "a" if ctx.times_eaten == 1 else "e" }}, l'ultima il {{ ctx.last_eaten.strftime("%d/%m/%Y") }}</span>{% endif %}</header>
+  <form method="post" action="/diario/aggiungi" class="row">
+    <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+    <input type="hidden" name="recipe_id" value="{{ r.id }}">
+    <input type="hidden" name="back" value="/ricette/{{ r.id }}">
+    <input type="date" name="day" value="{{ ctx.today.isoformat() }}">
+    <select name="meal">{% for k, v in ctx.MEALS.items() %}<option value="{{ k }}" {% if k == "cena" %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+    <button class="secondary">L'ho mangiata</button>
+  </form>
+</article>

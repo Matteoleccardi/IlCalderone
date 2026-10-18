@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/users.json (calderone-users/1)",
+  "type": "object",
+  "required": [
+    "format",
+    "users"
+  ],
+  "properties": {
+    "format": {
+      "const": "calderone-users/1"
+    },
+    "users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "password_hash",
+          "admin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 32
+          },
+          "display": {
+            "type": "string"
+          },
+          "password_hash": {
+            "type": "string",
+            "description": "PHP password_hash() output (bcrypt/argon2)."
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "string"
+          },
+          "lang": {
+            "enum": [
+              "it",
+              "en",
+              "de",
+              "fr",
+              null
+            ],
+            "description": "Interface language chosen by the user (null = follow the browser)."
+          }
+        }
+      }
+    }
+  }
+}

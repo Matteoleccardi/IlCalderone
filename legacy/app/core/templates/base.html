@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Il Calderone{% endblock %}</title>
+  <link rel="stylesheet" href="/static/pico.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+<header class="container">
+  <nav>
+    <ul><li><a href="/" class="brand">🍲 Il Calderone</a></li></ul>
+    {% if user %}
+    <ul>
+      {% for label, url in nav %}<li><a href="{{ url }}">{{ label }}</a></li>{% endfor %}
+      <li><a href="/famiglie">Famiglie</a></li>
+      <li>
+        <form method="post" action="/logout" class="inline">
+          <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+          <button class="secondary outline small" title="Esci">{{ user.label }} · esci</button>
+        </form>
+      </li>
+    </ul>
+    {% endif %}
+  </nav>
+</header>
+<main class="container">
+  {% for msg in pop_flash(request) %}<div class="flash">{{ msg }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="container muted">Il Calderone v{{ app_version }}</footer>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_scope.html" import scope_fields with context %}
+{% block title %}{{ "Modifica" if r else "Nuova ricetta" }} · Il Calderone{% endblock %}
+{% block content %}
+<h1>{{ "Modifica «" ~ r.title ~ "»" if r else "Nuova ricetta" }}</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" enctype="multipart/form-data" action="{{ '/ricette/' ~ r.id ~ '/modifica' if r else '/ricette/nuova' }}">
+  <input type="hidden" name="csrf" value="{{ csrf_token(request) }}">
+  <label>Titolo <input name="title" value="{{ r.title if r else '' }}" required></label>
+  <div class="grid">
+    <label>Porzioni <input type="number" name="servings" min="1" value="{{ r.servings if r else 4 }}"></label>
+    <label>Tempo (minuti) <input type="number" name="time_minutes" min="0" value="{{ r.time_minutes if r and r.time_minutes else '' }}"></label>
+    <label>Categoria <input name="category" value="{{ r.category if r else 'Piatto unico' }}"></label>
+  </div>
+  <label>Tag <input name="tags" value="{{ r.tags if r else '' }}" placeholder="autunno, veloce, natale"></label>
+  <label>Ingredienti
+    <textarea name="ingredients_text" rows="10" class="code" placeholder="Zucca (pulita) | 300 | g&#10;Cipolla | 1 | p. | facoltativo&#10;Sale | q.b.">{{ ingredients_text }}</textarea>
+    <small>Una riga per ingrediente: <code>Nome | quantità | unità | facoltativo o nota</code>. Quantità: 2, 0,5, 1/3 o q.b. Unità come nel foglio: g, ml, p., tbs, spicchi, foglie, rametti, cm.</small>
+  </label>
+  <label>Preparazione
+    <textarea name="steps_text" rows="12" placeholder="Preparate il soffritto&#10;Tritate la cipolla…&#10;&#10;Cuocete la zucca&#10;Aggiungete…">{{ steps_text }}</textarea>
+    <small>Un passaggio per blocco, blocchi separati da una riga vuota; la prima riga di un blocco è il titolo del passaggio.</small>
+  </label>
+  <label>Note <textarea name="notes" rows="3">{{ r.notes if r else '' }}</textarea></label>
+  <label>Foto <input type="file" name="photo" accept="image/*"><small>Solo la foto del piatto.</small></label>
+  {% if r and r.photo %}<label><input type="checkbox" name="remove_photo" value="true"> Rimuovi la foto attuale</label>{% endif %}
+  {{ scope_fields(VISIBILITY, r.visibility if r else "private", r.household_id if r else None) }}
+  <button>Salva</button>
+  {% if r %}<a href="/ricette/{{ r.id }}" class="secondary">Annulla</a>{% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+# Il Calderone — Apache configuration (also used by Altervista and most shared PHP hosts).
+Options -Indexes
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # The JSON data folder is never served (see also data/.htaccess)
+  RewriteRule ^data(/|$) - [F,L]
+  # API: /api/anything -> api/index.php (the PHP router reads the original URL)
+  RewriteCond %{REQUEST_URI} !/api/index\.php
+  RewriteRule ^api(/.*)?$ api/index.php [L,QSA]
+  # Angular routes: anything that is not a real file goes to index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>

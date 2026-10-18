@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/menus/<id>.json (calderone-menu/1)",
+  "description": "A cycle of `weeks` weeks that repeats forever from `start` (a Monday). Private menus belong to their owner; household menus to a household (every member can edit them).",
+  "type": "object",
+  "required": [
+    "format",
+    "id",
+    "name",
+    "owner",
+    "visibility",
+    "start",
+    "weeks",
+    "meals",
+    "active",
+    "items"
+  ],
+  "properties": {
+    "format": {
+      "const": "calderone-menu/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8,64}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "notes": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "visibility": {
+      "enum": [
+        "private",
+        "household"
+      ]
+    },
+    "household": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "start": {
+      "type": "string",
+      "format": "date",
+      "description": "Monday of week 1."
+    },
+    "weeks": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "meals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "colazione",
+          "pranzo",
+          "cena",
+          "spuntino"
+        ]
+      }
+    },
+    "season": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "from",
+            "to"
+          ],
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^\\d\\d-\\d\\d$"
+            },
+            "to": {
+              "type": "string",
+              "pattern": "^\\d\\d-\\d\\d$"
+            }
+          },
+          "description": "Active only between these MM-DD days (may wrap around the new year)."
+        }
+      ]
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "week",
+          "day",
+          "meal"
+        ],
+        "properties": {
+          "week": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "day": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "1 = Monday … 7 = Sunday"
+          },
+          "meal": {
+            "enum": [
+              "colazione",
+              "pranzo",
+              "cena",
+              "spuntino"
+            ]
+          },
+          "recipe": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "servings": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0,
+            "description": "null = the recipe's own servings"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "created": {
+      "type": "string"
+    },
+    "updated": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

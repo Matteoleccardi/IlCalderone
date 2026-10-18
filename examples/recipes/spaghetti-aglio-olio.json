@@ -1,0 +1,74 @@
+{
+  "format": "calderone-recipe/1",
+  "id": "a1e0b5c2d3f4a5b6c7d8e9f0a1b2c3d4",
+  "title": "Spaghetti aglio, olio e peperoncino",
+  "servings": 2,
+  "time_minutes": 15,
+  "category": "Primo",
+  "tags": [
+    "veloce",
+    "dispensa"
+  ],
+  "ingredients": [
+    {
+      "name": "Spaghetti",
+      "qty": 180,
+      "unit": "g",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Aglio",
+      "qty": 2,
+      "unit": "spicchi",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Olio extravergine di oliva",
+      "qty": 3,
+      "unit": "tbs",
+      "optional": false,
+      "note": ""
+    },
+    {
+      "name": "Peperoncino",
+      "qty": 1,
+      "unit": "p.",
+      "optional": false,
+      "note": "fresco o secco"
+    },
+    {
+      "name": "Prezzemolo",
+      "qty": null,
+      "unit": "q.b.",
+      "optional": true,
+      "note": ""
+    },
+    {
+      "name": "Sale",
+      "qty": null,
+      "unit": "q.b.",
+      "optional": false,
+      "note": ""
+    }
+  ],
+  "steps": [
+    {
+      "title": "Cuocete la pasta",
+      "text": "Portate a bollore abbondante acqua salata e cuocete gli spaghetti."
+    },
+    {
+      "title": "Preparate il condimento",
+      "text": "Intanto scaldate dolcemente l'olio con l'aglio a fettine e il peperoncino, senza far scurire l'aglio."
+    },
+    {
+      "title": "Saltate",
+      "text": "Scolate la pasta al dente tenendo un mestolo d'acqua di cottura e saltatela in padella con il condimento. Completate con prezzemolo tritato."
+    }
+  ],
+  "notes": "",
+  "taken_from": "",
+  "photo": null,
+  "parents": []
+}

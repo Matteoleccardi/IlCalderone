@@ -1,0 +1,21 @@
+{# Visibility + household fields, shared by every module that has scoped objects. #}
+{% macro scope_fields(VISIBILITY, current="private", current_household=None) %}
+<div class="grid">
+  <label>Visibilità
+    <select name="visibility">
+      {% for key, label in VISIBILITY.items() %}
+        <option value="{{ key }}" {% if key == current %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <small>Privata: solo tu · Famiglia: i membri della famiglia scelta · Condivisa: tutti gli utenti.</small>
+  </label>
+  <label>Famiglia
+    <select name="household_id">
+      <option value="">—</option>
+      {% for m in user.memberships %}
+        <option value="{{ m.household_id }}" {% if m.household_id == current_household %}selected{% endif %}>{{ m.household.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</div>
+{% endmacro %}

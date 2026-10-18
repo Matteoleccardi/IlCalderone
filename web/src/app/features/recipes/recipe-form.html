@@ -1,0 +1,113 @@
+@if (loaded()) {
+  <h1>{{ (id() ? 'form.edit_title' : 'recipes.new') | t }}</h1>
+  <form class="recipe-form" (ngSubmit)="save()">
+    <section class="card">
+      <label>{{ 'form.title' | t }} <input name="title" [(ngModel)]="title" required maxlength="200" /></label>
+      <div class="row">
+        <label>{{ 'form.people' | t }} <input name="servings" type="number" min="1" max="100" [(ngModel)]="servings" required /></label>
+        <label>{{ 'form.time' | t }} <input name="time" type="number" min="1" [(ngModel)]="time" /></label>
+        <label>{{ 'form.category' | t }}
+          <input name="category" [(ngModel)]="category" list="categories" [placeholder]="'form.category_placeholder' | t" />
+          <datalist id="categories">@for (c of vocab().categories; track c) { <option [value]="c"></option> }</datalist>
+        </label>
+      </div>
+      <label>{{ 'form.tags' | t }} <span class="muted small">{{ 'form.tags_hint' | t }}</span>
+        <input name="tags" [(ngModel)]="tags" />
+      </label>
+      @if (!existing() || existing()!.is_owner) {
+        <app-scope-picker [(visibility)]="visibility" [(household)]="household" />
+      } @else {
+        <p class="muted small">{{ 'form.household_edit' | t: { name: existing()!.owner_name ?? '' } }}</p>
+      }
+    </section>
+
+    <section class="card">
+      <div class="page-head">
+        <h2>{{ 'form.ingredients_and_steps' | t }}</h2>
+        <button type="button" class="link" (click)="toggleText()">
+          {{ (textMode() ? 'form.back_to_rows' : 'form.as_text') | t }}
+        </button>
+      </div>
+
+      @if (textMode()) {
+        <label>{{ 'form.text_ingredients' | t }} <code>{{ 'form.text_format' | t }}</code>
+          <textarea name="ingText" rows="10" [(ngModel)]="ingText" [placeholder]="'form.text_placeholder' | t"></textarea>
+        </label>
+        <label>{{ 'form.text_steps' | t }}
+          <textarea name="stepText" rows="12" [(ngModel)]="stepText"></textarea>
+        </label>
+      } @else {
+        <h3>{{ 'recipe.ingredients' | t }}</h3>
+        <p class="muted small">{{ 'form.qty_hint' | t: { n: servings } }}</p>
+        <datalist id="ingredients">@for (i of vocab().ingredients; track i) { <option [value]="i"></option> }</datalist>
+        <datalist id="units">@for (u of vocab().units; track u) { <option [value]="u"></option> }</datalist>
+        <div class="ing-rows">
+          @for (row of rows(); track $index; let i = $index) {
+            <div class="ing-row">
+              <input [name]="'n' + i" [(ngModel)]="row.name" [placeholder]="'form.ingredient' | t" list="ingredients" [attr.aria-label]="'form.ingredient' | t" />
+              <input [name]="'q' + i" [(ngModel)]="row.qty" [placeholder]="'form.qty' | t" class="qty" [attr.aria-label]="'form.qty_label' | t" />
+              <input [name]="'u' + i" [(ngModel)]="row.unit" [placeholder]="'form.unit' | t" class="unit" list="units" [attr.aria-label]="'form.unit' | t" />
+              <input [name]="'x' + i" [(ngModel)]="row.note" [placeholder]="'form.note' | t" class="note" [attr.aria-label]="'form.note' | t" />
+              <label class="check" [title]="'recipe.optional' | t"><input type="checkbox" [name]="'o' + i" [(ngModel)]="row.optional" /> {{ 'form.optional_short' | t }}</label>
+              <span class="tools">
+                <button type="button" class="icon" (click)="move(rows, i, -1)" [attr.aria-label]="'common.move_up' | t">↑</button>
+                <button type="button" class="icon" (click)="move(rows, i, 1)" [attr.aria-label]="'common.move_down' | t">↓</button>
+                <button type="button" class="icon" (click)="removeRow(i)" [attr.aria-label]="'common.remove' | t">✕</button>
+              </span>
+            </div>
+          }
+        </div>
+        <button type="button" (click)="addRow()">+ {{ 'form.ingredient' | t }}</button>
+
+        <h3>{{ 'recipe.steps' | t }}</h3>
+        @for (s of steps(); track $index; let i = $index) {
+          <div class="step-edit">
+            <div class="row">
+              <strong class="step-n">{{ i + 1 }}</strong>
+              <input [name]="'st' + i" [(ngModel)]="s.title" [placeholder]="'form.step_title' | t" [attr.aria-label]="'form.step_title' | t" />
+              <span class="tools">
+                <button type="button" class="icon" (click)="move(steps, i, -1)" [attr.aria-label]="'common.move_up' | t">↑</button>
+                <button type="button" class="icon" (click)="move(steps, i, 1)" [attr.aria-label]="'common.move_down' | t">↓</button>
+                <button type="button" class="icon" (click)="removeStep(i)" [attr.aria-label]="'common.remove' | t">✕</button>
+              </span>
+            </div>
+            <textarea [name]="'sx' + i" [(ngModel)]="s.text" rows="3" [attr.aria-label]="'form.step_text' | t"></textarea>
+          </div>
+        }
+        <button type="button" (click)="addStep()">+ {{ 'form.step' | t }}</button>
+      }
+    </section>
+
+    <section class="card">
+      <h2>{{ 'form.photo' | t }}</h2>
+      <div class="photo-edit">
+        @if (preview()) {
+          <img [src]="preview()" [alt]="'form.new_photo' | t" />
+        } @else if (existing()?.photo && !removePhoto()) {
+          <img [src]="api.photoUrl(existing()!.id, existing()!.updated)" [alt]="'form.current_photo' | t" />
+        }
+        <div>
+          <input type="file" accept="image/*" (change)="pickPhoto($event)" [attr.aria-label]="'form.pick_photo' | t" />
+          @if ((existing()?.photo || preview()) && !removePhoto()) {
+            <button type="button" class="link" (click)="removePhoto.set(true); newPhoto.set(null); preview.set(null)">{{ 'form.remove_photo' | t }}</button>
+          }
+          <p class="muted small">{{ 'form.photo_hint' | t }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <label>{{ 'recipe.notes' | t }} <textarea name="notes" rows="3" [(ngModel)]="notes"></textarea></label>
+      <label>{{ 'form.taken_from' | t }} <span class="muted small">{{ 'form.taken_from_hint' | t }}</span>
+        <input name="taken_from" [(ngModel)]="takenFrom" [placeholder]="'form.taken_from_placeholder' | t" />
+      </label>
+    </section>
+
+    <div class="actions sticky">
+      <button type="submit" class="primary" [disabled]="busy()">{{ (busy() ? 'common.saving' : 'common.save') | t }}</button>
+      <a class="button" [routerLink]="id() ? ['/ricette', id()] : ['/ricette']">{{ 'common.cancel' | t }}</a>
+    </div>
+  </form>
+} @else {
+  <p class="muted">{{ 'common.loading' | t }}</p>
+}

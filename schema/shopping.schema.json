@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/shopping/<space>/<monday>.json (calderone-shopping/1)",
+  "description": "What is stored on top of the live shopping list of one space and week (the list itself is computed from the menus). Item keys are \"<lowercase name>|<lowercase unit>\", or \"x:<id>\" for extra items.",
+  "type": "object",
+  "required": [
+    "format",
+    "week",
+    "checked",
+    "extra"
+  ],
+  "properties": {
+    "format": {
+      "const": "calderone-shopping/1"
+    },
+    "week": {
+      "type": "string",
+      "format": "date"
+    },
+    "checked": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ticked item keys."
+    },
+    "extra": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "qty": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "added": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string",
+            "description": "Display name of who moved it here from a personal list."
+          }
+        }
+      }
+    },
+    "moved": {
+      "type": [
+        "object",
+        "array"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Personal lists only: item key → household id it was moved to."
+    }
+  }
+}
