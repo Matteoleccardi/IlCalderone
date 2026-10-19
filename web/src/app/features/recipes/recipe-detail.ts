@@ -48,6 +48,11 @@ export class RecipeDetail {
       .filter((f) => !f.module || this.session.has(f.module))
       .flatMap((f) => f.recipePanels ?? []),
   );
+  protected actions = computed(() =>
+    this.features
+      .filter((f) => !f.module || this.session.has(f.module))
+      .flatMap((f) => f.recipeActions ?? []),
+  );
 
   protected scaled = computed(() => {
     const r = this.recipe();

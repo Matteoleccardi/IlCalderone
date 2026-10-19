@@ -15,6 +15,7 @@ import { I18n, TPipe } from '../../core/i18n';
 import { MEALS, Meal, Menu, MenuItem, RecipeSummary, Visibility } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
+import { Pick, RecipePicker } from '../../shared/recipe-picker';
 import { ScopePicker } from '../../shared/scope-picker';
 
 /**
@@ -23,7 +24,7 @@ import { ScopePicker } from '../../shared/scope-picker';
  */
 @Component({
   selector: 'app-menu-edit',
-  imports: [FormsModule, RouterLink, ScopePicker, TPipe],
+  imports: [FormsModule, RouterLink, RecipePicker, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (menu(); as m) {
@@ -134,11 +135,6 @@ import { ScopePicker } from '../../shared/scope-picker';
         }
       </div>
 
-      <datalist id="menu-recipes">
-        @for (r of candidates(); track r.id) {
-          <option [value]="r.title"></option>
-        }
-      </datalist>
       <div class="menu-grid" [style.--meals]="meals().length">
         <div class="head"></div>
         @for (x of meals(); track x) {
@@ -190,13 +186,11 @@ import { ScopePicker } from '../../shared/scope-picker';
                 </div>
               }
               @if (m.can_edit) {
-                <input
-                  class="add"
-                  list="menu-recipes"
+                <app-recipe-picker
+                  [recipes]="candidates()"
                   [placeholder]="'menus.add_dish' | t"
-                  [attr.aria-label]="'menus.add_dish' | t"
-                  (change)="add(d + 1, x, $any($event.target))"
-                  (keydown.enter)="$event.preventDefault(); $any($event.target).blur()"
+                  [dashed]="true"
+                  (picked)="add(d + 1, x, $event)"
                 />
               }
             </div>
@@ -327,12 +321,9 @@ export class MenuEdit {
     this.touch();
   }
 
-  /** Typed text: a recipe if it matches a title exactly, otherwise free text. */
-  protected add(day: number, meal: Meal, el: HTMLInputElement): void {
-    const text = el.value.trim();
-    el.value = '';
-    if (!text) return;
-    const r = this.candidates().find((c) => c.title.toLowerCase() === text.toLowerCase());
+  /** A picked recipe, or free text. */
+  protected add(day: number, meal: Meal, p: Pick): void {
+    const r = p.recipe;
     const it: MenuItem = r
       ? {
           week: this.week(),
@@ -345,7 +336,7 @@ export class MenuEdit {
           available: true,
           recipe_servings: r.servings,
         }
-      : { week: this.week(), day, meal, recipe: null, text, servings: null };
+      : { week: this.week(), day, meal, recipe: null, text: p.text, servings: null };
     this.items.update((l) => [...l, it]);
     this.touch();
   }

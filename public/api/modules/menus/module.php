@@ -79,6 +79,31 @@ return [
             });
         });
 
+        // Add one dish to a slot: {week, day, meal, recipe | text, servings?} (the "Add to menu" button).
+        $app->post('/menus/{id}/items', function (Request $r, array $p) use ($auth, $svc, $view, $store) {
+            $u = $auth->require();
+            return $store->locked(function () use ($u, $r, $p, $svc, $view) {
+                $m = $svc->load($u, $p['id'], true);
+                $d = $r->json();
+                $week = (int) ($d['week'] ?? 0);
+                $day = (int) ($d['day'] ?? 0);
+                $meal = (string) ($d['meal'] ?? '');
+                if ($week < 1 || $week > $m['weeks'] || $day < 1 || $day > 7 || !in_array($meal, $m['meals'], true)) {
+                    throw new HttpError(400, 'menu_slot_invalid');
+                }
+                $before = count($m['items']);
+                $item = ['week' => $week, 'day' => $day, 'meal' => $meal, 'recipe' => $d['recipe'] ?? null,
+                    'text' => $d['text'] ?? '', 'servings' => $d['servings'] ?? null];
+                $m = $svc->clean($u, ['items' => [...$m['items'], $item]], $m);
+                if (count($m['items']) === $before) {
+                    throw new HttpError(400, 'menu_dish_required');
+                }
+                $m['updated'] = Util::now();
+                $m['updated_by'] = $u['id'];
+                return $view($u, $svc->save($m));
+            });
+        });
+
         $app->delete('/menus/{id}', function (Request $r, array $p) use ($auth, $svc) {
             $u = $auth->require();
             $svc->delete($svc->load($u, $p['id'], true));

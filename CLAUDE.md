@@ -67,9 +67,13 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
     only with an `{n}` param. Client-side errors: `throw new AppError('key', params)`. Language = account `lang` or browser;
     changing it reloads the page. Stored values (`meal.cena`, `kind.variant`, `field.title`) are translated via key prefixes.
   - `core/api.ts` makes promise calls to relative `api/…` URLs and throws `ApiError` with the server's message.
-  - `features/<x>/<x>.feature.ts` exports a `Feature` (module, routes, nav, `recipePanels`), registered in `features.registry.ts`.
+  - `features/<x>/<x>.feature.ts` exports a `Feature` (module, routes, nav, `recipePanels`, `recipeActions`), registered in `features.registry.ts`.
     The routes match only when the PHP module is enabled.
   - Recipe-page panels are components with `recipe = input.required<Recipe>()`, rendered via `NgComponentOutlet`.
+    Recipe actions (e.g. menus' "Add to menu") take `recipe: RecipeRef` and `compact` (true on cards) and appear on
+    every recipe card and in the recipe page's buttons.
+  - Recipe choosers use `shared/recipe-picker.ts` (own suggestion list, alphabetical via `I18n.compare`), never
+    `<datalist>`: phone browsers support it badly.
   - Text formats shared with v0.1 are in `core/text-formats.ts`.
 - Units: every spoon is `tbs` (1 cucchiaino = 1/3 tbs), plus `g`, `ml`, `p.`, `spicchi`, `foglie`, `cm`, `q.b.`
   (stored as is; only `q.b.` is translated on display).

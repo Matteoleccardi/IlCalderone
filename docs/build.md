@@ -180,6 +180,7 @@ Example: a "wine cellar" feature (the real `menus` and `shopping` modules follow
      nav: [{ path: '/cantina', label: 'nav.wines' }],          // labels and titles are translation keys
      routes: [{ path: 'cantina', loadComponent: () => import('./wines').then((m) => m.Wines), title: 'nav.wines' }],
      recipePanels: [],          // optional components shown on every recipe page (input: recipe)
+     recipeActions: [],         // optional buttons on every recipe card and recipe page (inputs: recipe, compact)
    };
    ```
 

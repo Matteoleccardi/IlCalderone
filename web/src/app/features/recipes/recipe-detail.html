@@ -24,6 +24,9 @@
           @if (r.can_edit) {
             <a class="button primary" [routerLink]="['/ricette', r.id, 'modifica']">{{ 'common.edit' | t }}</a>
           }
+          @for (a of actions(); track $index) {
+            <ng-container *ngComponentOutlet="a; inputs: { recipe: r, compact: false }" />
+          }
           <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t">⑂ {{ 'recipe.make_variant' | t }}</button>
           <a class="button" [href]="api.url('recipes/' + r.id + '/json')" download>{{ 'recipe.download_json' | t }}</a>
           @if (r.rev > 1) {

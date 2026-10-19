@@ -74,6 +74,8 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   recipes, household-readable diaries, menus (N-week cycles, seasons, personal and household), the plan of the coming
   days and "Tonight" with one-click "I ate it", live shopping lists with pantry, ticks, extra items and moving personal
   items to the household list, and the interface in Italian, English, German and French.
+  Then, after the first phone test: a phone-friendly recipe picker in the menu editor (alphabetical, ignores case) and
+  "Add to menu" on every recipe card and recipe page (choose menu, week, day and meal).
 - **v0.4: deploy and hardening**:
   - a first real Altervista deploy;
   - data backup as a zip from the admin page;

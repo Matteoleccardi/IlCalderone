@@ -295,6 +295,29 @@ def test_menus_and_plan(admin, client):
     assert len(admin.get(f"/menus/{m['id']}").json()["items"]) == 1
 
 
+def test_add_one_dish_to_a_menu(admin, client):
+    bob = make_user(admin, client, "bob")
+    carl = make_user(admin, client, "carl")
+    h = household(admin, "bob")
+    a = admin.post("/recipes", RECIPE).json()
+    mine = bob.post("/recipes", PRIVATE).json()
+    m = bob.post("/menus", {"name": "Di casa", "visibility": "household", "household": h["id"], "weeks": 2,
+                            "items": [{"week": 1, "day": 1, "meal": "cena", "text": "Minestrone"}]}).json()
+    # a household member adds a dish; the slot keeps what was there
+    r = admin.post(f"/menus/{m['id']}/items", {"week": 2, "day": 5, "meal": "cena", "recipe": a["id"], "servings": 3}).json()
+    assert [(i["week"], i["day"], i.get("title") or i["text"], i["servings"]) for i in r["items"]] == \
+        [(1, 1, "Minestrone", None), (2, 5, RECIPE["title"], 3)]
+    r = admin.post(f"/menus/{m['id']}/items", {"week": 2, "day": 5, "meal": "cena", "text": "Insalata"}).json()
+    assert len(r["items"]) == 3
+    # refused: a slot outside the menu, nothing to add, a recipe not everyone can see, someone outside the household
+    assert admin.post(f"/menus/{m['id']}/items", {"week": 3, "day": 1, "meal": "cena", "text": "x"}).json()["code"] == "menu_slot_invalid"
+    assert admin.post(f"/menus/{m['id']}/items", {"week": 1, "day": 1, "meal": "pranzo", "text": "x"}).json()["code"] == "menu_slot_invalid"
+    assert admin.post(f"/menus/{m['id']}/items", {"week": 1, "day": 1, "meal": "cena"}).json()["code"] == "menu_dish_required"
+    assert bob.post(f"/menus/{m['id']}/items", {"week": 1, "day": 1, "meal": "cena", "recipe": mine["id"]}).json()["code"] == "menu_recipe_hidden"
+    assert carl.post(f"/menus/{m['id']}/items", {"week": 1, "day": 1, "meal": "cena", "text": "x"}).status_code == 404
+    assert len(bob.get(f"/menus/{m['id']}").json()["items"]) == 3
+
+
 def test_shopping_list_pantry_and_moving(admin, client):
     bob = make_user(admin, client, "bob")
     carl = make_user(admin, client, "carl")

@@ -68,6 +68,8 @@ final class Messages
         'menu_not_found' => 'Menu not found',
         'menu_edit_denied' => 'You cannot edit this menu',
         'menu_name_required' => 'Give the menu a name',
+        'menu_slot_invalid' => 'This day or meal is not in the menu',
+        'menu_dish_required' => 'Choose a recipe or write a dish',
         'menu_recipe_hidden' => '"{title}" is not visible to everyone who uses this menu',
         // shopping list and pantry
         'item_not_found' => 'Item not found',

@@ -110,6 +110,13 @@ export class I18n {
     return this.has('err.' + code) ? this.t('err.' + code, p) : fallback || code;
   }
 
+  /** Alphabetical order in the interface language, ignoring case and accents ("arancia" < "Banana" < "ciliegia"). */
+  compare = (a: string, b: string): number => {
+    this.collator ??= new Intl.Collator(this.lang, { sensitivity: 'base', numeric: true });
+    return this.collator.compare(a, b);
+  };
+  private collator?: Intl.Collator;
+
   number(n: number, digits = 2): string {
     return new Intl.NumberFormat(this.lang, { maximumFractionDigits: digits, useGrouping: false }).format(n);
   }
