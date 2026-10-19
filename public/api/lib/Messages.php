@@ -14,6 +14,7 @@ final class Messages
         'not_found' => 'Not found',
         'method_not_allowed' => 'Method not allowed',
         'bad_json' => 'Invalid JSON',
+        'request_too_large' => 'Request too large (the server accepts at most {mb} MB)',
         'bad_field' => 'Invalid field "{field}"',
         'csrf' => 'Security token missing or expired: reload the page',
         'internal' => 'Internal server error',

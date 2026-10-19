@@ -90,6 +90,13 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   "seed" = starter data loaded once with `tools/seed_data.py`; the live copy is `public/data/`, and app edits never go back to `seed/`.
 - Recipe icons: optional `icon` = `<id>.icon.png` in `media/` (PNG ≤ 64 KB, ≤ 512 px), routes `/recipes/{id}/icon`, `icon_data` in exchange files.
 - Every recipe, menu and collection page shows its JSON file name (`shared/file-name.ts`).
+- Batch import (`shared/json-batch.ts`): many files / a folder / drag-and-drop, sent in chunks under the server's
+  `post_max_size` (exposed as `max_upload` in `GET /session`; a body PHP dropped gives 413 `request_too_large`).
+  Recipes are sent parents first so variant links work across chunks.
+- Kitchen timers (`core/timers.ts`, `shared/timer-dock.ts`): up to 5, a tab on the right edge of every page, stored in
+  the `calderone_timers` cookie as end times. Ringing = beep + vibration on screen, a notification through `public/sw.js`
+  (from `web/public/`) when the page is in the background. Notifications need HTTPS (or localhost) and the user's permission;
+  the timer can only ring while the site is open in some tab (no push server).
 - Menu exchange: `Menus::toExchange`/`import` (`schema/menu-exchange.schema.json`); items carry `title` so they match by title elsewhere.
 
 ## Agents (`.claude/agents/`)

@@ -1,36 +1,54 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
 import { Visibility } from '../../core/models';
-import { Notify } from '../../core/notify';
+import { SessionService } from '../../core/session';
+import { ImportResult, Item, JsonBatch, PickedFile, importInChunks } from '../../shared/json-batch';
 import { ScopePicker } from '../../shared/scope-picker';
 
-interface ImportResult {
-  created: string[];
-  messages: { code: string; params: Record<string, unknown> }[];
+/** Parents before their variants, so a variant in a later chunk finds its parent already imported. */
+export function parentsFirst(items: Item[]): Item[] {
+  const byId = new Map(items.filter((i) => typeof i['id'] === 'string').map((i) => [i['id'] as string, i]));
+  const out: Item[] = [];
+  const seen = new Set<Item>();
+  const visit = (it: Item, depth: number): void => {
+    if (seen.has(it)) return;
+    seen.add(it);
+    if (depth < 50) {
+      for (const p of Array.isArray(it['parents']) ? it['parents'] : []) {
+        const parent = byId.get(String((p as Item)?.['id'] ?? ''));
+        if (parent) visit(parent, depth + 1);
+      }
+    }
+    out.push(it);
+  };
+  items.forEach((it) => visit(it, 0));
+  return out;
 }
 
 @Component({
   selector: 'app-recipe-import',
-  imports: [FormsModule, RouterLink, ScopePicker, TPipe],
+  imports: [FormsModule, RouterLink, JsonBatch, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'import.title' | t }}</h1>
     <section class="card">
       <h2>{{ 'import.import' | t }}</h2>
       <p>{{ 'import.intro' | t }}</p>
-      <label
-        >{{ 'import.file' | t }}
-        <input type="file" accept=".json,application/json" multiple (change)="pick($event)"
-      /></label>
+      <p class="small">{{ 'batch.intro' | t }}</p>
+      <app-json-batch listKey="recipes" [unit]="'batch.recipes'" (changed)="files.set($event)" />
       @if (items().length) {
         <p>{{ 'import.ready' | t: { n: items().length } }} {{ titles() }}</p>
         <app-scope-picker [(visibility)]="visibility" [(household)]="household" />
         <button type="button" class="primary" (click)="run()" [disabled]="busy()">
           {{ 'import.run' | t }}
         </button>
+      }
+      @if (busy() && total() > 0) {
+        <progress class="batch" [max]="total()" [value]="sent()"></progress>
+        <p class="small muted">{{ 'batch.progress' | t: { done: sent(), total: total() } }}</p>
       }
       @if (result(); as res) {
         <p class="ok">{{ 'import.done' | t: { n: res.created.length } }}</p>
@@ -66,8 +84,12 @@ interface ImportResult {
 export class RecipeImport {
   protected api = inject(Api);
   protected i18n = inject(I18n);
-  private notify = inject(Notify);
-  protected items = signal<Record<string, unknown>[]>([]);
+  private session = inject(SessionService);
+  private batch = viewChild(JsonBatch);
+  protected files = signal<PickedFile[]>([]);
+  protected items = computed(() => this.files().flatMap((f) => f.items));
+  protected sent = signal(0);
+  protected total = signal(0);
   protected result = signal<ImportResult | null>(null);
   protected busy = signal(false);
   protected visibility = signal<Visibility>('shared');
@@ -79,43 +101,30 @@ export class RecipeImport {
       .map((i) => String(i['title'] ?? '?'))
       .join(', ') + (this.items().length > 8 ? '…' : '');
 
-  async pick(ev: Event): Promise<void> {
-    const input = ev.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    input.value = ''; // so picking the same file again still works
-    const all: Record<string, unknown>[] = [];
-    for (const f of files) {
-      try {
-        const data = JSON.parse(await f.text());
-        const list = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.recipes)
-            ? data.recipes
-            : [data];
-        all.push(...list.filter((x: unknown) => x && typeof x === 'object'));
-      } catch {
-        this.notify.error(this.i18n.t('import.bad_file', { name: f.name }));
-      }
-    }
-    this.items.set(all);
-    this.result.set(null);
-  }
-
   async run(): Promise<void> {
     this.busy.set(true);
+    this.result.set(null);
     try {
+      const max = this.session.state()?.max_upload ?? 8 * 1048576;
       this.result.set(
-        await this.api.post<ImportResult>('recipes/import', {
-          recipes: this.items(),
-          visibility: this.visibility(),
-          household: this.household(),
-        }),
+        await importInChunks(
+          this.api,
+          'recipes/import',
+          'recipes',
+          parentsFirst(this.items()),
+          { visibility: this.visibility(), household: this.household() },
+          max,
+          (done, total) => {
+            this.sent.set(done);
+            this.total.set(total);
+          },
+          (it) => String(it['title'] ?? '?'),
+        ),
       );
-      this.items.set([]);
-    } catch (e) {
-      this.notify.error(e);
+      this.batch()?.reset();
     } finally {
       this.busy.set(false);
+      this.total.set(0);
     }
   }
 }

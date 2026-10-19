@@ -18,6 +18,7 @@ return [
                 'needs_setup' => $auth->needsSetup(),
                 'user' => $u ? Auth::publicUser($u) : null,
                 'modules' => array_values(array_filter(array_keys($app->modules), fn($m) => $m !== 'core')),
+                'max_upload' => Request::maxBody(),
             ];
         };
 

@@ -30,6 +30,10 @@
   </label>
 </footer>
 
+@if (session.user()) {
+  <app-timer-dock />
+}
+
 <div class="toasts" aria-live="polite">
   @for (t of notify.toasts(); track t.id) {
     <div class="toast" [class.error]="t.kind === 'error'" role="status">

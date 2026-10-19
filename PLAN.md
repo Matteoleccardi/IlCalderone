@@ -80,6 +80,9 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   shown on recipe, menu and collection pages, optional 8-bit recipe icons, and two Claude Code agents with their
   tools: `menu-planner` (`tools/menu_tool.py`) and `recipe-importer` (`tools/audit_recipes.py`,
   `tools/recipe_media.py`, `tools/pack_recipes.py`).
+  Then: "I ate it" for a whole day of the plan (today or yesterday) in the diary, batch import of recipes and menus
+  (many files, a folder, drag-and-drop, sent in chunks under the server's upload limit) and up to 5 kitchen timers on
+  every page (cookie, beep, notification).
 - **v0.4: deploy and hardening**:
   - a first real Altervista deploy;
   - data backup as a zip from the admin page;
@@ -120,6 +123,8 @@ Known limitations:
 - The shopping list adds up only identical name+unit pairs: "Brodo vegetale 200 ml" and "Brodo vegetale q.b." stay two
   lines (flagged "different units"); spelling must match across recipes, as in the spreadsheet.
 - Menu seasons are edited by month in the UI (the data supports any MM-DD).
+- Timers ring only while the site is open in a tab (a phone may freeze a tab in the background after a few minutes);
+  notifications need HTTPS, so not over the plain-http NetBird test address.
 - Translations were written by the developer (Claude), not by native speakers: worth a read by one.
 
 ## 7. Open decisions for the owner

@@ -6,10 +6,11 @@ import { HouseholdsService } from './core/households';
 import { I18n, LANGS, Lang, TPipe } from './core/i18n';
 import { Notify } from './core/notify';
 import { SessionService } from './core/session';
+import { TimerDock } from './shared/timer-dock';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TimerDock, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './app.html',
 })

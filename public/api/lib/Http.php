@@ -56,11 +56,25 @@ final class Request
         return $rest;
     }
 
+    /** The largest request body PHP accepts (post_max_size), in bytes. 0 or unparsable means no limit: 64 MB then. */
+    public static function maxBody(): int
+    {
+        $v = trim((string) ini_get('post_max_size'));
+        $n = (int) $v;
+        $mult = ['k' => 1024, 'm' => 1048576, 'g' => 1073741824][strtolower(substr($v, -1))] ?? 1;
+        return $n > 0 ? $n * $mult : 64 * 1048576;
+    }
+
     /** Decoded JSON body (an object/array); {} when empty. */
     public function json(): array
     {
         if ($this->json === null) {
             $raw = file_get_contents('php://input') ?: '';
+            $length = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+            if ($raw === '' && $length > 0 && $length > self::maxBody()) {
+                // PHP drops a body larger than post_max_size: say so instead of acting on an empty request
+                throw new HttpError(413, 'request_too_large', ['mb' => round(self::maxBody() / 1048576, 1)]);
+            }
             if (trim($raw) === '') {
                 $this->json = $_POST;
             } else {

@@ -204,6 +204,20 @@ details[open] summary { margin-bottom: 1rem; }
 .day { margin-top: 1rem; font-size: 1rem; color: var(--muted); }
 .entry { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; }
 .entry .meal { min-width: 5.5rem; color: var(--muted); font-size: .875rem; }
+/* diary: confirm what was planned (meallog/plan-confirm.ts) */
+.segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.segmented button { border: 0; border-radius: 0; background: transparent; padding: .4rem .9rem; min-height: 2.5rem; }
+.segmented button.on { background: var(--accent); color: #fff; }
+label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0, 1fr); align-items: center; gap: .25rem .6rem;
+  white-space: normal; padding: .5rem 0; min-height: 2.75rem; }
+.plan-row input { width: 1.25rem; height: 1.25rem; margin: 0; }
+.plan-row .meal { grid-column: 2 / -1; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+.plan-row .meal ~ * { grid-row: 2; }
+.plan-row input { grid-row: 1 / span 3; }
+.plan-row app-recipe-icon { grid-column: 2; display: flex; }
+.plan-row .dish { grid-column: 3; }
+.plan-row .badge, .plan-row .muted.small { grid-column: 2 / -1; grid-row: 3; justify-self: start; }
+.plan-row.done { opacity: .7; }
 .table { width: 100%; border-collapse: collapse; overflow-x: auto; display: block; }
 .table th, .table td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line); }
 .checks { list-style: none; padding: 0; }
@@ -316,3 +330,58 @@ fieldset.choice.days button { min-width: 0; padding: .35rem .1rem; }
   .topbar, .foot, .actions, .toasts, .graph, .tabs, .add-extra, .card-actions, app-add-to-menu, ul.shop .tools, details, app-collection-panel, app-meallog-panel { display: none !important; }
   .card { box-shadow: none; border: 0; padding: 0; }
 }
+
+/* batch import: file picker, folder, drag-and-drop */
+label.button { display: inline-flex; margin: 0; }
+label.button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop-zone { border: 2px dashed var(--line); border-radius: var(--radius); padding: .75rem; margin-bottom: .75rem; }
+.drop-zone.over { border-color: var(--accent); background: var(--surface-2); }
+.drop-zone .actions, .drop-zone p:last-child { margin: 0; }
+.drop-zone .actions + p { margin-top: .5rem; }
+/* phones and tablets: no folder picker, no dragging */
+@media (pointer: coarse) {
+  .folder-only { display: none !important; }
+  .drop-zone { border: 0; padding: 0; }
+}
+ul.batch-list { max-height: 16rem; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin: 0 0 .5rem; }
+ul.batch-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 .5rem; padding: .35rem .6rem; }
+ul.batch-list li + li { border-top: 1px solid var(--line); }
+ul.batch-list .name { overflow-wrap: anywhere; }
+ul.batch-list .muted { grid-column: 1; }
+ul.batch-list button { grid-column: 2; grid-row: 1 / span 2; }
+ul.batch-list li.bad .muted { color: var(--danger); }
+progress.batch { width: 100%; }
+
+/* kitchen timers: a thin tab on the right edge that slides out a narrow column */
+.timer-dock {
+  --tab: 22px; --panel: 6.4rem;
+  position: fixed; right: 0; top: 34vh; z-index: 40; display: flex; align-items: flex-start;
+  transform: translateX(var(--panel)); transition: transform .2s ease; touch-action: pan-y;
+}
+.timer-dock.open { transform: none; }
+.timer-tab {
+  width: var(--tab); min-height: 56px; padding: .35rem 0; flex-direction: column; justify-content: center; gap: .25rem;
+  border-radius: 10px 0 0 10px; border-right: 0; background: var(--accent); color: var(--accent-text); border-color: var(--accent);
+  box-shadow: var(--shadow); font-size: 1rem;
+}
+.timer-tab-left { writing-mode: vertical-rl; font-variant-numeric: tabular-nums; font-size: .72rem; letter-spacing: .02em; }
+.timer-dock.ringing .timer-tab { animation: timer-pulse 1s ease-in-out infinite; }
+@keyframes timer-pulse { 50% { filter: brightness(1.35); transform: scale(1.08); } }
+.timer-panel {
+  width: var(--panel); background: var(--surface); border: 1px solid var(--line); border-right: 0;
+  border-radius: 0 0 0 10px; box-shadow: var(--shadow); padding: .3rem; display: flex; flex-direction: column; gap: .3rem;
+}
+.timer-row { display: grid; grid-template-columns: minmax(0, 1fr) 1.6rem; gap: .2rem; align-items: stretch; margin: 0; }
+.timer-row button { padding: .2rem; justify-content: center; }
+.timer-time { flex-direction: column; gap: 0; line-height: 1.1; }
+.timer-time .big { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.timer-time .small { font-size: .68rem; color: var(--muted); font-weight: 400; }
+.timer-row.paused .big { opacity: .55; }
+.timer-row.done .timer-time { background: var(--accent); color: var(--accent-text); border-color: var(--accent); animation: timer-pulse 1s ease-in-out infinite; }
+.timer-row.done .timer-time .small { color: inherit; }
+.timer-new input { margin: 0; padding: .3rem .35rem; min-width: 0; font-size: 1rem; height: 2.3rem; }
+.timer-new input.bad { border-color: var(--danger); }
+.timer-note { margin: 0; font-size: .68rem; color: var(--muted); line-height: 1.25; }
+.timer-note button.link { padding: 0; font-size: inherit; text-align: left; }
+@media (prefers-reduced-motion: reduce) { .timer-dock { transition: none; } .timer-dock.ringing .timer-tab, .timer-row.done .timer-time { animation: none; } }
+@media print { .timer-dock { display: none !important; } }

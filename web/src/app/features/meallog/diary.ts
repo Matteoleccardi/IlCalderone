@@ -14,11 +14,12 @@ import { MEALS, MealEntry, MealLog, RecipeSummary } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { today } from './dates';
+import { PlanConfirm } from './plan-confirm';
 
 /** The meal diary. You write your own; you can read the diaries of the people in your households. */
 @Component({
   selector: 'app-diary',
-  imports: [FormsModule, RouterLink, TPipe],
+  imports: [FormsModule, RouterLink, PlanConfirm, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="page-head">
@@ -37,6 +38,9 @@ import { today } from './dates';
         </label>
       }
     </div>
+    @if ((who() === me() || who() === 'all') && session.has('menus')) {
+      <app-plan-confirm [entries]="mine()" (saved)="reload()" />
+    }
     @if (who() === me() || who() === 'all') {
       <section class="card">
         <h2>{{ 'diary.add' | t }}</h2>
@@ -157,7 +161,7 @@ export class Diary implements OnInit {
   protected i18n = inject(I18n);
   private api = inject(Api);
   private notify = inject(Notify);
-  private session = inject(SessionService);
+  protected session = inject(SessionService);
   protected meals = [...MEALS].sort((a, b) => (a === 'cena' ? -1 : b === 'cena' ? 1 : 0));
   protected log = signal<MealLog | null>(null);
   protected recipes = signal<RecipeSummary[]>([]);
@@ -170,6 +174,9 @@ export class Diary implements OnInit {
   protected text = '';
   protected servings: number | null = null;
   protected note = '';
+
+  /** Your own entries (the plan card marks what is already logged). */
+  protected mine = computed(() => (this.log()?.entries ?? []).filter((e) => e.mine ?? e.user === this.me()));
 
   protected groups = computed(() => {
     const out: { day: string; entries: MealEntry[] }[] = [];

@@ -3,6 +3,7 @@ from conftest import PRIVATE, RECIPE, make_user
 
 def test_setup_login_and_csrf(client, admin):
     s = admin.get("/session").json()
+    assert isinstance(s["max_upload"], int) and s["max_upload"] > 0  # upload limit for chunked batch import
     assert s["user"]["admin"] and not s["needs_setup"] and "recipes" in s["modules"]
     assert admin.post("/setup", {"username": "x", "password": "password123"}).status_code == 409
     anon = client()

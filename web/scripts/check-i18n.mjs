@@ -19,7 +19,7 @@ function files(dir) {
 
 const used = new Map();
 // a key-shaped string literal: two lowercase segments separated by a dot (file names like 'photo.jpg' are listed below)
-const NOT_KEYS = new Set(['photo.jpg', 'icon.png', 'q.b', 'calderone.lang']);
+const NOT_KEYS = new Set(['photo.jpg', 'icon.png', 'sw.js', 'favicon.svg', 'q.b', 'calderone.lang']);
 for (const f of files(join(root, 'src/app'))) {
   for (const m of readFileSync(f, 'utf8').matchAll(/'([a-z]+\.[a-z][a-z0-9_]*)'/g)) {
     if (!NOT_KEYS.has(m[1])) used.set(m[1], f.slice(root.length));

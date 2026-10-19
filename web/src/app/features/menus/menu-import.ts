@@ -1,28 +1,21 @@
-import { Component, inject, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, output, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
 import { Visibility } from '../../core/models';
-import { Notify } from '../../core/notify';
+import { SessionService } from '../../core/session';
+import { ImportResult, JsonBatch, PickedFile, importInChunks } from '../../shared/json-batch';
 import { ScopePicker } from '../../shared/scope-picker';
-
-interface ImportResult {
-  created: string[];
-  messages: { code: string; params: Record<string, unknown> }[];
-}
 
 /** Import menus from a calderone-menu/1 JSON file (e.g. one made by the menu-planner agent) and export them. */
 @Component({
   selector: 'app-menu-import',
-  imports: [ScopePicker, TPipe],
+  imports: [JsonBatch, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="card narrow">
       <h2>{{ 'menuio.title' | t }}</h2>
       <p class="small">{{ 'menuio.intro' | t }}</p>
-      <label
-        >{{ 'import.file' | t }}
-        <input type="file" accept=".json,application/json" multiple (change)="pick($event)"
-      /></label>
+      <app-json-batch listKey="menus" [unit]="'batch.menus'" (changed)="files.set($event)" />
       @if (items().length) {
         <p>{{ 'menuio.ready' | t: { n: items().length } }} {{ names() }}</p>
         <app-scope-picker [(visibility)]="visibility" [(household)]="household" [allowShared]="false" />
@@ -49,10 +42,12 @@ interface ImportResult {
 export class MenuImport {
   protected api = inject(Api);
   protected i18n = inject(I18n);
-  private notify = inject(Notify);
+  private session = inject(SessionService);
+  private batch = viewChild(JsonBatch);
+  protected files = signal<PickedFile[]>([]);
   /** Emitted after an import that created menus, so the list can reload. */
   readonly imported = output<void>();
-  protected items = signal<Record<string, unknown>[]>([]);
+  protected items = computed(() => this.files().flatMap((f) => f.items));
   protected result = signal<ImportResult | null>(null);
   protected busy = signal(false);
   protected visibility = signal<Visibility>('private');
@@ -64,37 +59,23 @@ export class MenuImport {
       .map((i) => `${String(i['name'] ?? '?')} (${this.i18n.t('menus.weeks', { n: Number(i['weeks'] ?? 1) })})`)
       .join(', ') + (this.items().length > 8 ? '…' : '');
 
-  async pick(ev: Event): Promise<void> {
-    const input = ev.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    input.value = ''; // so picking the same file again still works
-    const all: Record<string, unknown>[] = [];
-    for (const f of files) {
-      try {
-        const data = JSON.parse(await f.text());
-        const list = Array.isArray(data) ? data : Array.isArray(data?.menus) ? data.menus : [data];
-        all.push(...list.filter((x: unknown) => x && typeof x === 'object'));
-      } catch {
-        this.notify.error(this.i18n.t('import.bad_file', { name: f.name }));
-      }
-    }
-    this.items.set(all);
-    this.result.set(null);
-  }
-
   async run(): Promise<void> {
     this.busy.set(true);
+    this.result.set(null);
     try {
-      const res = await this.api.post<ImportResult>('menus/import', {
-        menus: this.items(),
-        visibility: this.visibility(),
-        household: this.household(),
-      });
+      const res = await importInChunks(
+        this.api,
+        'menus/import',
+        'menus',
+        this.items(),
+        { visibility: this.visibility(), household: this.household() },
+        this.session.state()?.max_upload ?? 8 * 1048576,
+        () => {},
+        (it) => String(it['name'] ?? '?'),
+      );
       this.result.set(res);
-      this.items.set([]);
+      this.batch()?.reset();
       if (res.created.length) this.imported.emit();
-    } catch (e) {
-      this.notify.error(e);
     } finally {
       this.busy.set(false);
     }

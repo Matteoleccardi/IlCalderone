@@ -16,6 +16,8 @@ export interface Session {
   needs_setup: boolean;
   user: User | null;
   modules: string[];
+  /** Largest request body the server accepts (PHP post_max_size), in bytes. */
+  max_upload?: number;
 }
 
 export interface Ingredient {
