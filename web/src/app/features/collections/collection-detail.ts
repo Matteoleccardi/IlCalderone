@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -12,27 +12,43 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
 @Component({
   selector: 'app-collection-detail',
   imports: [FormsModule, RouterLink, ScopePicker, VisibilityBadge, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (c(); as c) {
       <div class="page-head">
         <h1>{{ c.name }}</h1>
         <app-visibility [value]="c.visibility" />
       </div>
-      @if (c.description) { <p>{{ c.description }}</p> }
-      <p class="muted small">{{ 'common.by' | t: { name: c.owner_name ?? ('common.deleted_user' | t) } }}</p>
+      @if (c.description) {
+        <p>{{ c.description }}</p>
+      }
+      <p class="muted small">
+        {{ 'common.by' | t: { name: c.owner_name ?? ('common.deleted_user' | t) } }}
+      </p>
       @if (c.items.length) {
         <ul class="collection-items">
           @for (it of c.items; track it.recipe) {
             <li class="card">
               @if (it.available) {
-                @if (it.photo) { <img [src]="api.photoUrl(it.recipe)" alt="" loading="lazy" /> }
+                @if (it.photo) {
+                  <img [src]="api.photoUrl(it.recipe)" alt="" loading="lazy" />
+                }
                 <a [routerLink]="['/ricette', it.recipe]">{{ it.title }}</a>
               } @else {
                 <span class="muted">{{ 'common.unavailable_recipe' | t }}</span>
               }
-              @if (it.note) { <span class="muted small">— {{ it.note }}</span> }
+              @if (it.note) {
+                <span class="muted small">— {{ it.note }}</span>
+              }
               @if (c.can_edit) {
-                <button type="button" class="link" (click)="removeItem(it.recipe)" [attr.aria-label]="'collections.remove_item' | t">✕</button>
+                <button
+                  type="button"
+                  class="link"
+                  (click)="removeItem(it.recipe)"
+                  [attr.aria-label]="'collections.remove_item' | t"
+                >
+                  ✕
+                </button>
               }
             </li>
           }
@@ -45,11 +61,16 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
           <summary>{{ 'collections.edit' | t }}</summary>
           <form (ngSubmit)="save()">
             <label>{{ 'common.name' | t }} <input name="name" [(ngModel)]="name" required /></label>
-            <label>{{ 'common.description' | t }} <textarea name="desc" [(ngModel)]="description" rows="2"></textarea></label>
+            <label
+              >{{ 'common.description' | t }}
+              <textarea name="desc" [(ngModel)]="description" rows="2"></textarea>
+            </label>
             <app-scope-picker [(visibility)]="visibility" [(household)]="household" />
             <div class="actions">
               <button type="submit" class="primary">{{ 'common.save' | t }}</button>
-              <button type="button" class="danger" (click)="remove()">{{ 'collections.delete' | t }}</button>
+              <button type="button" class="danger" (click)="remove()">
+                {{ 'collections.delete' | t }}
+              </button>
             </div>
           </form>
         </details>
@@ -98,9 +119,14 @@ export class CollectionDetail {
 
   async save(): Promise<void> {
     try {
-      this.set(await this.api.put<Collection>(`collections/${this.id()}`, {
-        name: this.name, description: this.description, visibility: this.visibility(), household: this.household(),
-      }));
+      this.set(
+        await this.api.put<Collection>(`collections/${this.id()}`, {
+          name: this.name,
+          description: this.description,
+          visibility: this.visibility(),
+          household: this.household(),
+        }),
+      );
       this.notify.ok('collections.saved');
     } catch (e) {
       this.notify.error(e);

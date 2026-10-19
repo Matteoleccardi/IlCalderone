@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import { HouseholdsService } from '../../core/households';
@@ -10,6 +10,7 @@ import { SessionService } from '../../core/session';
 @Component({
   selector: 'app-households',
   imports: [FormsModule, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'nav.households' | t }}</h1>
     <p class="muted">{{ 'households.intro' | t }}</p>
@@ -19,18 +20,28 @@ import { SessionService } from '../../core/session';
         <ul class="plain">
           @for (m of h.members; track m.user) {
             <li>
-              {{ m.display ?? ('common.deleted_user' | t) }} @if (m.role === 'owner') { <span class="badge">{{ 'households.manager' | t }}</span> }
+              {{ m.display ?? ('common.deleted_user' | t) }}
+              @if (m.role === 'owner') {
+                <span class="badge">{{ 'households.manager' | t }}</span>
+              }
               @if (m.user === me()) {
-                <button type="button" class="link" (click)="removeMember(h, m.user, true)">{{ 'households.leave' | t }}</button>
+                <button type="button" class="link" (click)="removeMember(h, m.user, true)">
+                  {{ 'households.leave' | t }}
+                </button>
               } @else if (isOwner(h)) {
-                <button type="button" class="link" (click)="removeMember(h, m.user, false)">{{ 'common.remove' | t }}</button>
+                <button type="button" class="link" (click)="removeMember(h, m.user, false)">
+                  {{ 'common.remove' | t }}
+                </button>
               }
             </li>
           }
         </ul>
         @if (isOwner(h)) {
           <form class="row" (ngSubmit)="addMember(h, input.value); input.value = ''">
-            <label>{{ 'households.add_by_username' | t }} <input #input name="u" [placeholder]="'login.username' | t" /></label>
+            <label
+              >{{ 'households.add_by_username' | t }}
+              <input #input name="u" [placeholder]="'login.username' | t"
+            /></label>
             <button type="submit">{{ 'common.add' | t }}</button>
           </form>
         }
@@ -41,7 +52,14 @@ import { SessionService } from '../../core/session';
     <section class="card narrow">
       <h2>{{ 'households.new' | t }}</h2>
       <form (ngSubmit)="create()">
-        <label>{{ 'common.name' | t }} <input name="name" [(ngModel)]="name" required [placeholder]="'households.name_placeholder' | t" /></label>
+        <label
+          >{{ 'common.name' | t }}
+          <input
+            name="name"
+            [(ngModel)]="name"
+            required
+            [placeholder]="'households.name_placeholder' | t"
+        /></label>
         <button type="submit" class="primary">{{ 'common.create' | t }}</button>
       </form>
     </section>
@@ -85,7 +103,14 @@ export class Households implements OnInit {
   }
 
   async removeMember(h: Household, uid: string, self: boolean): Promise<void> {
-    if (!confirm(self ? this.i18n.t('households.confirm_leave', { name: h.name }) : this.i18n.t('households.confirm_remove'))) return;
+    if (
+      !confirm(
+        self
+          ? this.i18n.t('households.confirm_leave', { name: h.name })
+          : this.i18n.t('households.confirm_remove'),
+      )
+    )
+      return;
     try {
       await this.api.delete(`households/${h.id}/members/${uid}`);
       await this.hh.refresh();

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, model } from '@angular/core';
+import { Component, OnInit, inject, input, model, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HouseholdsService } from '../core/households';
 import { TPipe } from '../core/i18n';
@@ -8,6 +8,7 @@ import { Visibility } from '../core/models';
 @Component({
   selector: 'app-scope-picker',
   imports: [FormsModule, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="row">
       <label>
@@ -15,9 +16,12 @@ import { Visibility } from '../core/models';
         <select [ngModel]="visibility()" (ngModelChange)="setVisibility($event)" name="visibility">
           <option value="private">{{ 'scope.private' | t }}</option>
           <option value="household" [disabled]="!households.list().length">
-            {{ 'scope.household' | t }}{{ households.list().length ? '' : ' ' + ('scope.no_household' | t) }}
+            {{ 'scope.household' | t
+            }}{{ households.list().length ? '' : ' ' + ('scope.no_household' | t) }}
           </option>
-          @if (allowShared()) { <option value="shared">{{ 'scope.shared' | t }}</option> }
+          @if (allowShared()) {
+            <option value="shared">{{ 'scope.shared' | t }}</option>
+          }
         </select>
       </label>
       @if (visibility() === 'household' && households.list().length > 1) {

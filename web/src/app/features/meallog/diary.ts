@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -12,14 +19,18 @@ import { today } from './dates';
 @Component({
   selector: 'app-diary',
   imports: [FormsModule, RouterLink, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="page-head">
       <h1>{{ 'diary.title' | t }}</h1>
       @if ((log()?.people?.length ?? 0) > 1) {
-        <label class="inline">{{ 'diary.whose' | t }}
+        <label class="inline"
+          >{{ 'diary.whose' | t }}
           <select [ngModel]="who()" (ngModelChange)="setWho($event)" name="who">
             @for (p of log()!.people; track p.id) {
-              <option [value]="p.id">{{ p.id === me() ? ('diary.me' | t) : (p.name ?? ('common.deleted_user' | t)) }}</option>
+              <option [value]="p.id">
+                {{ p.id === me() ? ('diary.me' | t) : (p.name ?? ('common.deleted_user' | t)) }}
+              </option>
             }
             <option value="all">{{ 'diary.everyone' | t }}</option>
           </select>
@@ -31,26 +42,43 @@ import { today } from './dates';
         <h2>{{ 'diary.add' | t }}</h2>
         <form class="diary-form" (ngSubmit)="add()">
           <div class="row">
-            <label>{{ 'diary.day' | t }} <input type="date" name="day" [(ngModel)]="day" required /></label>
-            <label>{{ 'diary.meal' | t }}
+            <label
+              >{{ 'diary.day' | t }} <input type="date" name="day" [(ngModel)]="day" required
+            /></label>
+            <label
+              >{{ 'diary.meal' | t }}
               <select name="meal" [(ngModel)]="meal">
-                @for (m of meals; track m) { <option [value]="m">{{ 'meal.' + m | t }}</option> }
+                @for (m of meals; track m) {
+                  <option [value]="m">{{ 'meal.' + m | t }}</option>
+                }
               </select>
             </label>
-            <label>{{ 'diary.servings' | t }} <input type="number" name="servings" min="0.5" step="0.5" [(ngModel)]="servings" /></label>
+            <label
+              >{{ 'diary.servings' | t }}
+              <input type="number" name="servings" min="0.5" step="0.5" [(ngModel)]="servings"
+            /></label>
           </div>
           <div class="row">
-            <label>{{ 'diary.recipe' | t }}
+            <label
+              >{{ 'diary.recipe' | t }}
               <select name="recipe" [(ngModel)]="recipe">
                 <option value="">{{ 'diary.other' | t }}</option>
-                @for (r of recipes(); track r.id) { <option [value]="r.id">{{ r.title }}</option> }
+                @for (r of recipes(); track r.id) {
+                  <option [value]="r.id">{{ r.title }}</option>
+                }
               </select>
             </label>
             @if (!recipe) {
-              <label>{{ 'diary.what' | t }} <input name="text" [(ngModel)]="text" [placeholder]="'diary.what_placeholder' | t" /></label>
+              <label
+                >{{ 'diary.what' | t }}
+                <input name="text" [(ngModel)]="text" [placeholder]="'diary.what_placeholder' | t"
+              /></label>
             }
           </div>
-          <label>{{ 'form.note' | t }} <input name="note" [(ngModel)]="note" [placeholder]="'common.optional' | t" /></label>
+          <label
+            >{{ 'form.note' | t }}
+            <input name="note" [(ngModel)]="note" [placeholder]="'common.optional' | t"
+          /></label>
           <button type="submit" class="primary">{{ 'common.add' | t }}</button>
         </form>
       </section>
@@ -60,7 +88,11 @@ import { today } from './dates';
       <section>
         <div class="page-head">
           <h2>{{ 'diary.recent_days' | t }}</h2>
-          <select [ngModel]="days()" (ngModelChange)="setDays($event)" [attr.aria-label]="'diary.period' | t">
+          <select
+            [ngModel]="days()"
+            (ngModelChange)="setDays($event)"
+            [attr.aria-label]="'diary.period' | t"
+          >
             <option [ngValue]="7">{{ 'diary.days' | t: { n: 7 } }}</option>
             <option [ngValue]="30">{{ 'diary.days' | t: { n: 30 } }}</option>
             <option [ngValue]="90">{{ 'diary.days' | t: { n: 90 } }}</option>
@@ -73,12 +105,29 @@ import { today } from './dates';
             @for (e of g.entries; track e.id) {
               <li class="entry">
                 <span class="meal">{{ 'meal.' + e.meal | t }}</span>
-                @if (e.recipe && e.recipe_available) { <a [routerLink]="['/ricette', e.recipe]">{{ e.title }}</a> } @else { <span>{{ e.title }}</span> }
-                @if (e.servings) { <span class="muted small">× {{ i18n.number(e.servings) }}</span> }
-                @if (e.note) { <span class="muted small">— {{ e.note }}</span> }
-                @if (who() === 'all') { <span class="badge">{{ e.user_name ?? ('common.deleted_user' | t) }}</span> }
+                @if (e.recipe && e.recipe_available) {
+                  <a [routerLink]="['/ricette', e.recipe]">{{ e.title }}</a>
+                } @else {
+                  <span>{{ e.title }}</span>
+                }
+                @if (e.servings) {
+                  <span class="muted small">× {{ i18n.number(e.servings) }}</span>
+                }
+                @if (e.note) {
+                  <span class="muted small">— {{ e.note }}</span>
+                }
+                @if (who() === 'all') {
+                  <span class="badge">{{ e.user_name ?? ('common.deleted_user' | t) }}</span>
+                }
                 @if (e.mine) {
-                  <button type="button" class="link" (click)="remove(e)" [attr.aria-label]="'common.delete' | t">✕</button>
+                  <button
+                    type="button"
+                    class="link"
+                    (click)="remove(e)"
+                    [attr.aria-label]="'common.delete' | t"
+                  >
+                    ✕
+                  </button>
                 }
               </li>
             }
@@ -92,7 +141,10 @@ import { today } from './dates';
         <p class="muted small">{{ 'diary.top_period' | t }}</p>
         <ol>
           @for (t of log()?.top ?? []; track t.recipe) {
-            <li><a [routerLink]="['/ricette', t.recipe]">{{ t.title }}</a> <span class="muted small">× {{ t.count }}</span></li>
+            <li>
+              <a [routerLink]="['/ricette', t.recipe]">{{ t.title }}</a>
+              <span class="muted small">× {{ t.count }}</span>
+            </li>
           } @empty {
             <li class="muted">—</li>
           }
@@ -154,7 +206,12 @@ export class Diary implements OnInit {
   async add(): Promise<void> {
     try {
       await this.api.post('meallog', {
-        day: this.day, meal: this.meal, recipe: this.recipe, text: this.text, servings: this.servings, note: this.note,
+        day: this.day,
+        meal: this.meal,
+        recipe: this.recipe,
+        text: this.text,
+        servings: this.servings,
+        note: this.note,
       });
       this.text = this.note = '';
       this.recipe = '';

@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { TPipe } from '../../core/i18n';
@@ -8,6 +8,7 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
 @Component({
   selector: 'app-recipe-card',
   imports: [RouterLink, VisibilityBadge, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <a class="recipe-card" [routerLink]="['/ricette', recipe().id]">
       @if (recipe().photo) {
@@ -18,9 +19,13 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
       <div class="body">
         <strong>{{ recipe().title }}</strong>
         <span class="meta">
-          @if (recipe().time_minutes) { <span>⏱ {{ 'recipe.minutes' | t: { n: recipe().time_minutes } }}</span> }
+          @if (recipe().time_minutes) {
+            <span>⏱ {{ 'recipe.minutes' | t: { n: recipe().time_minutes } }}</span>
+          }
           <span [title]="'recipe.servings_title' | t">👥 {{ recipe().servings }}</span>
-          @if (recipe().parents.length) { <span [title]="'recipe.is_variant' | t">⑂ {{ 'kind.variant' | t }}</span> }
+          @if (recipe().parents.length) {
+            <span [title]="'recipe.is_variant' | t">⑂ {{ 'kind.variant' | t }}</span>
+          }
           <app-visibility [value]="recipe().visibility" />
         </span>
       </div>

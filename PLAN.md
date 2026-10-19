@@ -25,7 +25,7 @@ Non-goals: public sign-up at scale, social features, native apps (a PWA may come
 | Server runtime | **PHP ≥ 8.1, no framework, no Composer** | The only thing every free/cheap host has. Laravel/Symfony would be overkill for about 1,500 lines; Python was rejected (not on Altervista); Node hosting is rarely free. |
 | Storage | **JSON files**, one per entity, plus a derived index | Easy to inspect, back up, diff and migrate. SQLite/MySQL were rejected for portability. At 30 users and a few thousand recipes a full scan is milliseconds. |
 | Concurrency | One `flock` around every write; writes go to a temp file and are then renamed (atomic) | Simple and correct for low write rates. |
-| Front end | **Angular 21**: standalone components, signals, zoneless, lazy routes; plain CSS | The owner knows Angular and wants to practise it. It builds into static files any host can serve. Angular 22 needs Node ≥ 22.22.3; upgrade with `ng update` once Node is updated. |
+| Front end | **Angular 22**: standalone components, signals, zoneless, lazy routes; plain CSS; **phone-first** layout | The owner knows Angular and wants to practise it. It builds into static files any host can serve. Most use will be on phones (shopping list in the shop, tonight's dinner). |
 | API | JSON REST under `/api`, with routing that works with or without URL rewriting | One front controller (`api/index.php`). |
 | Auth | PHP sessions (HttpOnly, SameSite=Lax cookie), `password_hash`, login throttling (10 failures per IP per 15 min) | No external services. |
 | CSRF | A double-submit token: the `XSRF-TOKEN` cookie must match the `X-XSRF-TOKEN` header | Angular's HttpClient does it automatically. |
@@ -78,7 +78,6 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   - a first real Altervista deploy;
   - data backup as a zip from the admin page;
   - a recipe ownership transfer, for when an account is deleted;
-  - Angular 22 once the build machine has Node ≥ 22.22.3;
   - an xlsx/CSV export of the shopping list (today: "copy as text");
   - an admin audit of recipes;
   - an optional invite link instead of admin-created passwords.
@@ -111,7 +110,7 @@ Known limitations:
 - Not yet deployed on Altervista. Its `.htaccess` behaviour must be confirmed with the self-check.
 - Deleting a user keeps their recipes; shared ones stay visible, but nobody can edit them until ownership transfer exists.
 - The search is a substring match (no accent folding: "ragu" doesn't match "ragù").
-- Photos are not part of the history (replacing a photo cannot be undone).
+- Photos are not part of the history (replacing a photo cannot be undone); decided: text history only.
 - The shopping list adds up only identical name+unit pairs: "Brodo vegetale 200 ml" and "Brodo vegetale q.b." stay two
   lines (flagged "different units"); spelling must match across recipes, as in the spreadsheet.
 - Menu seasons are edited by month in the UI (the data supports any MM-DD).
@@ -119,9 +118,8 @@ Known limitations:
 
 ## 7. Open decisions for the owner
 
-1. **Spreadsheet**: keep `Ricette.xlsx` in parallel until you have tried the menus and the shopping list, then retire it?
-   The 9 recipes can be loaded with `tools/seed_data.py`; the 4-week menu would need to be re-entered (or I can write an importer).
-2. **Open source**: the repository name on your GitHub, and MIT or another license.
-3. **Branding**: logo and colours. A simple cauldron SVG and a warm terracotta palette are in place.
-4. **Default visibility of new collections and menus**: today *private* ("Solo io"); recipes are *shared*. Fine?
-5. **Photos in the history**: keep old photos too (uses disk space on free hosting)?
+Answered on 2026-10-19: the spreadsheet stays untouched for now; the repository will be `IlCalderone` on the owner's
+GitHub (not created yet); collections and menus stay private by default; history is text only (no old photos);
+styling waits until the main features work. **The site is phone-first**: design and test every page at phone width first.
+
+1. **License**: MIT, or another one, before publishing.

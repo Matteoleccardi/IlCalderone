@@ -1,4 +1,12 @@
-import { Component, OnInit, WritableSignal, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  WritableSignal,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -6,7 +14,14 @@ import { AppError, I18n, TPipe } from '../../core/i18n';
 import { shrinkImage } from '../../core/image';
 import { Recipe, Step, Visibility, Vocabulary } from '../../core/models';
 import { Notify } from '../../core/notify';
-import { fmtQty, ingredientsToText, parseIngredients, parseQty, parseSteps, stepsToText } from '../../core/text-formats';
+import {
+  fmtQty,
+  ingredientsToText,
+  parseIngredients,
+  parseQty,
+  parseSteps,
+  stepsToText,
+} from '../../core/text-formats';
 import { ScopePicker } from '../../shared/scope-picker';
 
 /** An ingredient row while editing: the quantity stays text ("1/2", "q.b.") until saving. */
@@ -22,6 +37,7 @@ interface Row {
 @Component({
   selector: 'app-recipe-form',
   imports: [FormsModule, RouterLink, ScopePicker, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-form.html',
 })
 export class RecipeForm implements OnInit {
@@ -59,7 +75,10 @@ export class RecipeForm implements OnInit {
   private i18n = inject(I18n);
 
   async ngOnInit(): Promise<void> {
-    this.api.get<Vocabulary>('recipes/vocabulary').then((v) => this.vocab.set(v), () => {});
+    this.api.get<Vocabulary>('recipes/vocabulary').then(
+      (v) => this.vocab.set(v),
+      () => {},
+    );
     const id = this.id();
     if (id) {
       try {
@@ -79,7 +98,12 @@ export class RecipeForm implements OnInit {
         this.takenFrom = r.taken_from;
         this.visibility.set(r.visibility);
         this.household.set(r.household);
-        this.rows.set(r.ingredients.map((i) => ({ ...i, qty: i.qty === null ? 'q.b.' : fmtQty(i.qty, this.i18n.lang) })));
+        this.rows.set(
+          r.ingredients.map((i) => ({
+            ...i,
+            qty: i.qty === null ? 'q.b.' : fmtQty(i.qty, this.i18n.lang),
+          })),
+        );
         this.steps.set(r.steps.length ? r.steps.map((s) => ({ ...s })) : [{ title: '', text: '' }]);
       } catch (e) {
         this.notify.error(e);
@@ -124,10 +148,19 @@ export class RecipeForm implements OnInit {
   toggleText(): void {
     try {
       if (!this.textMode()) {
-        this.ingText = ingredientsToText(this.collectIngredients(), this.i18n.t('form.optional_word'), this.i18n.lang);
+        this.ingText = ingredientsToText(
+          this.collectIngredients(),
+          this.i18n.t('form.optional_word'),
+          this.i18n.lang,
+        );
         this.stepText = stepsToText(this.steps().filter((s) => s.title || s.text));
       } else {
-        this.rows.set(parseIngredients(this.ingText).map((i) => ({ ...i, qty: i.qty === null ? 'q.b.' : fmtQty(i.qty, this.i18n.lang) })));
+        this.rows.set(
+          parseIngredients(this.ingText).map((i) => ({
+            ...i,
+            qty: i.qty === null ? 'q.b.' : fmtQty(i.qty, this.i18n.lang),
+          })),
+        );
         const s = parseSteps(this.stepText);
         this.steps.set(s.length ? s : [{ title: '', text: '' }]);
       }
@@ -143,7 +176,13 @@ export class RecipeForm implements OnInit {
       .map((r, n) => {
         try {
           const qty = parseQty(r.qty);
-          return { name: r.name.trim(), qty, unit: r.unit.trim() || (qty === null ? 'q.b.' : ''), optional: r.optional, note: r.note.trim() };
+          return {
+            name: r.name.trim(),
+            qty,
+            unit: r.unit.trim() || (qty === null ? 'q.b.' : ''),
+            optional: r.optional,
+            note: r.note.trim(),
+          };
         } catch (e) {
           throw new AppError('form.ingredient_error', { n: n + 1, name: r.name, error: e });
         }
@@ -176,14 +215,27 @@ export class RecipeForm implements OnInit {
       return;
     }
     const body = {
-      title: this.title, servings: this.servings, time_minutes: this.time, category: this.category,
-      tags: this.tags.split(',').map((t) => t.trim()).filter(Boolean), notes: this.notes, taken_from: this.takenFrom,
-      visibility: this.visibility(), household: this.household(), ingredients, steps,
+      title: this.title,
+      servings: this.servings,
+      time_minutes: this.time,
+      category: this.category,
+      tags: this.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+      notes: this.notes,
+      taken_from: this.takenFrom,
+      visibility: this.visibility(),
+      household: this.household(),
+      ingredients,
+      steps,
     };
     this.busy.set(true);
     try {
       const id = this.id();
-      let r = id ? await this.api.put<Recipe>(`recipes/${id}`, body) : await this.api.post<Recipe>('recipes', body);
+      let r = id
+        ? await this.api.put<Recipe>(`recipes/${id}`, body)
+        : await this.api.post<Recipe>('recipes', body);
       const photo = this.newPhoto();
       if (photo) {
         const fd = new FormData();

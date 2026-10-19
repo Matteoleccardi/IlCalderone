@@ -1,4 +1,12 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
@@ -20,21 +28,41 @@ interface Line {
 @Component({
   selector: 'app-recipe-history',
   imports: [RouterLink, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (recipe(); as r) {
-      <p><a [routerLink]="['/ricette', r.id]">← {{ r.title }}</a></p>
+      <p>
+        <a [routerLink]="['/ricette', r.id]">← {{ r.title }}</a>
+      </p>
       <h1>{{ 'history.title' | t }}</h1>
       <p class="muted">{{ 'history.intro' | t }}</p>
       <table class="table history">
-        <thead><tr><th>{{ 'history.version' | t }}</th><th>{{ 'history.when' | t }}</th><th>{{ 'history.who' | t }}</th><th>{{ 'history.what' | t }}</th><th></th></tr></thead>
+        <thead>
+          <tr>
+            <th>{{ 'history.version' | t }}</th>
+            <th>{{ 'history.when' | t }}</th>
+            <th>{{ 'history.who' | t }}</th>
+            <th>{{ 'history.what' | t }}</th>
+            <th></th>
+          </tr>
+        </thead>
         <tbody>
           @for (v of versions(); track v.rev) {
             <tr [class.selected]="v.rev === selected()">
-              <td>{{ v.rev }} @if (v.current) { <span class="badge">{{ 'history.current' | t }}</span> }</td>
+              <td>
+                {{ v.rev }}
+                @if (v.current) {
+                  <span class="badge">{{ 'history.current' | t }}</span>
+                }
+              </td>
               <td class="small">{{ i18n.dateTime(v.updated) }}</td>
               <td>{{ v.by_name ?? ('common.deleted_user' | t) }}</td>
               <td class="small">{{ v.first ? ('history.created' | t) : changes(v) }}</td>
-              <td><button type="button" class="link" (click)="show(v.rev)">{{ 'history.show' | t }}</button></td>
+              <td>
+                <button type="button" class="link" (click)="show(v.rev)">
+                  {{ 'history.show' | t }}
+                </button>
+              </td>
             </tr>
           }
         </tbody>
@@ -45,23 +73,42 @@ interface Line {
           <div class="page-head">
             <h2>{{ 'history.version_n' | t: { n: s.rev } }} — {{ s.title }}</h2>
             @if (r.can_edit && s.rev !== r.rev) {
-              <button type="button" class="primary" (click)="restore(s.rev)">{{ 'history.restore' | t }}</button>
+              <button type="button" class="primary" (click)="restore(s.rev)">
+                {{ 'history.restore' | t }}
+              </button>
             }
           </div>
-          <p class="muted small">{{ 'recipe.people' | t: { n: s.servings } }}
-            @if (s.time_minutes) { · {{ 'recipe.minutes' | t: { n: s.time_minutes } }} }
-            @if (s.category) { · {{ s.category }} }</p>
+          <p class="muted small">
+            {{ 'recipe.people' | t: { n: s.servings } }}
+            @if (s.time_minutes) {
+              · {{ 'recipe.minutes' | t: { n: s.time_minutes } }}
+            }
+            @if (s.category) {
+              · {{ s.category }}
+            }
+          </p>
           <h3>{{ 'recipe.ingredients' | t }}</h3>
           <ul class="plain diff">
-            @for (l of ingredientLines(); track $index) { <li [class]="l.mark">{{ l.text }}</li> }
+            @for (l of ingredientLines(); track $index) {
+              <li [class]="l.mark">{{ l.text }}</li>
+            }
           </ul>
           <h3>{{ 'recipe.steps' | t }}</h3>
           <ul class="plain diff">
-            @for (l of stepLines(); track $index) { <li [class]="l.mark">{{ l.text }}</li> }
+            @for (l of stepLines(); track $index) {
+              <li [class]="l.mark">{{ l.text }}</li>
+            }
           </ul>
-          @if (s.notes) { <h3>{{ 'recipe.notes' | t }}</h3> <p class="pre">{{ s.notes }}</p> }
-          @if (s.taken_from) { <p class="muted small">{{ 'recipe.taken_from' | t: { from: s.taken_from } }}</p> }
-          @if (previous()) { <p class="muted small">{{ 'history.legend' | t }}</p> }
+          @if (s.notes) {
+            <h3>{{ 'recipe.notes' | t }}</h3>
+            <p class="pre">{{ s.notes }}</p>
+          }
+          @if (s.taken_from) {
+            <p class="muted small">{{ 'recipe.taken_from' | t: { from: s.taken_from } }}</p>
+          }
+          @if (previous()) {
+            <p class="muted small">{{ 'history.legend' | t }}</p>
+          }
         </section>
       }
     } @else {
@@ -83,11 +130,15 @@ export class RecipeHistory {
   protected previous = signal<Recipe | null>(null);
 
   protected ingredientLines = computed(() =>
-    this.diff(this.shown()?.ingredients.map((i) => this.ingredientText(i)) ?? [], this.previous()?.ingredients.map((i) => this.ingredientText(i))),
+    this.diff(
+      this.shown()?.ingredients.map((i) => this.ingredientText(i)) ?? [],
+      this.previous()?.ingredients.map((i) => this.ingredientText(i)),
+    ),
   );
   protected stepLines = computed(() =>
     this.diff(
-      this.shown()?.steps.map((s, n) => `${n + 1}. ${s.title ? s.title + ': ' : ''}${s.text}`) ?? [],
+      this.shown()?.steps.map((s, n) => `${n + 1}. ${s.title ? s.title + ': ' : ''}${s.text}`) ??
+        [],
       this.previous()?.steps.map((s, n) => `${n + 1}. ${s.title ? s.title + ': ' : ''}${s.text}`),
     ),
   );
@@ -100,7 +151,10 @@ export class RecipeHistory {
 
   private async load(id: string): Promise<void> {
     try {
-      const [r, h] = await Promise.all([this.api.get<Recipe>(`recipes/${id}`), this.api.get<Revision[]>(`recipes/${id}/history`)]);
+      const [r, h] = await Promise.all([
+        this.api.get<Recipe>(`recipes/${id}`),
+        this.api.get<Revision[]>(`recipes/${id}/history`),
+      ]);
       this.recipe.set(r);
       this.versions.set(h);
       this.title.set(`${this.i18n.t('history.title')}: ${r.title}`);
@@ -122,7 +176,9 @@ export class RecipeHistory {
     try {
       const [s, p] = await Promise.all([
         this.api.get<Recipe>(`recipes/${this.id()}/history/${rev}`),
-        prevRev ? this.api.get<Recipe>(`recipes/${this.id()}/history/${prevRev}`) : Promise.resolve(null),
+        prevRev
+          ? this.api.get<Recipe>(`recipes/${this.id()}/history/${prevRev}`)
+          : Promise.resolve(null),
       ]);
       this.selected.set(rev);
       this.shown.set(s);
@@ -144,8 +200,11 @@ export class RecipeHistory {
   }
 
   private ingredientText(i: Ingredient): string {
-    const qty = i.qty === null ? this.i18n.t('qty.qb') : `${fmtQty(i.qty, this.i18n.lang)} ${i.unit}`;
-    const extra = [i.optional ? this.i18n.t('recipe.optional') : '', i.note].filter(Boolean).join(', ');
+    const qty =
+      i.qty === null ? this.i18n.t('qty.qb') : `${fmtQty(i.qty, this.i18n.lang)} ${i.unit}`;
+    const extra = [i.optional ? this.i18n.t('recipe.optional') : '', i.note]
+      .filter(Boolean)
+      .join(', ');
     return `${i.name} — ${qty}${extra ? ` (${extra})` : ''}`;
   }
 

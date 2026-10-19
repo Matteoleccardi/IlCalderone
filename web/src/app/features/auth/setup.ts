@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Api } from '../../core/api';
@@ -10,17 +10,40 @@ import { SessionService } from '../../core/session';
 @Component({
   selector: 'app-setup',
   imports: [FormsModule, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="narrow card">
       <h1>{{ 'setup.title' | t }}</h1>
       <p>{{ 'setup.intro' | t }}</p>
       <form (ngSubmit)="submit()">
-        <label>{{ 'login.username' | t }} <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="username" /></label>
-        <label>{{ 'account.display' | t }} <input name="d" [(ngModel)]="display" [placeholder]="'common.optional' | t" /></label>
-        <label>{{ 'account.password_min' | t }}
-          <input name="p" type="password" [(ngModel)]="password" required minlength="8" autocomplete="new-password" />
+        <label
+          >{{ 'login.username' | t }}
+          <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="username"
+        /></label>
+        <label
+          >{{ 'account.display' | t }}
+          <input name="d" [(ngModel)]="display" [placeholder]="'common.optional' | t"
+        /></label>
+        <label
+          >{{ 'account.password_min' | t }}
+          <input
+            name="p"
+            type="password"
+            [(ngModel)]="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          />
         </label>
-        <label>{{ 'setup.repeat' | t }} <input name="p2" type="password" [(ngModel)]="password2" required autocomplete="new-password" /></label>
+        <label
+          >{{ 'setup.repeat' | t }}
+          <input
+            name="p2"
+            type="password"
+            [(ngModel)]="password2"
+            required
+            autocomplete="new-password"
+        /></label>
         <button type="submit" class="primary" [disabled]="busy()">{{ 'setup.submit' | t }}</button>
       </form>
     </section>

@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -10,6 +10,7 @@ import { RecipeCard } from './recipe-card';
 @Component({
   selector: 'app-recipe-list',
   imports: [FormsModule, RouterLink, RecipeCard, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="page-head">
       <h1>{{ 'nav.recipes' | t }}</h1>
@@ -19,15 +20,31 @@ import { RecipeCard } from './recipe-card';
       </div>
     </div>
     <form class="search" (ngSubmit)="apply()" role="search">
-      <input name="q" [(ngModel)]="text" [placeholder]="'recipes.search_placeholder' | t" [attr.aria-label]="'recipes.search' | t" (input)="typed()" />
-      <label class="check"><input type="checkbox" name="mine" [ngModel]="mine() === '1'" (ngModelChange)="toggleMine($event)" /> {{ 'recipes.only_mine' | t }}</label>
+      <input
+        name="q"
+        [(ngModel)]="text"
+        [placeholder]="'recipes.search_placeholder' | t"
+        [attr.aria-label]="'recipes.search' | t"
+        (input)="typed()"
+      />
+      <label class="check"
+        ><input
+          type="checkbox"
+          name="mine"
+          [ngModel]="mine() === '1'"
+          (ngModelChange)="toggleMine($event)"
+        />
+        {{ 'recipes.only_mine' | t }}</label
+      >
     </form>
     @if (loading()) {
       <p class="muted">{{ 'common.loading' | t }}</p>
     } @else if (recipes().length) {
       <p class="muted small">{{ 'recipes.count' | t: { n: recipes().length } }}</p>
       <div class="grid">
-        @for (r of recipes(); track r.id) { <app-recipe-card [recipe]="r" /> }
+        @for (r of recipes(); track r.id) {
+          <app-recipe-card [recipe]="r" />
+        }
       </div>
     } @else {
       <p class="muted">{{ 'recipes.none_found' | t }}</p>
@@ -58,7 +75,9 @@ export class RecipeList {
   private async load(q: string, mine: boolean): Promise<void> {
     this.loading.set(true);
     try {
-      this.recipes.set(await this.api.get<RecipeSummary[]>('recipes', { q, mine: mine ? 1 : undefined }));
+      this.recipes.set(
+        await this.api.get<RecipeSummary[]>('recipes', { q, mine: mine ? 1 : undefined }),
+      );
     } catch (e) {
       this.notify.error(e);
     } finally {
@@ -72,10 +91,17 @@ export class RecipeList {
   }
 
   apply(): void {
-    this.router.navigate([], { queryParams: { q: this.text || null }, queryParamsHandling: 'merge', replaceUrl: true });
+    this.router.navigate([], {
+      queryParams: { q: this.text || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   toggleMine(on: boolean): void {
-    this.router.navigate([], { queryParams: { mine: on ? 1 : null }, queryParamsHandling: 'merge' });
+    this.router.navigate([], {
+      queryParams: { mine: on ? 1 : null },
+      queryParamsHandling: 'merge',
+    });
   }
 }

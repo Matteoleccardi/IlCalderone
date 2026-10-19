@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Api } from './core/api';
 import { FEATURES } from './core/features';
@@ -10,6 +10,7 @@ import { SessionService } from './core/session';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './app.html',
 })
 export class App {

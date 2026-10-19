@@ -4,7 +4,7 @@
 
 | Tool | Version | Used for |
 |---|---|---|
-| Node.js + npm | Node ≥ 20.19 or ≥ 22.12 | building the Angular app (Angular 21; Angular 22 needs ^22.22.3, ^24.15 or ≥ 26) |
+| Node.js + npm | Node ^22.22.3, ^24.15 or ≥ 26 | building the Angular app (Angular 22) |
 | PHP CLI | ≥ 8.1 | running the API locally (`php -S`) |
 | Python 3 + `pytest`, `httpx`, `jsonschema` | optional | API tests, data validation, loading recipes |
 
@@ -57,6 +57,24 @@ cd .. && php -S 127.0.0.1:8080 -t public public/api/router-dev.php
 `public/`, because the Angular builder empties its output folder, and that would delete `api/` and `data/`.
 The previous build's files are listed in `public/.build-manifest.json` and removed before copying, so old hashed bundles
 don't accumulate.
+
+### Testing on your phone
+
+The site is phone-first, so test it on a real phone. The simplest safe way is a private network such as
+[NetBird](https://netbird.io) or Tailscale on both the PC and the phone: serve on the PC's private-network address and
+open it on the phone.
+
+```bash
+cd web && npm run build && cd ..
+PHP_CLI_SERVER_WORKERS=4 php -S <PC's NetBird/Tailscale IP>:8080 -t public public/api/router-dev.php
+# phone: http://<that IP>:8080   (or the PC's NetBird name, e.g. http://mypc.netbird.cloud:8080)
+```
+
+For live reload on the phone: `npm run api` in one terminal (PHP on 127.0.0.1:8080), and
+`npx ng serve --host <that IP>` in another, then open `http://<that IP>:4200`.
+Binding to `0.0.0.0` also works but exposes the app to everyone on your Wi-Fi; prefer the private-network address.
+If the phone cannot connect, allow the port on the private-network interface in your firewall
+(Fedora: `sudo firewall-cmd --zone=trusted --change-interface=wt0`).
 
 **Sub-folder deployment** (e.g. `https://example.org/ricette/`): build with
 `npx ng build --base-href /ricette/ && node scripts/publish.mjs`.

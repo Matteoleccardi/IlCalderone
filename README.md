@@ -1,6 +1,6 @@
 # 🍲 Il Calderone
 
-**A small, self-hostable recipe book for families and groups of friends.**
+**A small, self-hostable, phone-first recipe book for families and groups of friends.**
 Private, family and shared recipes · edit history · recipe variants as a graph · weekly menus · automatic shopping list ·
 named collections · "What did I eat?" diary.
 Runs on any cheap PHP hosting (even free ones) or on your own PC. **No database**: everything is plain JSON files.
@@ -46,7 +46,7 @@ Browser ── Angular app (static HTML/JS/CSS) ──►  /api/…  PHP 8.1+ (n
 
 - **Server needs**: PHP ≥ 8.1 with the default extensions, write access to one folder, and (on Apache) `.htaccess` support.
   No database, no Node and no Python on the server.
-- **Developer needs**: Node.js ≥ 20.19 / 22.12 (to build the Angular app) and `php-cli`. Python 3 is optional, for the tests and data tools.
+- **Developer needs**: Node.js ^22.22.3, ^24.15 or ≥ 26 (to build the Angular app) and `php-cli`. Python 3 is optional, for the tests and data tools.
 
 ## Quick start (on your PC)
 

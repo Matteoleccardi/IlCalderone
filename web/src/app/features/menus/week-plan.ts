@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18n, TPipe } from '../../core/i18n';
 import { PlanDay } from '../../core/models';
@@ -7,6 +7,7 @@ import { PlanDay } from '../../core/models';
 @Component({
   selector: 'app-week-plan',
   imports: [RouterLink, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="plan">
       @for (d of days(); track d.date) {
@@ -18,11 +19,18 @@ import { PlanDay } from '../../core/models';
               <ul class="plain">
                 @for (o of m.options; track $index) {
                   <li>
-                    @if (o.recipe && o.available) { <a [routerLink]="['/ricette', o.recipe]">{{ o.title }}</a> }
-                    @else if (o.recipe) { <span class="muted">{{ 'common.unavailable_recipe' | t }}</span> }
-                    @else { {{ o.text }} }
+                    @if (o.recipe && o.available) {
+                      <a [routerLink]="['/ricette', o.recipe]">{{ o.title }}</a>
+                    } @else if (o.recipe) {
+                      <span class="muted">{{ 'common.unavailable_recipe' | t }}</span>
+                    } @else {
+                      {{ o.text }}
+                    }
                     @if (m.options.length > 1 || showMenu()) {
-                      <a class="badge" [routerLink]="['/menu', o.menu]">{{ o.space === 'me' ? ('space.me' | t) : o.space_name }} · {{ o.menu_name }}</a>
+                      <a class="badge" [routerLink]="['/menu', o.menu]"
+                        >{{ o.space === 'me' ? ('space.me' | t) : o.space_name }} ·
+                        {{ o.menu_name }}</a
+                      >
                     }
                   </li>
                 }

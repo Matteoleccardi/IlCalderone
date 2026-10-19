@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Api } from '../../core/api';
 import { RecipePanelComponent } from '../../core/features';
 import { I18n, TPipe } from '../../core/i18n';
@@ -10,6 +10,7 @@ import { today } from './dates';
 @Component({
   selector: 'app-meallog-panel',
   imports: [TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="card">
       <h2>{{ 'nav.diary' | t }}</h2>
@@ -44,7 +45,12 @@ export class MeallogPanel implements RecipePanelComponent {
 
   async ate(): Promise<void> {
     try {
-      await this.api.post('meallog', { recipe: this.recipe().id, day: today(), meal: 'cena', servings: this.recipe().servings });
+      await this.api.post('meallog', {
+        recipe: this.recipe().id,
+        day: today(),
+        meal: 'cena',
+        servings: this.recipe().servings,
+      });
       this.notify.ok('diary.logged');
       await this.load(this.recipe().id);
     } catch (e) {

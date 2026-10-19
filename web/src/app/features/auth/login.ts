@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Component, OnInit, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Api } from '../../core/api';
@@ -9,12 +9,24 @@ import { SessionService } from '../../core/session';
 @Component({
   selector: 'app-login',
   imports: [FormsModule, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="narrow card">
       <h1>{{ 'login.title' | t }}</h1>
       <form (ngSubmit)="submit()">
-        <label>{{ 'login.username' | t }} <input name="u" [(ngModel)]="username" autocomplete="username" required autofocus /></label>
-        <label>{{ 'login.password' | t }} <input name="p" type="password" [(ngModel)]="password" autocomplete="current-password" required /></label>
+        <label
+          >{{ 'login.username' | t }}
+          <input name="u" [(ngModel)]="username" autocomplete="username" required autofocus
+        /></label>
+        <label
+          >{{ 'login.password' | t }}
+          <input
+            name="p"
+            type="password"
+            [(ngModel)]="password"
+            autocomplete="current-password"
+            required
+        /></label>
         <button type="submit" class="primary" [disabled]="busy()">{{ 'login.submit' | t }}</button>
       </form>
       <p class="muted small">{{ 'login.no_account' | t }}</p>

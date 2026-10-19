@@ -1,5 +1,13 @@
 import { NgComponentOutlet } from '@angular/common';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -17,6 +25,7 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
 @Component({
   selector: 'app-recipe-detail',
   imports: [FormsModule, RouterLink, NgComponentOutlet, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-detail.html',
 })
 export class RecipeDetail {
@@ -35,7 +44,9 @@ export class RecipeDetail {
 
   /** Recipe-page panels contributed by the enabled features (collections, diary…). */
   protected panels = computed(() =>
-    this.features.filter((f) => !f.module || this.session.has(f.module)).flatMap((f) => f.recipePanels ?? []),
+    this.features
+      .filter((f) => !f.module || this.session.has(f.module))
+      .flatMap((f) => f.recipePanels ?? []),
   );
 
   protected scaled = computed(() => {
@@ -76,7 +87,9 @@ export class RecipeDetail {
 
   async variant(): Promise<void> {
     try {
-      const v = await this.api.post<Recipe>(`recipes/${this.id()}/variant`, { label: this.i18n.t('recipe.variant_word') });
+      const v = await this.api.post<Recipe>(`recipes/${this.id()}/variant`, {
+        label: this.i18n.t('recipe.variant_word'),
+      });
       this.notify.ok('recipe.variant_created');
       this.router.navigate(['/ricette', v.id, 'modifica']);
     } catch (e) {
@@ -107,7 +120,12 @@ export class RecipeDetail {
   async link(): Promise<void> {
     if (!this.linkParent) return;
     try {
-      this.recipe.set(await this.api.post<Recipe>(`recipes/${this.id()}/parents`, { parent: this.linkParent, kind: this.linkKind }));
+      this.recipe.set(
+        await this.api.post<Recipe>(`recipes/${this.id()}/parents`, {
+          parent: this.linkParent,
+          kind: this.linkKind,
+        }),
+      );
       this.linking.set(false);
       this.linkParent = '';
     } catch (e) {

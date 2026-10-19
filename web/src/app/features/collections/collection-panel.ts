@@ -1,4 +1,12 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { RecipePanelComponent } from '../../core/features';
@@ -10,6 +18,7 @@ import { Notify } from '../../core/notify';
 @Component({
   selector: 'app-collection-panel',
   imports: [RouterLink, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="card">
       <h2>{{ 'nav.collections' | t }}</h2>
@@ -22,11 +31,18 @@ import { Notify } from '../../core/notify';
           }
         </div>
       } @else {
-        <p class="muted small">{{ 'collections.none_yours' | t }} <a routerLink="/raccolte">{{ 'collections.create_one' | t }}</a></p>
+        <p class="muted small">
+          {{ 'collections.none_yours' | t }}
+          <a routerLink="/raccolte">{{ 'collections.create_one' | t }}</a>
+        </p>
       }
       @if (others().length) {
-        <p class="small muted">{{ 'collections.also_in' | t }}
-          @for (c of others(); track c.id) { <a [routerLink]="['/raccolte', c.id]">{{ c.name }}</a>{{ $last ? '' : ', ' }} }
+        <p class="small muted">
+          {{ 'collections.also_in' | t }}
+          @for (c of others(); track c.id) {
+            <a [routerLink]="['/raccolte', c.id]">{{ c.name }}</a
+            >{{ $last ? '' : ', ' }}
+          }
         </p>
       }
     </section>
@@ -43,7 +59,9 @@ export class CollectionPanel implements RecipePanelComponent {
   constructor() {
     effect(() => {
       const id = this.recipe().id;
-      this.api.get<CollectionSummary[]>('collections', { recipe: id }).then((l) => this.list.set(l));
+      this.api
+        .get<CollectionSummary[]>('collections', { recipe: id })
+        .then((l) => this.list.set(l));
     });
   }
 
@@ -52,7 +70,13 @@ export class CollectionPanel implements RecipePanelComponent {
     try {
       if (c.contains) await this.api.delete(`collections/${c.id}/items/${rid}`);
       else await this.api.post(`collections/${c.id}/items`, { recipe: rid });
-      this.list.update((l) => l.map((x) => (x.id === c.id ? { ...x, contains: !x.contains, count: x.count + (x.contains ? -1 : 1) } : x)));
+      this.list.update((l) =>
+        l.map((x) =>
+          x.id === c.id
+            ? { ...x, contains: !x.contains, count: x.count + (x.contains ? -1 : 1) }
+            : x,
+        ),
+      );
     } catch (e) {
       this.notify.error(e);
     }

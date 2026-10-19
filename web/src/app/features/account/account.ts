@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import { I18n, LANGS, Lang, TPipe } from '../../core/i18n';
@@ -9,30 +9,54 @@ import { User } from '../../core/models';
 @Component({
   selector: 'app-account',
   imports: [FormsModule, TPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'account.title' | t }}</h1>
     <section class="card narrow">
       <h2>{{ 'account.display' | t }}</h2>
       <form (ngSubmit)="saveName()">
-        <label>{{ 'account.name' | t }} <input name="d" [(ngModel)]="display" maxlength="60" /></label>
+        <label
+          >{{ 'account.name' | t }} <input name="d" [(ngModel)]="display" maxlength="60"
+        /></label>
         <button type="submit">{{ 'common.save' | t }}</button>
       </form>
-      <p class="muted small">{{ 'account.username_is' | t }} <strong>{{ session.user()?.username }}</strong></p>
+      <p class="muted small">
+        {{ 'account.username_is' | t }} <strong>{{ session.user()?.username }}</strong>
+      </p>
     </section>
     <section class="card narrow">
       <h2>{{ 'app.language' | t }}</h2>
-      <label>{{ 'account.language_hint' | t }}
+      <label
+        >{{ 'account.language_hint' | t }}
         <select name="lang" [ngModel]="i18n.lang" (ngModelChange)="setLang($event)">
-          @for (l of langs; track l.code) { <option [value]="l.code">{{ l.name }}</option> }
+          @for (l of langs; track l.code) {
+            <option [value]="l.code">{{ l.name }}</option>
+          }
         </select>
       </label>
     </section>
     <section class="card narrow">
       <h2>{{ 'account.change_password' | t }}</h2>
       <form (ngSubmit)="changePassword()">
-        <label>{{ 'account.current_password' | t }} <input name="o" type="password" [(ngModel)]="old" autocomplete="current-password" required /></label>
-        <label>{{ 'account.password_min' | t }}
-          <input name="n" type="password" [(ngModel)]="pw" autocomplete="new-password" required minlength="8" />
+        <label
+          >{{ 'account.current_password' | t }}
+          <input
+            name="o"
+            type="password"
+            [(ngModel)]="old"
+            autocomplete="current-password"
+            required
+        /></label>
+        <label
+          >{{ 'account.password_min' | t }}
+          <input
+            name="n"
+            type="password"
+            [(ngModel)]="pw"
+            autocomplete="new-password"
+            required
+            minlength="8"
+          />
         </label>
         <button type="submit" [disabled]="busy()">{{ 'account.change_password' | t }}</button>
       </form>

@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Il Calderone: a recipe web app. It has an **Angular 21 front end** (`web/`), a **framework-free PHP ≥ 8.1 API** (`public/api/`) and **JSON-file
+Il Calderone: a recipe web app, **phone-first** (design and check every page at ~390 px width first). It has an **Angular 22 front end** (`web/`), a **framework-free PHP ≥ 8.1 API** (`public/api/`) and **JSON-file
 storage** (`public/data/`, no database). The server must never need Python, Node, Composer packages or non-default PHP extensions:
 the target is free PHP hosting (Altervista). The UI is translated (it/en/de/fr, see i18n below); code and docs are English
 (the project will be open source on the owner's GitHub).
@@ -25,8 +25,10 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   - `python tools/export_from_ricette.py --xlsx PATH`: spreadsheet → `seed/`.
 - PHP CLI: `php public/api/bin/create-user.php NAME [--admin]` (password via `CALDERONE_PASSWORD` or a prompt),
   `php public/api/bin/reindex.php`. Both honour `CALDERONE_DATA_DIR`.
-- npm 10 crashes on install with `edgesOut`. Use `npx -y npm@11 install`. The local Node is 22.22.2, so Angular 22 is not
-  possible yet (upgrade steps in docs/build.md).
+- Node 26 / npm 12 come from nvm: in non-interactive shells run `source ~/.bashrc` first (otherwise the old system
+  Node 22.22.2 is found, which is too old for Angular 22).
+- Test on the owner's phone over NetBird: `PHP_CLI_SERVER_WORKERS=4 php -S <NetBird IP>:8080 -t public public/api/router-dev.php`
+  (get the IP with `ip -4 addr show wt0`; the interface is in firewalld's trusted zone; don't bind 0.0.0.0, that exposes the Wi-Fi LAN).
 - Smoke tests: use a scratch `CALDERONE_DATA_DIR`, never `public/data`.
   Don't `pkill -f` a pattern that also appears in the same shell command (it kills the shell).
 - Local PHP has no mbstring and no GD. Use `Util::lower`/`Util::clip`, never `mb_*` directly.
