@@ -50,6 +50,15 @@ def main():
                 (data / "media" / r["photo"]).write_bytes(base64.b64decode(photo_data.split(",", 1)[1]))
             else:
                 r["photo"] = None
+            icon_data = r.pop("icon_data", None)
+            if r.get("icon") and (src / ".." / "media" / r["icon"]).exists():
+                shutil.copy2(src / ".." / "media" / r["icon"], data / "media" / f"{r['id']}.icon.png")
+                r["icon"] = f"{r['id']}.icon.png"
+            elif icon_data and icon_data.startswith("data:image/png;base64,"):
+                r["icon"] = f"{r['id']}.icon.png"
+                (data / "media" / r["icon"]).write_bytes(base64.b64decode(icon_data.split(",", 1)[1]))
+            else:
+                r["icon"] = None
             # files from before v0.3 call it "source"; the spreadsheet export put bookkeeping there, which is not a source
             taken = r.pop("source", r.get("taken_from", "")) or ""
             r["taken_from"] = "" if taken.startswith("Ricette.xlsx") else taken

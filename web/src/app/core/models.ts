@@ -66,6 +66,8 @@ export interface Recipe extends RecipeContent, Scoped {
   format: string;
   id: string;
   photo: string | null;
+  /** Pixel-art picture of the dish (<id>.icon.png), if any. */
+  icon?: string | null;
   parents: ParentLink[];
   owner: string;
   created: string;
@@ -103,6 +105,7 @@ export interface RecipeSummary extends Scoped {
   owner_name: string;
   parents: string[];
   photo: boolean;
+  icon?: boolean;
   updated: string;
 }
 

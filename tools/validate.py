@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a Calderone data folder (or exchange files) against schema/*.json, plus graph/reference checks.
+"""Validate a Calderone data folder (or recipe/menu exchange files) against schema/*.json, plus graph/reference checks.
 
 Usage: python tools/validate.py [DATA_DIR | FILE.json ...]     (default: public/data)
 Exit code 1 if anything is invalid.
@@ -11,7 +11,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
-SCHEMAS = {p.name.split(".")[0]: Draft202012Validator(json.loads(p.read_text())) for p in (ROOT / "schema").glob("*.schema.json")}
+SCHEMAS = {p.name.removesuffix(".schema.json"): Draft202012Validator(json.loads(p.read_text())) for p in (ROOT / "schema").glob("*.schema.json")}
 
 
 def check(schema: str, path: Path, data) -> list[str]:
@@ -36,6 +36,8 @@ def validate_dir(d: Path) -> list[str]:
             errs.append(f"{p}: owner {r.get('owner')!r} is not a known user")
         if r.get("photo") and not (d / "media" / r["photo"]).exists():
             errs.append(f"{p}: photo {r['photo']} missing in media/")
+        if r.get("icon") and not (d / "media" / r["icon"]).exists():
+            errs.append(f"{p}: icon {r['icon']} missing in media/")
         recipes[p.stem] = r
     # variant graph must be acyclic and point to existing recipes
     for rid, r in recipes.items():
@@ -87,7 +89,8 @@ def main(args):
             for f in files:
                 data = json.loads(f.read_text(encoding="utf-8"))
                 for r in data if isinstance(data, list) else [data]:
-                    errs += check("recipe", f, r)
+                    kind = "menu-exchange" if isinstance(r, dict) and r.get("format") == "calderone-menu/1" else "recipe"
+                    errs += check(kind, f, r)
             print(f"{t}: {len(files)} exchange file(s) checked")
     for e in errs:
         print("ERROR", e)

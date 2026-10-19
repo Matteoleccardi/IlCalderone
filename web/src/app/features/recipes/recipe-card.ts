@@ -17,11 +17,20 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
     <a class="recipe-card" [routerLink]="['/ricette', recipe().id]">
       @if (recipe().photo) {
         <img [src]="api.photoUrl(recipe().id, recipe().updated)" alt="" loading="lazy" />
+      } @else if (recipe().icon) {
+        <div class="nophoto" aria-hidden="true">
+          <img class="recipe-icon big" [src]="api.iconUrl(recipe().id, recipe().updated)" alt="" loading="lazy" />
+        </div>
       } @else {
         <div class="nophoto" aria-hidden="true">🍲</div>
       }
       <div class="body">
-        <strong>{{ recipe().title }}</strong>
+        <strong class="with-icon">
+          @if (recipe().icon && recipe().photo) {
+            <img class="recipe-icon" [src]="api.iconUrl(recipe().id, recipe().updated)" alt="" loading="lazy" />
+          }
+          {{ recipe().title }}
+        </strong>
         <span class="meta">
           @if (recipe().time_minutes) {
             <span>⏱ {{ 'recipe.minutes' | t: { n: recipe().time_minutes } }}</span>

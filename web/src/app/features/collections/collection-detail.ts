@@ -6,12 +6,13 @@ import { Collection, Visibility } from '../../core/models';
 import { I18n, TPipe } from '../../core/i18n';
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
+import { FileName } from '../../shared/file-name';
 import { ScopePicker } from '../../shared/scope-picker';
 import { VisibilityBadge } from '../../shared/visibility-badge';
 
 @Component({
   selector: 'app-collection-detail',
-  imports: [FormsModule, RouterLink, ScopePicker, VisibilityBadge, TPipe],
+  imports: [FormsModule, RouterLink, FileName, ScopePicker, VisibilityBadge, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (c(); as c) {
@@ -75,6 +76,7 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
           </form>
         </details>
       }
+      <app-file-name [id]="c.id" folder="collections" />
     } @else {
       <p class="muted">{{ 'common.loading' | t }}</p>
     }

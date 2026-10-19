@@ -126,6 +126,13 @@
       ],
       "description": "File name inside data/media/ (usually <id>.jpg)."
     },
+    "icon": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional pixel-art picture of the dish: file name inside data/media/ (<id>.icon.png, a PNG of at most 512x512, usually 128x128)."
+    },
     "photo_data": {
       "type": "string",
       "pattern": "^data:image/",

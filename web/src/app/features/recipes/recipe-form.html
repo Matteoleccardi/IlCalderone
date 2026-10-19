@@ -94,6 +94,21 @@
           <p class="muted small">{{ 'form.photo_hint' | t }}</p>
         </div>
       </div>
+      <h3>{{ 'form.icon' | t }}</h3>
+      <div class="photo-edit">
+        @if (iconPreview()) {
+          <img class="recipe-icon big" [src]="iconPreview()" alt="" />
+        } @else if (existing()?.icon && !removeIcon()) {
+          <img class="recipe-icon big" [src]="api.iconUrl(existing()!.id, existing()!.updated)" alt="" />
+        }
+        <div>
+          <input type="file" accept="image/png" (change)="pickIcon($event)" [attr.aria-label]="'form.icon' | t" />
+          @if ((existing()?.icon || iconPreview()) && !removeIcon()) {
+            <button type="button" class="link" (click)="removeIcon.set(true); newIcon.set(null); iconPreview.set(null)">{{ 'form.remove_icon' | t }}</button>
+          }
+          <p class="muted small">{{ 'form.icon_hint' | t }}</p>
+        </div>
+      </div>
     </section>
 
     <section class="card">

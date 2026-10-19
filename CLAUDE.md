@@ -23,6 +23,11 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   - `python tools/validate.py DIR`: schema plus graph checks;
   - `python tools/seed_data.py SRC --owner USER [--data DIR]`;
   - `python tools/export_from_ricette.py --xlsx PATH`: spreadsheet → `seed/`.
+  - `python tools/menu_tool.py summary|draft|check …`: balanced menu planning (used by the menu-planner agent).
+  - `python tools/audit_recipes.py [--existing SRC] [--new inbox/]`: spelling/unit/duplicate audit.
+  - `python tools/recipe_media.py crop|icon …`: dish photo from a cover screenshot, and the Inkscape export of 8-bit icons.
+  - `python tools/pack_recipes.py inbox/`: `inbox/<slug>/{recipe.json,photo.jpg,icon.png}` → one import file in `exports/`.
+  - SRC for these is a data folder, a folder of recipe files or a site export file (`tools/calderone_io.py`).
 - PHP CLI: `php public/api/bin/create-user.php NAME [--admin]` (password via `CALDERONE_PASSWORD` or a prompt),
   `php public/api/bin/reindex.php`. Both honour `CALDERONE_DATA_DIR`.
 - Node 26 / npm 12 come from nvm: in non-interactive shells run `source ~/.bashrc` first (otherwise the old system
@@ -79,5 +84,19 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   (stored as is; only `q.b.` is translated on display).
 - `taken_from` (was `source`) is optional; the page shows "Fonte: <owner name> · da <taken_from>". Never put bookkeeping
   such as "Ricette.xlsx · IMG_…" there (the loader and `tools/seed_data.py` drop it).
-  Photos show the dish only, with no app UI. The sibling spreadsheet project is documented in `../CLAUDE.md`.
+  Photos show the dish only, with no app UI. The owner's 9 recipes use their 8-bit picture as the photo too
+  (`recipe_media.py photo`, a 4:3 transparent PNG; the original photos are backed up outside the repo in `../backups/`). The sibling spreadsheet project is documented in `../CLAUDE.md`.
 - `seed/` (the owner's 9 recipes transcribed from a commercial app) is git-ignored and must not be published; `examples/` is the public sample.
+  "seed" = starter data loaded once with `tools/seed_data.py`; the live copy is `public/data/`, and app edits never go back to `seed/`.
+- Recipe icons: optional `icon` = `<id>.icon.png` in `media/` (PNG ≤ 64 KB, ≤ 512 px), routes `/recipes/{id}/icon`, `icon_data` in exchange files.
+- Every recipe, menu and collection page shows its JSON file name (`shared/file-name.ts`).
+- Menu exchange: `Menus::toExchange`/`import` (`schema/menu-exchange.schema.json`); items carry `title` so they match by title elsewhere.
+
+## Agents (`.claude/agents/`)
+
+- `menu-planner`: plans a balanced N-week menu from SRC with `tools/menu_tool.py`, writes `exports/<slug>.calderone-menu.json`
+  and explains how to import it (website *Menu → Importa / esporta menu*, locally or on Altervista; never FTP into `data/`).
+- `recipe-importer`: screenshots (natural order, several recipes per batch) → `inbox/<slug>/recipe.json` + `photo.jpg`
+  + an 8-bit 32×32-grid SVG icon exported by Inkscape to 128×128 PNG → audit and fix → user review → `pack_recipes.py`
+  → import on the website. Existing recipes are only reported, and fixed by the user in the editor (keeps history).
+- Both never write into `public/data/`; `inbox/` and `exports/` are git-ignored.

@@ -150,6 +150,28 @@ return [
             return $detail($u, $svc->savePhoto($svc->editableOr403($u, $p['id']), $_FILES['photo'], (int) $app->config['max_upload']));
         });
 
+        $app->get('/recipes/{id}/icon', function (Request $r, array $p) use ($auth, $svc, $app) {
+            $rec = $svc->visibleOr404($auth->require(), $p['id']);
+            $file = !empty($rec['icon']) ? $app->store->path('media/' . basename($rec['icon'])) : null;
+            if (!$file || !is_file($file)) {
+                throw new HttpError(404, 'icon_none');
+            }
+            Response::file($file, 'image/png');
+        });
+
+        $app->post('/recipes/{id}/icon', function (Request $r, array $p) use ($auth, $svc, $detail) {
+            $u = $auth->require();
+            if (empty($_FILES['icon'])) {
+                throw new HttpError(400, 'photo_missing');
+            }
+            return $detail($u, $svc->saveIcon($svc->editableOr403($u, $p['id']), $_FILES['icon']));
+        });
+
+        $app->delete('/recipes/{id}/icon', function (Request $r, array $p) use ($auth, $svc, $detail) {
+            $u = $auth->require();
+            return $detail($u, $svc->save($svc->deleteIcon($svc->editableOr403($u, $p['id']))));
+        });
+
         $app->delete('/recipes/{id}/photo', function (Request $r, array $p) use ($auth, $svc, $detail) {
             $u = $auth->require();
             return $detail($u, $svc->save($svc->deletePhoto($svc->editableOr403($u, $p['id']))));

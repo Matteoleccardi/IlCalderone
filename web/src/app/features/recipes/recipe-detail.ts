@@ -19,12 +19,13 @@ import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { scaleQty } from '../../core/text-formats';
 import { AppTitle } from '../../core/title';
+import { FileName } from '../../shared/file-name';
 import { QtyPipe, UnitPipe } from '../../shared/qty.pipe';
 import { VisibilityBadge } from '../../shared/visibility-badge';
 
 @Component({
   selector: 'app-recipe-detail',
-  imports: [FormsModule, RouterLink, NgComponentOutlet, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
+  imports: [FormsModule, RouterLink, NgComponentOutlet, FileName, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-detail.html',
 })

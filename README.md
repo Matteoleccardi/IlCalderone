@@ -63,6 +63,16 @@ To load the two example recipes, use *Ricette → Importa / esporta*, or run:
 python3 tools/seed_data.py examples/recipes --owner <your-username> --visibility shared
 ```
 
+## Claude Code agents
+
+Two [Claude Code](https://claude.com/claude-code) subagents in `.claude/agents/` help with the data. Neither writes into
+`public/data/`: they produce a JSON file that you import on the website, locally or on the hosted site.
+
+- **menu-planner**: builds a balanced menu for N weeks from your recipes (no repeats in a week, legumes spread out, no
+  pasta after pasta…). Import it under *Menu → Importa / esporta menu*. Its helper is `tools/menu_tool.py`.
+- **recipe-importer**: turns recipe screenshots into recipes, with the dish photo and an 8-bit icon drawn with Inkscape.
+  It checks names and units against your recipes (`tools/audit_recipes.py`). Import the result under *Ricette → Importa / esporta*.
+
 ## Documentation
 
 | | |
@@ -81,9 +91,12 @@ public/          everything that goes on the server
   data/          the JSON data (protected; git-ignored)
 web/             Angular source (src/app/features/<feature>/), builds into public/
 schema/          JSON Schemas of every data file
-tools/           Python helpers: validate data, load recipes, convert the original spreadsheet
+tools/           Python helpers: validate data, load recipes, plan menus, audit and pack recipes
 tests/           end-to-end API tests (pytest + php -S)
 examples/        sample recipes
+seed/            (not in git) the owner's starter recipes, loaded once with tools/seed_data.py;
+                 the live copy the app reads and edits is public/data/
+.claude/agents/  Claude Code helpers: menu-planner (balanced menus) and recipe-importer (screenshots → recipes)
 legacy/          the first prototype (Python/FastAPI), kept for reference
 ```
 

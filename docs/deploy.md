@@ -124,6 +124,18 @@ If you edit or copy recipe files by hand, rebuild the search index with `php pub
 **Moving to another server** = copy `data/` across and deploy the same version of the app.
 The in-app **export** (a JSON file with photos) also works for moving recipes between two different Calderone installations.
 
+## Loading a menu or recipes made on your PC
+
+The `menu-planner` and `recipe-importer` agents (see README) make JSON files on your PC. To load them, use the website,
+not FTP. The import sets the owner and household and checks every recipe:
+
+- a menu: **Menu → Importa / esporta menu** → *File* → choose *Di chi è* (personal or household) → **Importa**;
+- recipes: **Ricette → Importa / esporta** → *File* → choose *Chi può vederla* → **Importa**.
+
+To plan from the recipes on a hosted site, first download them (*Ricette → Importa / esporta → Le mie ricette*) and give
+that file to the agent. Copying files straight into `data/menus/` or `data/recipes/` skips these checks and the
+search index; avoid it.
+
 ## Upgrading
 
 1. Back up `data/`.

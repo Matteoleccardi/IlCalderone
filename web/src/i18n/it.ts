@@ -186,6 +186,9 @@ export const it = {
   'form.saved': 'Ricetta salvata',
   'form.created': 'Ricetta creata',
   'form.ingredient_error': 'Ingrediente {n} ({name}): {error}',
+  'form.icon': "Icona 8-bit",
+  'form.remove_icon': "Rimuovi l’icona",
+  'form.icon_hint': "Un PNG piccolo in pixel art (di solito 128×128, max 64 KB), mostrato accanto al titolo.",
   'fmt.no_name': "riga {line}: manca il nome dell'ingrediente",
   'fmt.line_error': 'riga {line}: {error}',
   'photo.browser_cannot': 'Il browser non può elaborare la foto',
@@ -331,6 +334,12 @@ export const it = {
   'menus.delete': 'Elimina menu',
   'menus.saved': 'Menu salvato',
   'menus.confirm_delete': 'Eliminare il menu «{name}»?',
+  'menuio.title': "Importa / esporta menu",
+  'menuio.intro': "Carica un file di menu in formato JSON (per esempio quello preparato dall’agente menu-planner). Le ricette si collegano per id o per titolo; quelle che mancano diventano piatti di testo.",
+  'menuio.ready': "{n} menu pronto:|{n} menu pronti:",
+  'menuio.done': "{n} menu importato.|{n} menu importati.",
+  'menuio.export_all': "Esporta tutti i menu",
+  'menuio.export_one': "Esporta questo menu (JSON)",
 
   // shopping list
   'shop.personal': 'Personale',
@@ -451,6 +460,12 @@ export const it = {
   'err.item_not_found': 'Voce non trovata',
   'err.item_name_required': 'Scrivi cosa comprare',
   'err.household_required': 'Scegli una famiglia',
+  'err.icon_none': "Nessuna icona",
+  'err.icon_too_large': "Icona troppo grande (max 64 KB)",
+  'err.icon_type': "L’icona deve essere un PNG di al massimo 512×512 pixel",
+  'err.import_menu_exists': "Il menu «{title}» c’è già: non importato",
+  'err.import_menus_empty': "Nessun menu da importare",
+  'err.import_menu_recipe_text': "«{menu}»: ricetta «{title}» non trovata, tenuta come piatto di testo",
 };
 
 export type Key = keyof typeof it;

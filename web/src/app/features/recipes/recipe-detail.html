@@ -5,7 +5,10 @@
         <img class="hero-photo" [src]="api.photoUrl(r.id, r.updated)" [alt]="'recipe.photo_alt' | t: { title: r.title }" />
       }
       <div>
-        <h1>{{ r.title }}</h1>
+        <h1 class="with-icon">
+          @if (r.icon) { <img class="recipe-icon" [src]="api.iconUrl(r.id, r.updated)" alt="" /> }
+          {{ r.title }}
+        </h1>
         <p class="meta">
           @if (r.time_minutes) { <span>⏱ {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
           @if (r.category) { <span>{{ r.category }}</span> }
@@ -87,6 +90,7 @@
           {{ 'recipe.source' | t: { name: r.owner_name ?? ('common.deleted_user' | t) } }}
           @if (r.taken_from) { · {{ 'recipe.taken_from' | t: { from: r.taken_from } }} }
         </p>
+        <app-file-name [id]="r.id" folder="recipes" />
       </section>
     </div>
 

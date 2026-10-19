@@ -15,6 +15,7 @@ import { I18n, TPipe } from '../../core/i18n';
 import { MEALS, Meal, Menu, MenuItem, RecipeSummary, Visibility } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
+import { FileName } from '../../shared/file-name';
 import { Pick, RecipePicker } from '../../shared/recipe-picker';
 import { ScopePicker } from '../../shared/scope-picker';
 
@@ -24,7 +25,7 @@ import { ScopePicker } from '../../shared/scope-picker';
  */
 @Component({
   selector: 'app-menu-edit',
-  imports: [FormsModule, RouterLink, RecipePicker, ScopePicker, TPipe],
+  imports: [FormsModule, RouterLink, FileName, RecipePicker, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (menu(); as m) {
@@ -198,6 +199,10 @@ import { ScopePicker } from '../../shared/scope-picker';
         }
       </div>
       <p class="muted small">{{ 'menus.grid_hint' | t }}</p>
+      <p>
+        <a class="button" [href]="api.url('menus/' + m.id + '/export')" download>{{ 'menuio.export_one' | t }}</a>
+      </p>
+      <app-file-name [id]="m.id" folder="menus" />
 
       @if (m.can_edit) {
         <div class="actions sticky">
@@ -221,7 +226,7 @@ export class MenuEdit {
   readonly id = input.required<string>();
   protected i18n = inject(I18n);
   protected households = inject(HouseholdsService);
-  private api = inject(Api);
+  protected api = inject(Api);
   private notify = inject(Notify);
   private router = inject(Router);
   private title = inject(AppTitle);

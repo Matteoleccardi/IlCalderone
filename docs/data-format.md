@@ -11,6 +11,7 @@ data/
   recipes/<id>.json              calderone-recipe/1       one file per recipe
   history/<id>/<rev>.json        calderone-recipe/1       earlier versions of a recipe (full copies)
   media/<id>.jpg|png|webp                                 dish photos
+  media/<id>.icon.png                                     optional 8-bit dish icons (PNG, ≤ 64 KB, ≤ 512 px; usually 128×128)
   collections/<id>.json          calderone-collection/1
   meallog/<userId>/<YYYY-MM>.json  calderone-meallog/1    one file per user per month
   menus/<id>.json                calderone-menu/1         one file per menu
@@ -37,7 +38,8 @@ Every file has a `"format": "<name>/<version>"` field, so a later version of the
 ## Recipe (`calderone-recipe/1`)
 
 The same shape is used for the stored files and for **exchange files** (import/export). Exchange files leave out `owner`,
-`visibility`, `household`, `created` and `updated`, and may carry the photo inline as `photo_data` (a `data:image/...;base64,` URI).
+`visibility`, `household`, `created` and `updated`, and may carry the photo inline as `photo_data` (a `data:image/...;base64,` URI)
+and the icon as `icon_data` (`data:image/png;base64,…`). `icon` is the icon's file name in `media/` (or `null`).
 
 ```json
 {
@@ -106,6 +108,23 @@ other's diaries; only the author can add or delete entries.
 - `season` (optional, `MM-DD`, may wrap around the new year) and `active` switch the menu on and off.
 - `servings: null` means the recipe's own servings. A cell may hold several items.
 - A household menu may only contain recipes every member can see (shared ones, or that household's).
+
+### Menu exchange files
+
+`GET /api/menus/export` (all the menus you can see) and `GET /api/menus/{id}/export` download a list of menus without
+`owner`, `visibility`, `household` and timestamps; recipe items also carry the recipe's `title`
+(schema: `schema/menu-exchange.schema.json`). The `menu-planner` agent writes the same format.
+
+```json
+[{"format": "calderone-menu/1", "id": "…", "name": "Cene autunnali", "notes": "", "start": "2026-10-12", "weeks": 4,
+  "meals": ["cena"], "season": null, "active": true,
+  "items": [{"week": 1, "day": 1, "meal": "cena", "recipe": "…", "title": "Zuppa di miso", "text": "", "servings": null}]}]
+```
+
+`POST /api/menus/import` `{menus, visibility: private|household, household}` (the website: *Menu → Importa / esporta menu*):
+- an `id` that already exists is skipped, so importing twice is safe; a missing id gets a new one;
+- each recipe is matched by id, else by title (ignoring case), among the recipes the importer can see that fit the
+  menu's space; one that is not found becomes a text dish with its title, and the result lists it.
 
 ## Shopping list and pantry
 

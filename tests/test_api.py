@@ -375,3 +375,63 @@ def test_language_preference(admin):
     assert admin.get("/session").json()["user"]["lang"] == "de"
     assert admin.put("/me", {"lang": "klingon"}).json()["lang"] is None
     assert admin.put("/me", {"display": "Boss"}).json()["display"] == "Boss"
+
+
+def test_recipe_icon(admin, client, server):
+    bob = make_user(admin, client, "bob")
+    r = admin.post("/recipes", PRIVATE).json()
+    up = admin.post(f"/recipes/{r['id']}/icon", files={"icon": ("i.png", PNG, "image/png")})
+    assert up.status_code == 200, up.text
+    assert up.json()["icon"] == f"{r['id']}.icon.png"
+    assert admin.get(f"/recipes/{r['id']}/icon").content == PNG
+    assert next(s for s in admin.get("/recipes").json() if s["id"] == r["id"])["icon"] is True
+    assert bob.get(f"/recipes/{r['id']}/icon").status_code == 404      # same rule as the photo
+    assert admin.post(f"/recipes/{r['id']}/icon", files={"icon": ("i.png", b"nope", "image/png")}).json()["code"] == "icon_type"
+    assert admin.post(f"/recipes/{r['id']}/icon", files={"icon": ("i.png", PNG + b"0" * 70000, "image/png")}).status_code == 413
+    # variants copy it, export embeds it and import restores it
+    v = admin.post(f"/recipes/{r['id']}/variant").json()
+    assert admin.get(f"/recipes/{v['id']}/icon").content == PNG
+    ex = admin.get(f"/recipes/{r['id']}/json").json()
+    assert ex["icon_data"].startswith("data:image/png;base64,")
+    imp = bob.post("/recipes/import", {"recipes": [ex | {"id": None}]}).json()
+    assert bob.get(f"/recipes/{imp['created'][0]}/icon").content == PNG
+    assert admin.delete(f"/recipes/{r['id']}/icon").json()["icon"] is None
+    assert not (server.data / "media" / f"{r['id']}.icon.png").exists()
+    admin.delete(f"/recipes/{v['id']}")
+    assert not (server.data / "media" / f"{v['id']}.icon.png").exists()
+
+
+def test_menu_export_import(admin, client):
+    bob = make_user(admin, client, "bob")
+    carl = make_user(admin, client, "carl")
+    h = household(admin, "bob")
+    a = admin.post("/recipes", RECIPE).json()
+    secret = admin.post("/recipes", PRIVATE | {"title": "Segreta"}).json()
+    m = admin.post("/menus", {"name": "Autunno", "weeks": 2, "start": "2026-10-12", "items": [
+        {"week": 1, "day": 1, "meal": "cena", "recipe": a["id"], "servings": 3},
+        {"week": 1, "day": 2, "meal": "cena", "recipe": secret["id"]},
+        {"week": 2, "day": 7, "meal": "cena", "text": "Pizza fuori"}]}).json()
+    one = admin.get(f"/menus/{m['id']}/export")
+    assert "attachment" in one.headers["content-disposition"] and "autunno" in one.headers["content-disposition"]
+    ex = one.json()
+    assert ex[0]["format"] == "calderone-menu/1" and "owner" not in ex[0] and ex[0]["items"][0]["title"] == RECIPE["title"]
+    assert carl.get(f"/menus/{m['id']}/export").status_code == 404
+    assert [x["name"] for x in admin.get("/menus/export").json()] == ["Autunno"]
+    assert bob.get("/menus/export").json() == []
+    # the same file again: the id exists, skipped
+    res = admin.post("/menus/import", {"menus": ex}).json()
+    assert res["created"] == [] and res["messages"][0]["code"] == "import_menu_exists"
+    # into a household under a new id: the shared recipe matches by title, the private one becomes a text dish
+    fresh = [ex[0] | {"id": None, "items": [it | {"recipe": "f" * 32} if it["recipe"] == a["id"] else it for it in ex[0]["items"]]}]
+    res = bob.post("/menus/import", {"menus": fresh[0], "visibility": "household", "household": h["id"]}).json()
+    assert len(res["created"]) == 1 and [x["code"] for x in res["messages"]] == ["import_menu_recipe_text"]
+    got = bob.get(f"/menus/{res['created'][0]}").json()
+    assert got["visibility"] == "household" and got["household"] == h["id"] and got["start"] == "2026-10-12"
+    assert [(i["recipe"], i["text"], i["servings"]) for i in got["items"]] == \
+        [(a["id"], "", 3), (None, "Segreta", None), (None, "Pizza fuori", None)]
+    # a household you are not in falls back to your personal space; garbage is reported, not fatal
+    res = carl.post("/menus/import", {"menus": [ex[0] | {"id": None}, "x", {"format": "other/1", "name": "Z"}],
+                                      "visibility": "household", "household": h["id"]}).json()
+    assert carl.get(f"/menus/{res['created'][0]}").json()["visibility"] == "private"
+    assert [x["code"] for x in res["messages"]][-2:] == ["import_invalid_item", "import_format"]
+    assert carl.post("/menus/import", {"menus": []}).json()["code"] == "import_menus_empty"

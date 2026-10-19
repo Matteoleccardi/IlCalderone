@@ -68,6 +68,10 @@ export class RecipeForm implements OnInit {
   protected newPhoto = signal<Blob | null>(null);
   protected preview = signal<string | null>(null);
   protected removePhoto = signal(false);
+  // pixel-art icon (uploaded as is: a small PNG)
+  protected newIcon = signal<File | null>(null);
+  protected iconPreview = signal<string | null>(null);
+  protected removeIcon = signal(false);
 
   protected api = inject(Api);
   private router = inject(Router);
@@ -204,6 +208,20 @@ export class RecipeForm implements OnInit {
     }
   }
 
+  pickIcon(ev: Event): void {
+    const file = (ev.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    if (file.type !== 'image/png' || file.size > 65536) {
+      this.notify.error(this.i18n.t('err.icon_type'));
+      return;
+    }
+    this.newIcon.set(file);
+    this.removeIcon.set(false);
+    const old = this.iconPreview();
+    if (old) URL.revokeObjectURL(old);
+    this.iconPreview.set(URL.createObjectURL(file));
+  }
+
   async save(): Promise<void> {
     let ingredients, steps;
     try {
@@ -243,6 +261,14 @@ export class RecipeForm implements OnInit {
         r = await this.api.post<Recipe>(`recipes/${r.id}/photo`, fd);
       } else if (this.removePhoto() && r.photo) {
         r = await this.api.delete<Recipe>(`recipes/${r.id}/photo`);
+      }
+      const icon = this.newIcon();
+      if (icon) {
+        const fd = new FormData();
+        fd.append('icon', icon, 'icon.png');
+        r = await this.api.post<Recipe>(`recipes/${r.id}/icon`, fd);
+      } else if (this.removeIcon() && r.icon) {
+        r = await this.api.delete<Recipe>(`recipes/${r.id}/icon`);
       }
       this.notify.ok(id ? 'form.saved' : 'form.created');
       this.router.navigate(['/ricette', r.id]);

@@ -7,12 +7,13 @@ import { MEALS, Meal, Menu, MenuSummary, PlanDay, Visibility } from '../../core/
 import { Notify } from '../../core/notify';
 import { ScopePicker } from '../../shared/scope-picker';
 import { addDays, today } from '../meallog/dates';
+import { MenuImport } from './menu-import';
 import { WeekPlan } from './week-plan';
 
 /** The plan of the coming days over all your menus, the list of menus, and "new menu". */
 @Component({
   selector: 'app-menu-list',
-  imports: [FormsModule, RouterLink, ScopePicker, WeekPlan, TPipe],
+  imports: [FormsModule, RouterLink, ScopePicker, WeekPlan, MenuImport, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'nav.menus' | t }}</h1>
@@ -116,6 +117,8 @@ import { WeekPlan } from './week-plan';
         <button type="submit" class="primary">{{ 'common.create' | t }}</button>
       </form>
     </section>
+
+    <app-menu-import (imported)="loadMenus()" />
   `,
 })
 export class MenuList implements OnInit {
@@ -139,6 +142,10 @@ export class MenuList implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.loadPlan();
+    this.loadMenus();
+  }
+
+  async loadMenus(): Promise<void> {
     try {
       this.menus.set(await this.api.get<MenuSummary[]>('menus'));
     } catch (e) {

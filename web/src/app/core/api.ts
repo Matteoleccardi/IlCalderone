@@ -49,6 +49,10 @@ export class Api {
     return this.url(`recipes/${recipeId}/photo`) + (version ? `?v=${encodeURIComponent(version)}` : '');
   }
 
+  iconUrl(recipeId: string, version?: string): string {
+    return this.url(`recipes/${recipeId}/icon`) + (version ? `?v=${encodeURIComponent(version)}` : '');
+  }
+
   private async run<T>(obs: import('rxjs').Observable<T>): Promise<T> {
     try {
       return await firstValueFrom(obs);

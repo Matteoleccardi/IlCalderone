@@ -18,6 +18,10 @@ public/prerendered-routes.json
 # Personal starter recipes transcribed from a commercial app: not redistributable
 seed/
 
+# Agent work folders: recipes being imported, generated menus and exports
+inbox/
+exports/
+
 # Old v0.1 data
 legacy/data/
 

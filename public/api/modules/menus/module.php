@@ -53,6 +53,36 @@ return [
             return ['from' => $from, 'days' => $svc->plan($u, $from, max(1, min(42, (int) ($r->q('days') ?: 7))))];
         });
 
+        // Download all the menus you can see (?scope=mine: only your personal ones and those you created).
+        $app->get('/menus/export', function (Request $r) use ($auth, $svc) {
+            $u = $auth->require();
+            $mine = $r->q('scope', 'all') === 'mine';
+            $list = array_filter($svc->visible($u), fn($m) => !$mine || $m['owner'] === $u['id']);
+            Response::download(array_values(array_map(fn($m) => $svc->toExchange($m), $list)), 'calderone-menu-' . gmdate('Y-m-d') . '.json');
+        });
+
+        // {menus: [...] | one menu, visibility: private|household, household?}
+        $app->post('/menus/import', function (Request $r) use ($auth, $svc) {
+            $u = $auth->require();
+            $body = $r->json();
+            $items = $body['menus'] ?? null;
+            if (!is_array($items) || !$items) {
+                throw new HttpError(400, 'import_menus_empty');
+            }
+            if (isset($items['name'])) {
+                $items = [$items]; // a single menu object
+            }
+            $vis = ($body['visibility'] ?? 'private') === 'household' ? 'household' : 'private';
+            return $svc->import($u, $items, $vis, isset($body['household']) ? (string) $body['household'] : null);
+        });
+
+        $app->get('/menus/{id}/export', function (Request $r, array $p) use ($auth, $svc) {
+            $u = $auth->require();
+            $m = $svc->load($u, $p['id']);
+            $slug = trim((string) preg_replace('/[^a-z0-9]+/', '-', Util::lower($m['name'])), '-') ?: 'menu';
+            Response::download([$svc->toExchange($m)], "calderone-menu-{$slug}.json");
+        });
+
         $app->post('/menus', function (Request $r) use ($auth, $svc, $view, $store) {
             $u = $auth->require();
             return $store->locked(function () use ($u, $r, $svc, $view) {

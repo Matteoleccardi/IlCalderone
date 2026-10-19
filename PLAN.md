@@ -76,6 +76,10 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   items to the household list, and the interface in Italian, English, German and French.
   Then, after the first phone test: a phone-friendly recipe picker in the menu editor (alphabetical, ignores case) and
   "Add to menu" on every recipe card and recipe page (choose menu, week, day and meal).
+  Then: menu import/export (`calderone-menu/1` exchange files, recipes matched by id or title), the JSON file name
+  shown on recipe, menu and collection pages, optional 8-bit recipe icons, and two Claude Code agents with their
+  tools: `menu-planner` (`tools/menu_tool.py`) and `recipe-importer` (`tools/audit_recipes.py`,
+  `tools/recipe_media.py`, `tools/pack_recipes.py`).
 - **v0.4: deploy and hardening**:
   - a first real Altervista deploy;
   - data backup as a zip from the admin page;

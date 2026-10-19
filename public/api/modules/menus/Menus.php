@@ -165,6 +165,88 @@ final class Menus
         return $out;
     }
 
+    // ---------- exchange (import/export) ----------
+
+    /** A menu as an exchange file entry: no owner/household; recipe items also carry the title (to match elsewhere). */
+    public function toExchange(array $m): array
+    {
+        $idx = $this->recipes->index();
+        $items = array_map(fn($it) => [
+            'week' => $it['week'], 'day' => $it['day'], 'meal' => $it['meal'], 'recipe' => $it['recipe'],
+            'title' => $it['recipe'] ? ($idx[$it['recipe']]['title'] ?? null) : null,
+            'text' => $it['text'], 'servings' => $it['servings'] ?? null,
+        ], $m['items']);
+        return ['format' => self::FORMAT, 'id' => $m['id'], 'name' => $m['name'], 'notes' => $m['notes'] ?? '',
+            'start' => $m['start'], 'weeks' => $m['weeks'], 'meals' => $m['meals'], 'season' => $m['season'] ?? null,
+            'active' => $m['active'], 'items' => $items];
+    }
+
+    /**
+     * Import exchange-format menus into the user's space or a household. Existing ids are skipped (idempotent).
+     * Each recipe item is matched by id, else by title (ignoring case) among the recipes that fit the menu;
+     * a recipe that cannot be found becomes a text dish with its title, so a menu is never lost for one dish.
+     */
+    public function import(array $user, array $items, string $visibility, ?string $household): array
+    {
+        return $this->app->store->locked(function () use ($user, $items, $visibility, $household) {
+            $created = [];
+            $msgs = [];
+            $idx = $this->recipes->index();
+            foreach ($items as $d) {
+                if (!is_array($d)) {
+                    $msgs[] = ['code' => 'import_invalid_item', 'params' => []];
+                    continue;
+                }
+                $name = is_string($d['name'] ?? null) ? $d['name'] : '?';
+                if (($d['format'] ?? self::FORMAT) !== self::FORMAT) {
+                    $msgs[] = ['code' => 'import_format', 'params' => ['title' => $name]];
+                    continue;
+                }
+                $id = isset($d['id']) && is_string($d['id']) && Util::isId($d['id']) ? $d['id'] : null;
+                if ($id && isset($this->all()[$id])) {
+                    $msgs[] = ['code' => 'import_menu_exists', 'params' => ['title' => $name]];
+                    continue;
+                }
+                try {
+                    $now = Util::now();
+                    $base = ['format' => self::FORMAT, 'id' => $id ?? Util::id(), 'owner' => $user['id'], 'items' => []];
+                    $m = $this->clean($user, ['visibility' => $visibility, 'household' => $household, 'items' => []] + $d, $base);
+                    // match the dishes now that the menu's space is known
+                    $byTitle = [];
+                    foreach ($idx as $s) {
+                        if ($this->app->canView($user, $s) && $this->fits($m, $s)) {
+                            $byTitle[Util::lower(Util::squash($s['title']))] ??= $s['id'];
+                        }
+                    }
+                    $dishes = [];
+                    foreach (is_array($d['items'] ?? null) ? $d['items'] : [] as $it) {
+                        if (!is_array($it)) {
+                            continue;
+                        }
+                        $rid = is_string($it['recipe'] ?? null) ? $it['recipe'] : null;
+                        $title = is_string($it['title'] ?? null) ? Util::squash($it['title']) : '';
+                        $ok = $rid && isset($idx[$rid]) && $this->app->canView($user, $idx[$rid]) && $this->fits($m, $idx[$rid]);
+                        if (!$ok && ($rid || $title !== '')) {
+                            $rid = $byTitle[Util::lower($title)] ?? null;
+                            if (!$rid) {
+                                $msgs[] = ['code' => 'import_menu_recipe_text', 'params' => ['menu' => $m['name'], 'title' => $title ?: '?']];
+                                $it['text'] = $title ?: (string) ($it['text'] ?? '');
+                            }
+                        }
+                        $dishes[] = ['recipe' => $rid] + $it;
+                    }
+                    $m['items'] = $this->cleanItems($user, $dishes, $m);
+                    $m = ['format' => self::FORMAT] + $m + ['created' => $now, 'updated' => $now, 'updated_by' => $user['id']];
+                    $this->save($m);
+                    $created[] = $m['id'];
+                } catch (HttpError $e) {
+                    $msgs[] = ['code' => 'import_failed', 'params' => ['title' => $name, 'reason' => $e->errorCode] + $e->params];
+                }
+            }
+            return ['created' => $created, 'messages' => $msgs];
+        });
+    }
+
     // ---------- input ----------
 
     /** Clean the editable fields of a menu sent by the client; $m is the current menu (or the defaults of a new one). */

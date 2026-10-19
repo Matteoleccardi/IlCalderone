@@ -6,6 +6,7 @@ declare(strict_types=1);
  *  data/recipes/<id>.json   one recipe: exchange format calderone-recipe/1 + owner/visibility/household/timestamps
  *  data/index/recipes.json  derived summaries for listing/search (rebuilt automatically if missing)
  *  data/media/<id>.<ext>    the dish photo
+ *  data/media/<id>.icon.png an optional small pixel-art picture of the dish (128×128 PNG)
  *  data/history/<id>/<rev>.json  earlier versions (full copies), written every time the recipe is changed in place
  * Variants form a DAG: each child lists its parents ({id, kind, note}); children are found through the index.
  */
@@ -19,6 +20,9 @@ final class Recipes
         'visibility', 'household'];
     private const PHOTO_TYPES = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
     public const MIME = ['jpg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
+    /** Icons are small PNGs (pixel art), at most this many bytes and pixels per side. */
+    public const ICON_MAX_BYTES = 65536;
+    public const ICON_MAX_SIDE = 512;
 
     private ?array $index = null;
 
@@ -93,7 +97,7 @@ final class Recipes
             'units' => array_values(array_unique(array_filter(array_map(fn($i) => $i['unit'], $r['ingredients'] ?? [])))),
             'owner' => $r['owner'], 'visibility' => $r['visibility'], 'household' => $r['household'] ?? null,
             'parents' => array_map(fn($p) => $p['id'], $r['parents'] ?? []),
-            'photo' => !empty($r['photo']), 'updated' => $r['updated'] ?? null,
+            'photo' => !empty($r['photo']), 'icon' => !empty($r['icon']), 'updated' => $r['updated'] ?? null,
         ];
     }
 
@@ -153,6 +157,7 @@ final class Recipes
                 }
             }
             $this->deletePhoto($r);
+            $this->deleteIcon($r);
             $this->store()->delete("recipes/{$id}.json");
             $this->store()->deleteDir("history/{$id}");
             $idx = $this->index();
@@ -277,7 +282,7 @@ final class Recipes
         [$vis, $hh] = $this->app->cleanScope($user, $input['visibility'] ?? 'shared', $input['household'] ?? null);
         $now = Util::now();
         $r = ['format' => self::FORMAT, 'id' => $id ?? Util::id()] + self::cleanContent($input) + [
-            'photo' => null, 'parents' => [],
+            'photo' => null, 'icon' => null, 'parents' => [],
             'owner' => $user['id'], 'visibility' => $vis, 'household' => $hh, 'created' => $now, 'updated' => $now,
             'rev' => 1, 'updated_by' => $user['id'],
         ];
@@ -441,6 +446,10 @@ final class Recipes
                     $child['photo'] = "{$child['id']}.{$ext}";
                 }
             }
+            if (!empty($parent['icon']) && is_file($this->store()->path("media/{$parent['icon']}"))
+                && copy($this->store()->path("media/{$parent['icon']}"), $this->store()->path("media/{$child['id']}.icon.png"))) {
+                $child['icon'] = "{$child['id']}.icon.png";
+            }
             return $this->save($this->withParent($child, $parent['id'], 'variant'));
         });
     }
@@ -534,12 +543,54 @@ final class Recipes
         return $r;
     }
 
+    // ---------- icons ----------
+
+    /** Save an icon from raw PNG bytes (an upload or an exchange file's icon_data). */
+    public function saveIconBytes(array $r, string $bin): array
+    {
+        $info = strlen($bin) <= self::ICON_MAX_BYTES ? @getimagesizefromstring($bin) : false;
+        if (strlen($bin) > self::ICON_MAX_BYTES) {
+            throw new HttpError(413, 'icon_too_large');
+        }
+        if (!$info || $info[2] !== IMAGETYPE_PNG || $info[0] > self::ICON_MAX_SIDE || $info[1] > self::ICON_MAX_SIDE) {
+            throw new HttpError(415, 'icon_type');
+        }
+        $name = "{$r['id']}.icon.png";
+        $this->store()->locked(function () use ($name, $bin) {
+            $dest = $this->store()->path("media/{$name}");
+            if (!is_dir(dirname($dest))) {
+                mkdir(dirname($dest), 0775, true);
+            }
+            file_put_contents($dest, $bin);
+        });
+        $r['icon'] = $name;
+        $r['updated'] = Util::now();
+        return $this->save($r);
+    }
+
+    public function saveIcon(array $r, array $file): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+            throw new HttpError(400, 'photo_upload_failed');
+        }
+        return $this->saveIconBytes($r, (string) file_get_contents($file['tmp_name']));
+    }
+
+    public function deleteIcon(array $r): array
+    {
+        if (!empty($r['icon'])) {
+            $this->store()->delete('media/' . basename($r['icon']));
+        }
+        $r['icon'] = null;
+        return $r;
+    }
+
     // ---------- exchange format ----------
 
     /** Exchange-format copy of a recipe; with $photos the dish photo is embedded as photo_data (data: URI). */
     public function toExchange(array $r, bool $photos = false): array
     {
-        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'category', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'parents'];
+        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'category', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'icon', 'parents'];
         $out = [];
         foreach ($keys as $k) {
             $out[$k] = $r[$k] ?? null;
@@ -549,6 +600,10 @@ final class Recipes
             $ext = pathinfo($r['photo'], PATHINFO_EXTENSION);
             $out['photo_data'] = 'data:' . (self::MIME[$ext] ?? 'image/jpeg') . ';base64,'
                 . base64_encode((string) file_get_contents($this->store()->path('media/' . basename($r['photo']))));
+        }
+        if ($photos && !empty($r['icon']) && $this->store()->exists('media/' . basename($r['icon']))) {
+            $out['icon_data'] = 'data:image/png;base64,'
+                . base64_encode((string) file_get_contents($this->store()->path('media/' . basename($r['icon']))));
         }
         return $out;
     }
@@ -583,6 +638,13 @@ final class Recipes
                 }
                 if (is_string($d['photo_data'] ?? null)) {
                     $r = $this->savePhotoData($r, $d['photo_data']);
+                }
+                if (is_string($d['icon_data'] ?? null) && preg_match('#^data:image/png;base64,(.+)$#s', $d['icon_data'], $im)) {
+                    try {
+                        $r = $this->saveIconBytes($r, (string) base64_decode($im[1], true));
+                    } catch (HttpError $e) {
+                        $msgs[] = ['code' => 'import_failed', 'params' => ['title' => $title, 'reason' => $e->errorCode]];
+                    }
                 }
                 $created[] = $r['id'];
                 $pending[$r['id']] = is_array($d['parents'] ?? null) ? $d['parents'] : [];

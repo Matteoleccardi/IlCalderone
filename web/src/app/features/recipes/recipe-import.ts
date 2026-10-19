@@ -80,7 +80,9 @@ export class RecipeImport {
       .join(', ') + (this.items().length > 8 ? '…' : '');
 
   async pick(ev: Event): Promise<void> {
-    const files = Array.from((ev.target as HTMLInputElement).files ?? []);
+    const input = ev.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = ''; // so picking the same file again still works
     const all: Record<string, unknown>[] = [];
     for (const f of files) {
       try {
