@@ -1,12 +1,13 @@
 import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { RecipeIcon } from '../../shared/recipe-icon';
 import { I18n, TPipe } from '../../core/i18n';
 import { PlanDay } from '../../core/models';
 
 /** Days of a plan with every option of every active menu (several menus on the same meal = several options). */
 @Component({
   selector: 'app-week-plan',
-  imports: [RouterLink, TPipe],
+  imports: [RouterLink, RecipeIcon, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="plan">
@@ -20,7 +21,9 @@ import { PlanDay } from '../../core/models';
                 @for (o of m.options; track $index) {
                   <li>
                     @if (o.recipe && o.available) {
-                      <a [routerLink]="['/ricette', o.recipe]">{{ o.title }}</a>
+                      <a class="with-icon" [routerLink]="['/ricette', o.recipe]"
+                        ><app-recipe-icon [id]="o.recipe" [show]="o.icon" [version]="o.updated" />{{ o.title }}</a
+                      >
                     } @else if (o.recipe) {
                       <span class="muted">{{ 'common.unavailable_recipe' | t }}</span>
                     } @else {

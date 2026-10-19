@@ -248,6 +248,7 @@ export interface PlanOption {
   title: string | null;
   available: boolean;
   photo: boolean;
+  icon?: boolean;
   updated: string | null;
   text: string;
   servings: number | null;

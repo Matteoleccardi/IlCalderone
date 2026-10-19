@@ -51,6 +51,8 @@ code { background: var(--surface-2); padding: 0 .3em; border-radius: 4px; font-s
 /* 8-bit dish icons: keep the pixels crisp */
 .recipe-icon { image-rendering: pixelated; width: 48px; height: 48px; flex: none; }
 .recipe-icon.big { width: 96px; height: 96px; }
+.recipe-icon.inline { width: 28px; height: 28px; margin-right: .1rem; }
+a.with-icon { display: inline-flex; align-items: center; gap: .35rem; }
 .with-icon { display: flex; align-items: center; gap: .5rem; }
 /* .recipe-card img is the full-width photo: icons keep their own size */
 .recipe-card img.recipe-icon { width: 32px; height: 32px; aspect-ratio: auto; object-fit: contain; background: none; }

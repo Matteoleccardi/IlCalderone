@@ -8,10 +8,11 @@ import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { today } from '../meallog/dates';
 import { RecipeCard } from '../recipes/recipe-card';
+import { RecipeIcon } from '../../shared/recipe-icon';
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule, RouterLink, RecipeCard, TPipe],
+  imports: [FormsModule, RouterLink, RecipeCard, RecipeIcon, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="hero">
@@ -49,7 +50,9 @@ import { RecipeCard } from '../recipes/recipe-card';
                 @for (o of m.options; track $index) {
                   <li>
                     @if (o.recipe && o.available) {
-                      <a [routerLink]="['/ricette', o.recipe]">{{ o.title }}</a>
+                      <a class="with-icon" [routerLink]="['/ricette', o.recipe]"
+                        ><app-recipe-icon [id]="o.recipe" [show]="o.icon" [version]="o.updated" />{{ o.title }}</a
+                      >
                     } @else if (o.recipe) {
                       <span class="muted">{{ 'common.unavailable_recipe' | t }}</span>
                     } @else {

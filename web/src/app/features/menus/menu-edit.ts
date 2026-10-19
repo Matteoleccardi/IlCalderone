@@ -16,6 +16,7 @@ import { MEALS, Meal, Menu, MenuItem, RecipeSummary, Visibility } from '../../co
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
 import { FileName } from '../../shared/file-name';
+import { RecipeIcon } from '../../shared/recipe-icon';
 import { Pick, RecipePicker } from '../../shared/recipe-picker';
 import { ScopePicker } from '../../shared/scope-picker';
 
@@ -25,7 +26,7 @@ import { ScopePicker } from '../../shared/scope-picker';
  */
 @Component({
   selector: 'app-menu-edit',
-  imports: [FormsModule, RouterLink, FileName, RecipePicker, ScopePicker, TPipe],
+  imports: [FormsModule, RouterLink, FileName, RecipeIcon, RecipePicker, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (menu(); as m) {
@@ -152,7 +153,9 @@ import { ScopePicker } from '../../shared/scope-picker';
                 <div class="dish">
                   @if (it.recipe) {
                     @if (it.available) {
-                      <a [routerLink]="['/ricette', it.recipe]">{{ it.title }}</a>
+                      <a class="with-icon" [routerLink]="['/ricette', it.recipe]"
+                        ><app-recipe-icon [id]="it.recipe" [show]="byId().get(it.recipe)?.icon" [version]="byId().get(it.recipe)?.updated" />{{ it.title }}</a
+                      >
                     } @else {
                       <span class="muted">{{ 'common.unavailable_recipe' | t }}</span>
                     }
@@ -252,6 +255,9 @@ export class MenuEdit {
   protected months = this.i18n.months();
 
   protected weekList = computed(() => Array.from({ length: this.weeks() }, (_, i) => i + 1));
+
+  /** Recipe summaries by id (for the dishes' icons). */
+  protected byId = computed(() => new Map(this.recipes().map((r) => [r.id, r])));
 
   /** Recipes that can go in this menu: in a household menu, only those every member can see. */
   protected candidates = computed(() => {

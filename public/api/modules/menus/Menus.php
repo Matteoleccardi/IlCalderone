@@ -149,7 +149,7 @@ final class Menus
                         'space' => $m['visibility'] === 'household' ? $m['household'] : 'me',
                         'space_name' => $m['visibility'] === 'household' ? ($hh[$m['household']] ?? null) : null,
                         'recipe' => $it['recipe'], 'title' => $ok ? $s['title'] : null, 'available' => $ok,
-                        'photo' => $ok && $s['photo'], 'updated' => $ok ? $s['updated'] : null,
+                        'photo' => $ok && $s['photo'], 'icon' => $ok && !empty($s['icon']), 'updated' => $ok ? $s['updated'] : null,
                         'text' => $it['text'], 'servings' => $it['servings'] ?? ($ok ? $s['servings'] : null),
                     ];
                 }
