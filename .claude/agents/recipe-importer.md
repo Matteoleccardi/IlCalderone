@@ -34,7 +34,9 @@ If the caller only wants a check, run `tools/audit_recipes.py --existing SRC` an
 
 ```json
 {"format": "calderone-recipe/1", "id": null, "title": "Gnocchi con salsa alle noci", "servings": 4,
- "time_minutes": 15, "category": "Piatto unico", "tags": ["Cereali", "Grassi vegetali"],
+ "time_minutes": 15, "tags": ["cereali", "grassi vegetali"],
+ "facets": {"course": "piatto_unico", "diet": "vegana", "base": ["gnocchi", "frutta_secca"], "dish": ["sugo"],
+            "serve": "caldo", "season": ["autunno", "inverno"], "cuisine": "italiana"},
  "ingredients": [{"name": "Noci sgusciate", "qty": 80, "unit": "g", "optional": false, "note": ""}],
  "steps": [{"title": "Cuocete gli gnocchi", "text": "…"}], "notes": "", "taken_from": "", "parents": []}
 ```
@@ -61,6 +63,26 @@ If the caller only wants a check, run `tools/audit_recipes.py --existing SRC` an
 **Steps and source**
 - `steps[].title` is the heading without the `n/N` prefix; `text` is the paragraph on one line.
 - `taken_from` is empty unless the user names a source. Never put file names or "screenshot" there.
+
+**Classification (`facets`)**: only the keys of `public/api/modules/recipes/facets.json`, never other words.
+- `course` (one, **required**): what the dish is in a meal. The app's own label (Primo, Secondo, Piatto unico…)
+  wins when the screenshot shows one.
+- `diet` (one, **required**): `vegana` (no animal products at all, honey included), `vegetariana` (eggs, milk,
+  cheese, butter, honey, but no meat or fish), `pesce` (fish or seafood, no meat), `carne` (any meat, cured meat,
+  meat stock). Read every ingredient, also the optional ones; "latte di soia", "burro di arachidi" are plant-based.
+- `base` (up to 5, in order of importance): what the dish is built on: the starch (pasta, riso, cereali, gnocchi,
+  pane_pizza) first, then the protein (legumi, soia_seitan, uova, formaggi, carne, pesce), then verdure, funghi,
+  frutta, frutta_secca when they are a main part, not a garnish.
+- `dish` (any): how it is made or what it is: zuppa, insalata, forno, fritto, umido, griglia, crudo, torta_salata,
+  sugo (pasta with a sauce or pesto), risotto, curry, ripieno.
+  - `zuppa` only for soups, minestre and vellutate eaten with a spoon. A pasta dish stays a pasta dish even when the pasta
+    cooks in broth or in a creamy sauce (gnocchetti, pasta e ceci asciutta): give it `sugo` or nothing.
+  - Gnocchetti sardi / malloreddus are pasta (`base: pasta`); `gnocchi` is only for potato (or similar) gnocchi.
+- `serve` (one): caldo, tiepido or freddo, as normally eaten.
+- `season` (any): the seasons of its main fresh vegetables or fruit (zucca, cavolfiore, broccoli → autunno, inverno;
+  pomodori, zucchine, melanzane → estate). Empty when it works all year.
+- `cuisine` (one): italiana, mediterranea, asiatica, indiana, mediorientale, messicana, or altro.
+- The audit (step 5) checks the keys and compares `diet` with the ingredients.
 
 ## 3. Photo → `inbox/<slug>/photo.jpg`
 `tools/recipe_media.py crop <cover image> inbox/<slug>/photo.jpg`.
@@ -102,6 +124,8 @@ of mint…).
 ## 5. Audit and fix
 Run `tools/audit_recipes.py --existing SRC --new inbox/`.
 - **New recipes**: fix every ERROR and WARN in their files, adopting the spelling and unit most recipes already use.
+  - Facets: every value must be a key of `facets.json`; `course` and `diet` are required. When the audit says the
+    ingredients suggest another diet, re-read the ingredients and fix whichever is wrong.
   - Convert units only when it is exact: spoons → tbs. Otherwise keep the printed unit and report it.
 - **Existing recipes**: report their WARNs as suggested edits for the user. Don't edit them.
 - NOTEs ("new ingredient") are fine when the ingredient is new; fix them when they are typos.
@@ -112,6 +136,7 @@ Run `tools/audit_recipes.py --existing SRC --new inbox/`.
   - the recipes found, with their images;
   - every `??` or uncertain reading;
   - new ingredient names and units;
+  - the classification of each recipe (course · diet · base), so the user can correct it;
   - the fixes you made, and the edits suggested for existing recipes;
   - the icons, as paths to view.
 - **Wait for the user's OK.** Then run `tools/pack_recipes.py inbox/ [--only slug …]`, which writes

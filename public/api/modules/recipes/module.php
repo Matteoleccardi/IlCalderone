@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/Facets.php';
 require_once __DIR__ . '/Recipes.php';
 
 return [
@@ -25,21 +26,23 @@ return [
         };
 
         $app->get('/recipes', function (Request $r) use ($auth, $svc) {
-            return $svc->visible($auth->require(), $r->q('q'), $r->q('mine') === '1');
+            return $svc->visible($auth->require(), $r->q('q'), $r->q('mine') === '1', Facets::filtersFromQuery($r->query));
         });
+
+        // The fixed classification (facets.json): the editor's choices and the list filters.
+        $app->get('/recipes/facets', fn() => Facets::def());
 
         // Distinct ingredient names / units / categories among visible recipes (editor autocomplete).
         $app->get('/recipes/vocabulary', function () use ($auth, $svc) {
-            $ing = $units = $cats = $tags = [];
+            $ing = $units = $tags = [];
             foreach ($svc->visible($auth->require()) as $s) {
                 foreach ($s['ingredients'] as $i) { $ing[$i] = true; }
                 foreach ($s['units'] as $u) { $units[$u] = true; }
                 foreach ($s['tags'] as $t) { $tags[$t] = true; }
-                $cats[$s['category']] = true;
             }
             $sorted = function (array $a) { $k = array_keys($a); natcasesort($k); return array_values($k); };
             return ['ingredients' => $sorted($ing), 'units' => $sorted($units + array_flip(['g', 'ml', 'p.', 'tbs', 'q.b.'])),
-                'categories' => $sorted($cats), 'tags' => $sorted($tags)];
+                'tags' => $sorted($tags)];
         });
 
         $app->get('/recipes/export', function (Request $r) use ($auth, $svc) {
@@ -65,8 +68,16 @@ return [
             return $svc->import($u, $items, (string) ($body['visibility'] ?? 'shared'), isset($body['household']) ? (string) $body['household'] : null);
         });
 
-        $app->post('/recipes', function (Request $r) use ($auth, $svc, $detail) {
+        // saving from the editor needs the required facets (course and diet); imports only get a warning
+        $requireFacets = function (array $body): void {
+            if (Facets::missing(Recipes::cleanContent($body)['facets'])) {
+                throw new HttpError(400, 'facets_required');
+            }
+        };
+
+        $app->post('/recipes', function (Request $r) use ($auth, $svc, $detail, $requireFacets) {
             $u = $auth->require();
+            $requireFacets($r->json());
             return $detail($u, $svc->create($u, $r->json()));
         });
 
@@ -75,8 +86,9 @@ return [
             return $detail($u, $svc->visibleOr404($u, $p['id']));
         });
 
-        $app->put('/recipes/{id}', function (Request $r, array $p) use ($auth, $svc, $detail, $app) {
+        $app->put('/recipes/{id}', function (Request $r, array $p) use ($auth, $svc, $detail, $app, $requireFacets) {
             $u = $auth->require();
+            $requireFacets($r->json());
             return $app->store->locked(fn() => $detail($u, $svc->update($u, $svc->editableOr403($u, $p['id']), $r->json())));
         });
 

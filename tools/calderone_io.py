@@ -100,8 +100,96 @@ def load_recipes(src) -> list[dict]:
     return out
 
 
+# ---- the fixed classification (public/api/modules/recipes/facets.json) ----
+
+FACETS = load_json(ROOT / "public" / "api" / "modules" / "recipes" / "facets.json")["facets"]
+LEGACY_COURSE = {"antipasti": "antipasto", "primi": "primo", "primo piatto": "primo", "secondi": "secondo",
+                 "secondo piatto": "secondo", "contorni": "contorno", "piatto unico": "piatto_unico", "dolci": "dolce",
+                 "dessert": "dolce", "snack": "merenda", "salse": "salsa", "condimento": "salsa", "lievitati": "pane",
+                 "bevande": "bevanda"}
+
+
+def facets_of(r: dict) -> dict:
+    """The recipe's facets, every one present (single → value or None, multi → list); an old free-text
+    "category" becomes the course, as the app does."""
+    raw = r.get("facets") if isinstance(r.get("facets"), dict) else {}
+    out = {}
+    for name, f in FACETS.items():
+        v = raw.get(name)
+        out[name] = (v if isinstance(v, list) else [v] if v else []) if f.get("multi") else (v if isinstance(v, str) else None)
+    if not raw and r.get("category"):
+        c = re.sub(r"\s+", " ", fold(r["category"])).strip()
+        key = c.replace(" ", "_")
+        out["course"] = key if key in FACETS["course"]["values"] else LEGACY_COURSE.get(c)
+    return out
+
+
+def facet_problems(r: dict) -> list[tuple[str, str]]:
+    """("ERROR"|"WARN", text) for unknown values, too many values and missing required facets."""
+    out = []
+    raw = r.get("facets") if isinstance(r.get("facets"), dict) else {}
+    for name in raw:
+        if name not in FACETS:
+            out.append(("ERROR", f"unknown facet {name!r} (known: {', '.join(FACETS)})"))
+    f = facets_of(r)
+    for name, d in FACETS.items():
+        vals = f[name] if d.get("multi") else [f[name]] if f[name] else []
+        for v in vals:
+            if v not in d["values"]:
+                out.append(("ERROR", f"{name}: {v!r} is not one of {', '.join(d['values'])}"))
+        if d.get("max") and len(vals) > d["max"]:
+            out.append(("ERROR", f"{name}: at most {d['max']} values"))
+        if d.get("required") and not vals:
+            out.append(("ERROR", f"{name} missing (required: one of {', '.join(d['values'])})"))
+    if "category" in r:
+        out.append(("WARN", "old field 'category': use facets.course"))
+    return out
+
+
+# Diet from the ingredient names: keep in sync with suggestDiet() in web/src/app/core/facets.ts.
+MEAT = ["carne", "manzo", "maiale", "vitello", "pollo", "tacchino", "agnello", "coniglio", "anatra", "salsicc", "salam",
+        "prosciutto", "pancetta", "guanciale", "speck", "bresaola", "mortadella", "wurstel", "lardo", "macinat",
+        "cotechino", "brodo di carne", "bacon", "chorizo", "gelatina animale", "strutto"]
+FISH = ["pesce", "tonno", "salmone", "merluzzo", "baccala", "stoccafisso", "acciug", "alici", "sgombro", "orata", "branzino",
+        "spigola", "gamber", "scamp", "cozz", "vongol", "calamar", "totan", "polpo", "seppi", "sardin", "trota", "aringa",
+        "crostace", "colatura", "bottarga", "surimi", "granchio", "aragost", "astice", "capesant", "ostric"]
+ANIMAL = ["uov", "tuorl", "album", "latte", "burro", "formagg", "parmigiano", "grana", "pecorino", "mozzarell", "ricotta",
+          "panna", "yogurt", "mascarpone", "gorgonzola", "stracchino", "miele", "besciamella", "scamorza", "fontina",
+          "provola", "burrata", "feta", "caprino", "emmental", "groviera", "taleggio", "asiago", "robiola", "crescenza",
+          "philadelphia"]
+PLANT = ["vegan", "vegetal", "di soia", "di cocco", "d'avena", "di avena", "di mandorl", "di riso", "di arachid", "di cacao",
+         "di anacardi", "di nocciol", "di sesamo", "tofu", "tempeh", "seitan"]
+
+
+def suggest_diet(names: list[str]) -> str | None:
+    """carne / pesce / vegetariana / vegana from the ingredient names (None without ingredients)."""
+    has = lambda n, stems: any(re.search(rf"(^|[^a-z]){re.escape(st)}", n) for st in stems)
+    names = [fold(n).strip() for n in names if n and n.strip()]
+    if not names:
+        return None
+    animal = [n for n in names if not has(n, PLANT)]
+    if any(has(n, MEAT) for n in animal):
+        return "carne"
+    if any(has(n, FISH) for n in animal):
+        return "pesce"
+    if any(has(n, ANIMAL) for n in animal):
+        return "vegetariana"
+    return "vegana"
+
+
+FACET_BASE = {"pasta": "pasta", "gnocchi": "gnocchi", "riso": "riso", "cereali": "cereali", "pane_pizza": "pane"}
+FACET_PROTEIN = {"legumi": "legumi", "soia_seitan": "soia", "uova": "uova", "formaggi": "formaggi", "pesce": "pesce",
+                 "carne": "carne"}
+
+
 def base_of(r: dict) -> str:
-    """What the dish is built on: pasta, gnocchi, riso, cereali, pane, patate, zuppa or altro."""
+    """What the dish is built on: pasta, gnocchi, riso, cereali, pane, patate, zuppa or altro (from the facets when set)."""
+    f = facets_of(r)
+    if "zuppa" in f["dish"]:
+        return "zuppa"
+    for b in f["base"]:
+        if b in FACET_BASE:
+            return FACET_BASE[b]
     title = fold(r.get("title", ""))
     if any(w in title for w in SOUP_WORDS):
         return "zuppa"
@@ -114,6 +202,9 @@ def base_of(r: dict) -> str:
 
 
 def proteins_of(r: dict) -> list[str]:
+    from_facets = [FACET_PROTEIN[b] for b in facets_of(r)["base"] if b in FACET_PROTEIN]
+    if from_facets:
+        return from_facets
     names = " | ".join(clean_name(i["name"]) for i in r.get("ingredients", []))
     return [k for k, words in PROTEINS.items() if any(re.search(rf"\b{re.escape(w)}", names) for w in words)]
 

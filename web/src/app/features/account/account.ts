@@ -5,10 +5,11 @@ import { I18n, LANGS, Lang, TPipe } from '../../core/i18n';
 import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { User } from '../../core/models';
+import { ThemePicker } from '../../shared/theme-picker';
 
 @Component({
   selector: 'app-account',
-  imports: [FormsModule, TPipe],
+  imports: [FormsModule, ThemePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'account.title' | t }}</h1>
@@ -34,6 +35,10 @@ import { User } from '../../core/models';
           }
         </select>
       </label>
+    </section>
+    <section class="card narrow">
+      <h2>{{ 'theme.title' | t }}</h2>
+      <app-theme-picker />
     </section>
     <section class="card narrow">
       <h2>{{ 'account.change_password' | t }}</h2>

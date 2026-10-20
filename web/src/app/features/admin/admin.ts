@@ -71,8 +71,9 @@ import { SessionService } from '../../core/session';
       <ul class="checks">
         @for (c of checks(); track c.name) {
           <li [class.bad]="!c.ok">
-            <span>{{ c.ok ? '✔' : '✖' }}</span> <strong>{{ 'check.' + c.name | t }}</strong>
-            <span class="muted small">{{ 'check.' + c.detail | t: c.params }}</span>
+            <span class="check-icon" aria-hidden="true">{{ c.ok ? '✔' : '✖' }}</span>
+            <strong>{{ 'check.' + c.name | t }}</strong>
+            <span class="muted small check-detail">{{ 'check.' + c.detail | t: c.params }}</span>
           </li>
         }
       </ul>

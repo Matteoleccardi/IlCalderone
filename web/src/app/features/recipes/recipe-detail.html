@@ -11,13 +11,13 @@
         </h1>
         <p class="meta">
           @if (r.time_minutes) { <span>⏱ {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
-          @if (r.category) { <span>{{ r.category }}</span> }
           <app-visibility [value]="r.visibility" />
           @if (r.visibility === 'household') { <span>{{ households.name(r.household) }}</span> }
           @if (r.rev > 1 && r.updated_by !== r.owner) {
             <span class="muted">{{ 'recipe.edited_by' | t: { name: r.updated_by_name ?? ('common.deleted_user' | t) } }}</span>
           }
         </p>
+        <app-facet-chips [facets]="r.facets" [time]="r.time_minutes" />
         @if (r.tags.length) {
           <p class="tags">
             @for (t of r.tags; track t) { <a class="tag" [routerLink]="['/ricette']" [queryParams]="{ q: t }">#{{ t }}</a> }
@@ -84,7 +84,7 @@
         </ol>
         @if (r.notes) {
           <h2>{{ 'recipe.notes' | t }}</h2>
-          <p class="pre">{{ r.notes }}</p>
+          <p class="pre notes">{{ r.notes }}</p>
         }
         <p class="muted small source">
           {{ 'recipe.source' | t: { name: r.owner_name ?? ('common.deleted_user' | t) } }}

@@ -1,0 +1,18 @@
+/* Everforest Dark (Everforest palette (medium), MIT licence). Mapped onto Il Calderone's colour tokens. */
+[data-theme="everforest-dark"] {
+  --bg: #232a2e;
+  --surface: #2d353b;
+  --surface-2: #343f44;
+  --text: #d3c6aa;
+  --muted: #9da9a0;
+  --line: #475258;
+  --accent: #e69875;
+  --accent-text: #000000;
+  --accent-soft: #564b48;
+  --ok: #a7c080;
+  --danger: #e67e80;
+  --shadow: none;
+  --on-danger: #000000;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

@@ -1,0 +1,18 @@
+/* Macchiato (Catppuccin palette 1.7.1, MIT licence). Mapped onto Il Calderone's colour tokens. */
+[data-theme="catppuccin-macchiato"] {
+  --bg: #1e2030;
+  --surface: #24273a;
+  --surface-2: #363a4f;
+  --text: #cad3f5;
+  --muted: #a5adcb;
+  --line: #494d64;
+  --accent: #f5a97f;
+  --accent-text: #000000;
+  --accent-soft: #524449;
+  --ok: #a6da95;
+  --danger: #ed8796;
+  --shadow: none;
+  --on-danger: #000000;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

@@ -11,6 +11,8 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
 
 ## Commands
 
+- Release for a server: `./deploy.sh [--base-href /sub/] [--data-dir PATH] [--with-data]` → `release/IlCalderone-<version>/`
+  (+ zip, with `docs/install.md` as INSTALL.md); it builds into `web/dist` and never touches `public/`. Keep `docs/install.md` in sync with it.
 - Build the front end: `cd web && npm run build`. This is `ng build` plus `scripts/publish.mjs`, which copies `web/dist/web/browser` into
   `public/`. **Never point `ng build` output at `public/`**: the builder empties its output folder (api/ + data/).
 - Dev: `cd web && npm run api` (PHP on :8080) and `npm start` (Angular on :4200, proxying /api).
@@ -97,6 +99,28 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   the `calderone_timers` cookie as end times. Ringing = beep + vibration on screen, a notification through `public/sw.js`
   (from `web/public/`) when the page is in the background. Notifications need HTTPS (or localhost) and the user's permission;
   the timer can only ring while the site is open in some tab (no push server).
+- **Themes** (`web/src/themes/`, see its README): one CSS file per theme setting the colour tokens on `[data-theme="id"]`,
+  generated with `themes.ts` and `index.css` by `tools/make_themes.py` (never edit them by hand; it enforces WCAG AA).
+  `core/theme.ts` (`ThemeService`) picks the favourite light/dark theme (auto = `prefers-color-scheme`), saves it in
+  localStorage `calderone.theme` and the account (`PUT /me {theme}`); the inline script in `index.html` applies it before
+  the first paint. Never hard-code colours in CSS: use the tokens. The `:where(:root)` fallback in `styles.css` must keep zero specificity.
+- **Fonts** (bundled via `@fontsource`, listed in `angular.json` styles): Lato (`--font`, titles and UI) and Literata
+  (`--font-read`, recipe ingredients/steps/notes). No external font CDN.
+- The top-bar title is `shared/brand.ts`: this week's logo from `web/public/logos/{light,dark,medium}/` (light logos on dark themes, medium on both),
+  listed by `web/scripts/logos.mjs` into `logos.json` (git-ignored, run by build/start/deploy.sh) and chosen by `core/logo.ts`
+  (continuous week count, seeded shuffle per cycle). `router-dev.php` URL-decodes static paths (file names with spaces).
+- Layout: the top bar is only the centred logo plus "name · logout"; page navigation is `nav.bottom-nav` fixed at the
+  bottom on every screen size: one row of accent-coloured line icons (`shared/nav-icon.ts`, by page path; order `NAV_ORDER`
+  in `app.ts`), each with the page name as title/aria-label. Its height is kept in
+  `--nav-h` (ResizeObserver): anything fixed or sticky at the bottom must sit above it (`bottom: var(--nav-h)`).
+- Timer lengths are picked on wheels (`shared/duration-wheel.ts`, full-screen overlay, outside the transformed dock).
+- **Recipe classification (facets)**: `public/api/modules/recipes/facets.json` is the single source (facet, single/multi,
+  max, required, values); `Facets.php` cleans and filters, `GET /recipes/facets` serves it, `GET /recipes?course=…&diet=…`
+  filters, `calderone_io.facets_of/facet_problems` read it in the tools, and `check-i18n` requires `facet.<f>.<value>`
+  in every language. Recipes store `facets`; the old free-text `category` is read as the course (Recipes::upgrade) and
+  dropped on save. Course and diet are required when saving from the editor (`facets_required`), not on import
+  (`import_facets_missing` warning). Diet suggestion from ingredients: `suggestDiet` (core/facets.ts) = `suggest_diet`
+  (tools/calderone_io.py), keep both lists in sync. "Quick" (≤ 20 min) is derived, never stored.
 - Menu exchange: `Menus::toExchange`/`import` (`schema/menu-exchange.schema.json`); items carry `title` so they match by title elsewhere.
 
 ## Agents (`.claude/agents/`)

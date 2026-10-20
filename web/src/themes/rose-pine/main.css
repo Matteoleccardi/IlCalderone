@@ -1,0 +1,18 @@
+/* Rosé Pine (Rosé Pine palette 4.0.1, MIT licence). Mapped onto Il Calderone's colour tokens. */
+[data-theme="rose-pine-main"] {
+  --bg: #191724;
+  --surface: #1f1d2e;
+  --surface-2: #26233a;
+  --text: #e0def4;
+  --muted: #908caa;
+  --line: #403d52;
+  --accent: #ebbcba;
+  --accent-text: #000000;
+  --accent-soft: #4c404d;
+  --ok: #9ccfd8;
+  --danger: #eb6f92;
+  --shadow: none;
+  --on-danger: #000000;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

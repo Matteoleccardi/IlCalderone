@@ -6,10 +6,6 @@
       <div class="row">
         <label>{{ 'form.people' | t }} <input name="servings" type="number" min="1" max="100" [(ngModel)]="servings" required /></label>
         <label>{{ 'form.time' | t }} <input name="time" type="number" min="1" [(ngModel)]="time" /></label>
-        <label>{{ 'form.category' | t }}
-          <input name="category" [(ngModel)]="category" list="categories" [placeholder]="'form.category_placeholder' | t" />
-          <datalist id="categories">@for (c of vocab().categories; track c) { <option [value]="c"></option> }</datalist>
-        </label>
       </div>
       <label>{{ 'form.tags' | t }} <span class="muted small">{{ 'form.tags_hint' | t }}</span>
         <input name="tags" [(ngModel)]="tags" />
@@ -20,6 +16,20 @@
         <p class="muted small">{{ 'form.household_edit' | t: { name: existing()!.owner_name ?? '' } }}</p>
       }
     </section>
+
+    @if (facetDefs(); as defs) {
+      <section class="card" id="facets">
+        <h2>{{ 'facet.title' | t }}</h2>
+        <p class="muted small">{{ 'facet.intro' | t }}</p>
+        @if (dietHint(); as d) {
+          <p class="small facet-hint">
+            {{ 'facet.diet_suggested' | t: { diet: ('facet.diet.' + d | t) } }}
+            <button type="button" class="link" (click)="useDiet(d)">{{ 'facet.use' | t }}</button>
+          </p>
+        }
+        <app-facet-picker [defs]="defs" [(value)]="facets" />
+      </section>
+    }
 
     <section class="card">
       <div class="page-head">

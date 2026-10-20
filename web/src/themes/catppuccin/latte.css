@@ -1,0 +1,18 @@
+/* Latte (Catppuccin palette 1.7.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #6c6f85 -> #63667a; accent #fe640b -> #b24608; ok #40a02b -> #2f7620; danger #d20f39 -> #ce0f38. */
+[data-theme="catppuccin-latte"] {
+  --bg: #e6e9ef;
+  --surface: #eff1f5;
+  --surface-2: #dce0e8;
+  --text: #4c4f69;
+  --muted: #63667a;
+  --line: #ccd0da;
+  --accent: #b24608;
+  --accent-text: #ffffff;
+  --accent-soft: #e5d6cf;
+  --ok: #2f7620;
+  --danger: #ce0f38;
+  --shadow: 0 1px 2px rgb(76 79 105 / 7%), 0 4px 16px rgb(76 79 105 / 6%);
+  --on-danger: #ffffff;
+  --backdrop: rgb(0 0 0 / 45%);
+  color-scheme: light;
+}

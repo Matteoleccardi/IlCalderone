@@ -1,0 +1,18 @@
+/* Every theme. Generated list: keep it in sync with themes.ts. */
+@import "./calderone/light.css";
+@import "./calderone/dark.css";
+@import "./catppuccin/latte.css";
+@import "./catppuccin/frappe.css";
+@import "./catppuccin/macchiato.css";
+@import "./catppuccin/mocha.css";
+@import "./rose-pine/dawn.css";
+@import "./rose-pine/moon.css";
+@import "./rose-pine/main.css";
+@import "./gruvbox/light.css";
+@import "./gruvbox/dark.css";
+@import "./nord/light.css";
+@import "./nord/dark.css";
+@import "./solarized/light.css";
+@import "./solarized/dark.css";
+@import "./everforest/light.css";
+@import "./everforest/dark.css";

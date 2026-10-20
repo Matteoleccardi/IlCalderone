@@ -12,6 +12,25 @@ final class Auth
     public const USERS = 'users.json';
     /** Interface languages of the web app (user preference stored in users.json). */
     public const LANGS = ['it', 'en', 'de', 'fr'];
+
+    /**
+     * A colour theme preference {light, dark, mode} as the web app sends it, or null (reset / invalid).
+     * Theme ids are only checked for shape: the web app knows the list and falls back to its defaults.
+     */
+    public static function cleanTheme(mixed $t): ?array
+    {
+        if (!is_array($t)) {
+            return null;
+        }
+        $id = fn($v) => is_string($v) && preg_match('/^[a-z0-9-]{1,40}$/', $v) ? $v : null;
+        $light = $id($t['light'] ?? null);
+        $dark = $id($t['dark'] ?? null);
+        if ($light === null || $dark === null) {
+            return null;
+        }
+        $mode = in_array($t['mode'] ?? null, ['auto', 'light', 'dark'], true) ? $t['mode'] : 'auto';
+        return ['light' => $light, 'dark' => $dark, 'mode' => $mode];
+    }
     private ?array $user = null;
     private bool $loaded = false;
 
@@ -109,7 +128,7 @@ final class Auth
     public static function publicUser(array $u): array
     {
         return ['id' => $u['id'], 'username' => $u['username'], 'display' => $u['display'] ?: $u['username'], 'admin' => (bool) $u['admin'],
-            'lang' => $u['lang'] ?? null];
+            'lang' => $u['lang'] ?? null, 'theme' => $u['theme'] ?? null];
     }
 
     public function createUser(string $username, string $password, string $display = '', bool $admin = false): array

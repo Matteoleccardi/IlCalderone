@@ -15,8 +15,9 @@ export class Notify {
   private next = 1;
   private i18n = inject(I18n);
 
-  /** A success message: a translation key (with params) or an already translated text. */
+  /** A success message: a translation key (with params) or an already translated text. Older errors go away. */
   ok(key: string, params?: Record<string, unknown>): void {
+    this.toasts.update((t) => t.filter((x) => x.kind !== 'error'));
     this.push(this.i18n.t(key, params), 'ok');
   }
 

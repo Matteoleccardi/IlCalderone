@@ -8,6 +8,8 @@ export interface User {
   display: string;
   admin: boolean;
   lang: string | null;
+  /** Colour theme preference (null: not chosen yet, the browser's choice applies). */
+  theme?: { light: string; dark: string; mode: 'auto' | 'light' | 'dark' } | null;
   created?: string;
 }
 
@@ -42,7 +44,8 @@ export interface RecipeContent {
   title: string;
   servings: number;
   time_minutes: number | null;
-  category: string;
+  /** Fixed classification (core/facets.ts). */
+  facets: Record<string, string | string[] | null>;
   tags: string[];
   ingredients: Ingredient[];
   steps: Step[];
@@ -100,7 +103,8 @@ export interface RecipeSummary extends Scoped {
   title: string;
   servings: number;
   time_minutes: number | null;
-  category: string;
+  /** Fixed classification (core/facets.ts). */
+  facets: Record<string, string | string[] | null>;
   tags: string[];
   ingredients: string[];
   owner: string;
@@ -114,7 +118,6 @@ export interface RecipeSummary extends Scoped {
 export interface Vocabulary {
   ingredients: string[];
   units: string[];
-  categories: string[];
   tags: string[];
 }
 

@@ -201,10 +201,13 @@ final class App
         return $out;
     }
 
-    /** Validate visibility + household chosen by a user; falls back to private. */
-    public function cleanScope(array $user, mixed $visibility, mixed $household): array
+    /**
+     * Validate visibility + household chosen by a user. A missing/unknown visibility becomes $fallback (recipes use
+     * 'shared'); "household" without a household of the user becomes private.
+     */
+    public function cleanScope(array $user, mixed $visibility, mixed $household, string $fallback = 'private'): array
     {
-        $visibility = in_array($visibility, ['private', 'household', 'shared'], true) ? $visibility : 'private';
+        $visibility = in_array($visibility, ['private', 'household', 'shared'], true) ? $visibility : $fallback;
         $mine = $this->householdIds($user);
         if ($visibility === 'household') {
             if (!in_array($household, $mine, true)) {

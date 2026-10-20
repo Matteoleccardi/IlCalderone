@@ -37,9 +37,119 @@
       ],
       "minimum": 1
     },
+    "facets": {
+      "type": "object",
+      "description": "Fixed classification; the values are the keys of public/api/modules/recipes/facets.json (keep in sync). course and diet are required when saving from the editor.",
+      "properties": {
+        "course": {
+          "enum": [
+            "antipasto",
+            "primo",
+            "secondo",
+            "contorno",
+            "piatto_unico",
+            "dolce",
+            "colazione",
+            "merenda",
+            "salsa",
+            "pane",
+            "bevanda",
+            null
+          ]
+        },
+        "diet": {
+          "enum": [
+            "vegana",
+            "vegetariana",
+            "pesce",
+            "carne",
+            null
+          ]
+        },
+        "base": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "pasta",
+              "riso",
+              "cereali",
+              "gnocchi",
+              "pane_pizza",
+              "legumi",
+              "verdure",
+              "funghi",
+              "uova",
+              "formaggi",
+              "soia_seitan",
+              "frutta",
+              "frutta_secca",
+              "carne",
+              "pesce"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 5
+        },
+        "dish": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "zuppa",
+              "insalata",
+              "forno",
+              "fritto",
+              "umido",
+              "griglia",
+              "crudo",
+              "torta_salata",
+              "sugo",
+              "risotto",
+              "curry",
+              "ripieno"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "serve": {
+          "enum": [
+            "caldo",
+            "tiepido",
+            "freddo",
+            null
+          ]
+        },
+        "season": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "primavera",
+              "estate",
+              "autunno",
+              "inverno"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "cuisine": {
+          "enum": [
+            "italiana",
+            "mediterranea",
+            "asiatica",
+            "indiana",
+            "mediorientale",
+            "messicana",
+            "altro",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "category": {
       "type": "string",
-      "maxLength": 60
+      "maxLength": 60,
+      "deprecated": true,
+      "description": "Before v0.3: free-text category. Read as facets.course (or a tag) by the app; not written any more."
     },
     "tags": {
       "type": "array",

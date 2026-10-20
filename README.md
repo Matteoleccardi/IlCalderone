@@ -12,7 +12,9 @@ Runs on any cheap PHP hosting (even free ones) or on your own PC. **No database*
 
 ## Features
 
-- **Recipes** with photo, servings (quantities rescale automatically), time, category, tags, optional ingredients, steps and notes.
+- **Recipes** with photo, servings (quantities rescale automatically), time, tags, optional ingredients, steps and notes.
+- **Classification** from fixed lists: course, diet (vegan → with meat), main ingredients, kind of dish, served hot/cold,
+  season and cuisine. Filter the recipe list by any of them (plus "quick"); tap a chip on a recipe to see similar ones.
 - **Who can see what**: every recipe and collection is *private*, *household* (your family group) or *shared* (every user);
   new recipes are shared by default. Household recipes and collections can be edited by every member of the household,
   other ones only by their author. Everyone who can see a recipe can make their own **variant** of it.
@@ -33,6 +35,9 @@ Runs on any cheap PHP hosting (even free ones) or on your own PC. **No database*
   a household can read each other's diaries.
 - **Households** and **accounts**: made for about 30 people. The first user is the admin and creates the other accounts.
 - **Import/export** in an open JSON format (`calderone-recipe/1`), with photos embedded. A backup is a copy of one folder.
+- **Themes**: 17 colour themes (Calderone, Catppuccin, Rosé Pine, Gruvbox, Nord, Solarized, Everforest). Pick a favourite
+  light and dark one; the site switches with the phone's night mode. Lato for the interface, Literata for reading recipes.
+- **Kitchen timers** on every page: up to 5, set with wheels, with a beep and a notification.
 - **Modular**: each feature is a PHP module plus an Angular feature folder, and features can be switched off in the config.
 
 ## How it works
@@ -63,6 +68,17 @@ To load the two example recipes, use *Ricette → Importa / esporta*, or run:
 python3 tools/seed_data.py examples/recipes --owner <your-username> --visibility shared
 ```
 
+## Put it on a server
+
+```bash
+./deploy.sh            # needs Node.js 22.22.3+/24.15+ here; the server only needs PHP 8.1+
+```
+
+This writes `release/IlCalderone-<version>/` (and a `.zip`): upload its contents to your site and open it.
+The full guide, [docs/install.md](docs/install.md), is also copied into the release as `INSTALL.md`. It covers
+requirements, Altervista (free hosting, FTP only) and your own Linux server (Apache/Nginx, HTTPS, data outside the
+web root).
+
 ## Claude Code agents
 
 Two [Claude Code](https://claude.com/claude-code) subagents in `.claude/agents/` help with the data. Neither writes into
@@ -78,7 +94,8 @@ Two [Claude Code](https://claude.com/claude-code) subagents in `.claude/agents/`
 | | |
 |---|---|
 | [docs/build.md](docs/build.md) | Development setup, Angular workflow, tests, how to add a feature |
-| [docs/deploy.md](docs/deploy.md) | Deploy on your own PC/server, on Altervista (free) or any PHP host; backups and upgrades |
+| [docs/install.md](docs/install.md) | **Installation**: requirements, `./deploy.sh`, Altervista and self-hosted Linux examples, upgrades, backups, troubleshooting |
+| [docs/deploy.md](docs/deploy.md) | What `deploy.sh` produces; loading menus/recipes made on your PC |
 | [docs/data-format.md](docs/data-format.md) | The JSON files, their schemas, and the exchange format |
 | [PLAN.md](PLAN.md) | Design decisions, roadmap, open questions |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |

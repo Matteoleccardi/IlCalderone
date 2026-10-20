@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 const root = new URL('..', import.meta.url).pathname;
 const dict = readFileSync(join(root, 'src/i18n/it.ts'), 'utf8');
-const keys = new Set([...dict.matchAll(/^\s*'([a-z_]+\.[a-z0-9_]+)':/gm)].map((m) => m[1]));
+const keys = new Set([...dict.matchAll(/^\s*'([a-z_]+(?:\.[a-z0-9_]+)+)':/gm)].map((m) => m[1]));
 
 function files(dir) {
   return readdirSync(dir).flatMap((f) => {
@@ -19,7 +19,7 @@ function files(dir) {
 
 const used = new Map();
 // a key-shaped string literal: two lowercase segments separated by a dot (file names like 'photo.jpg' are listed below)
-const NOT_KEYS = new Set(['photo.jpg', 'icon.png', 'sw.js', 'favicon.svg', 'q.b', 'calderone.lang']);
+const NOT_KEYS = new Set(['photo.jpg', 'icon.png', 'sw.js', 'favicon.svg', 'q.b', 'calderone.lang', 'calderone.theme']);
 for (const f of files(join(root, 'src/app'))) {
   for (const m of readFileSync(f, 'utf8').matchAll(/'([a-z]+\.[a-z][a-z0-9_]*)'/g)) {
     if (!NOT_KEYS.has(m[1])) used.set(m[1], f.slice(root.length));
@@ -43,7 +43,18 @@ for (const m of block.matchAll(/'([a-z_]+)' =>/g)) {
   }
 }
 
-const DYNAMIC = ['err.', 'check.', 'field.', 'kind.', 'meal.', 'visibility.'];
+// 4. every facet and facet value of the recipe classification has a translation (facet.<facet>, facet.<facet>.<value>)
+const facets = JSON.parse(readFileSync(join(root, '../public/api/modules/recipes/facets.json'), 'utf8')).facets;
+for (const [name, f] of Object.entries(facets)) {
+  for (const k of [`facet.${name}`, ...f.values.map((v) => `facet.${name}.${v}`)]) {
+    if (!keys.has(k)) {
+      console.error(`missing translation ${k} for public/api/modules/recipes/facets.json`);
+      errors++;
+    }
+  }
+}
+
+const DYNAMIC = ['err.', 'check.', 'field.', 'kind.', 'meal.', 'visibility.', 'facet.'];
 const unused = [...keys].filter((k) => !used.has(k) && !DYNAMIC.some((p) => k.startsWith(p)));
 if (unused.length) console.warn(`unused keys (warning): ${unused.join(', ')}`);
 

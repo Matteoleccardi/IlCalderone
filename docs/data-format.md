@@ -48,7 +48,8 @@ and the icon as `icon_data` (`data:image/png;base64,…`). `icon` is the icon's 
   "title": "Spaghetti aglio, olio e pangrattato tostato",
   "servings": 2,
   "time_minutes": 20,
-  "category": "Primo",
+  "facets": {"course": "primo", "diet": "vegana", "base": ["pasta"], "dish": [], "serve": "caldo",
+             "season": [], "cuisine": "italiana"},
   "tags": ["veloce"],
   "ingredients": [
     {"name": "Spaghetti", "qty": 180, "unit": "g", "optional": false, "note": ""},
@@ -65,6 +66,27 @@ and the icon as `icon_data` (`data:image/png;base64,…`). `icon` is the icon's 
 }
 ```
 
+- `facets` is the fixed classification. Every value is a key of `public/api/modules/recipes/facets.json`, which
+  lists the facets in display order, says which take several values and their maximum, and which are required.
+  The app translates the keys (`facet.<facet>.<value>` in `web/src/i18n`).
+
+  | Facet | Values | Notes |
+  |---|---|---|
+  | `course` | one | **required** in the editor: antipasto, primo, secondo, contorno, piatto_unico, dolce, colazione, merenda, salsa, pane, bevanda |
+  | `diet` | one | **required**: vegana, vegetariana, pesce, carne. Filtering by vegetariana also finds vegan dishes. |
+  | `base` | up to 5 | pasta, riso, cereali, gnocchi, pane_pizza, legumi, verdure, funghi, uova, formaggi, soia_seitan, frutta, frutta_secca, carne, pesce |
+  | `dish` | any | zuppa, insalata, forno, fritto, umido, griglia, crudo, torta_salata, sugo, risotto, curry, ripieno |
+  | `serve` | one | caldo, tiepido, freddo |
+  | `season` | any | primavera, estate, autunno, inverno (none = all year) |
+  | `cuisine` | one | italiana, mediterranea, asiatica, indiana, mediorientale, messicana, altro |
+
+  - Unknown values are dropped when saving.
+  - "Quick" is not stored: it is derived from `time_minutes` (20 or less).
+  - Files from before the facets have a free-text `category`. The app reads it as `course` when it names one
+    ("Primo", "Piatto unico"…), otherwise as a tag, and drops the field on the next save. Importing such a file works,
+    with a warning that course or diet is missing.
+  - The list API filters with `GET /recipes?course=primo,secondo&diet=vegana&base=legumi…`: within a facet any value
+    matches, and across facets all must match.
 - `taken_from` says where the recipe comes from (a book, a site, grandma); it is optional. The app shows
   "Source: <owner's name>" followed by "· from <taken_from>" when it is set. Files before v0.3 called this field
   `source`; it is still accepted on import and read from old files.

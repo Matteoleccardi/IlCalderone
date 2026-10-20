@@ -1,17 +1,20 @@
 <a class="skip" href="#main">{{ 'app.skip' | t }}</a>
 <header class="topbar">
   <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
-    <span class="logo" aria-hidden="true">🍲</span> Il Calderone
+    <app-brand />
   </a>
   @if (session.user(); as u) {
-    <nav [attr.aria-label]="'app.nav_label' | t">
-      @for (n of nav(); track n.path) {
-        <a [routerLink]="n.path" routerLinkActive="active">{{ n.label | t }}</a>
-      }
-    </nav>
     <div class="who">
       <a routerLink="/account" routerLinkActive="active" [title]="'account.title' | t">{{ u.display }}</a>
-      <button type="button" class="link" (click)="logout()">{{ 'app.logout' | t }}</button>
+      <span class="who-dot" aria-hidden="true"></span>
+      <button type="button" class="logout" (click)="logout()" [title]="'app.logout' | t" [attr.aria-label]="'app.logout' | t">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
+          <path d="M15 8l4 4-4 4" />
+          <path d="M19 12H9" />
+        </svg>
+      </button>
     </div>
   }
 </header>
@@ -32,6 +35,17 @@
 
 @if (session.user()) {
   <app-timer-dock />
+}
+
+@if (session.user()) {
+  <!-- the most used control: at the bottom, where the thumb is -->
+  <nav class="bottom-nav" #bottomNav [attr.aria-label]="'app.nav_label' | t">
+    @for (n of navItems(); track n.path) {
+      <a [routerLink]="n.path" routerLinkActive="active" ariaCurrentWhenActive="page" [title]="n.label | t" [attr.aria-label]="n.label | t">
+        <app-nav-icon [name]="n.path" />
+      </a>
+    }
+  </nav>
 }
 
 <div class="toasts" aria-live="polite">

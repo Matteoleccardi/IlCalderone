@@ -10,6 +10,9 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from calderone_io import facet_problems  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS = {p.name.removesuffix(".schema.json"): Draft202012Validator(json.loads(p.read_text())) for p in (ROOT / "schema").glob("*.schema.json")}
 
@@ -38,6 +41,8 @@ def validate_dir(d: Path) -> list[str]:
             errs.append(f"{p}: photo {r['photo']} missing in media/")
         if r.get("icon") and not (d / "media" / r["icon"]).exists():
             errs.append(f"{p}: icon {r['icon']} missing in media/")
+        # unknown facet values are errors; a missing course/diet is not (old files: completed in the editor)
+        errs += [f"{p}: facets: {t}" for lvl, t in facet_problems(r) if lvl == "ERROR" and "missing" not in t]
         recipes[p.stem] = r
     # variant graph must be acyclic and point to existing recipes
     for rid, r in recipes.items():

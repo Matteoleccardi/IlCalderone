@@ -31,7 +31,11 @@ Run the Python tools with `conda run -n CLAUDE python tools/<tool>.py …` from 
 
 ## 2. Plan
 1. Look at the recipes with `tools/menu_tool.py summary SRC`.
-   - Read the recipe files themselves when you need more detail: ingredients, tags, season hints in the notes.
+   - It shows each recipe's classification (`facets`: course, diet, base ingredients, season; see
+     `public/api/modules/recipes/facets.json`). base and proteins come from the facets when they are filled in.
+   - Read the recipe files themselves when you need more detail: ingredients, tags, kind of dish, cuisine.
+   - Plan mains from the courses `primo`, `secondo` and `piatto_unico`; `contorno` only next to a `secondo`, never
+     alone. Keep `dolce`, `colazione`, `merenda`, `salsa`, `pane` and `bevanda` out of lunch and dinner slots.
 2. Run the draft:
    `tools/menu_tool.py draft SRC -o exports/<slug>.calderone-menu.json --name "…" --weeks N --meals cena --start YYYY-MM-DD [--meallog public/data] [--exclude …]`.
    - It searches for the lowest "penalty" (see below) and prints the plan and the notes.
@@ -44,8 +48,10 @@ Run the Python tools with `conda run -n CLAUDE python tools/<tool>.py …` from 
    3. **Base variety**: don't put pasta after pasta or soup after soup. Alternate pasta / riso / cereali / gnocchi / zuppa.
    4. **Main vegetables**: avoid the same one (zucca, broccoli…) on consecutive days.
       - Prefer lighter dishes (soups) on weekdays and the richer ones at the weekend, when it doesn't hurt the rules above.
-   5. **Season**: if the menu is for a season, prefer recipes whose vegetables are in season. Ask the user before
-      setting the menu's `season` (MM-DD from/to).
+   5. **Season**: if the menu is for a season, prefer recipes whose `facets.season` includes it (an empty season
+      means all year). Ask the user before setting the menu's `season` (MM-DD from/to).
+      - **Diet**: respect the household's diet if the user gives one (e.g. only `vegana`/`vegetariana`), and otherwise
+        mix `diet` values sensibly (fish once or twice a week if there are fish recipes).
    6. **Even use** over the cycle: every recipe roughly the same number of times.
 4. Check: `tools/menu_tool.py check exports/<slug>.calderone-menu.json --recipes SRC`, then
    `tools/validate.py exports/<slug>.calderone-menu.json`. Fix every WARN you can; NOTEs are trade-offs to mention.

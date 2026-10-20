@@ -1,3 +1,5 @@
+import json
+
 from conftest import PRIVATE, RECIPE, make_user
 
 
@@ -30,10 +32,10 @@ def test_recipe_content_is_cleaned(admin):
     # new recipes are visible to everyone by default; "source" from older files is read as "taken_from"
     assert r["tags"] == ["veloce", "pasta"] and r["visibility"] == "shared" and r["can_edit"]
     assert r["rev"] == 1 and r["taken_from"] == "" and "source" not in r
-    assert admin.post("/recipes", {"title": "x", "source": "Nonna"}).json()["taken_from"] == "Nonna"
+    assert admin.post("/recipes", {"title": "x", "source": "Nonna", "facets": RECIPE["facets"]}).json()["taken_from"] == "Nonna"
     bad = admin.post("/recipes", {"title": "  "})
     assert bad.status_code == 400 and bad.json()["code"] == "recipe_title_required"
-    bad = admin.post("/recipes", {"title": "x", "ingredients": [{"name": "a", "qty": "tanto"}]}).json()
+    bad = admin.post("/recipes", {"title": "x", "ingredients": [{"name": "a", "qty": "tanto"}], "facets": RECIPE["facets"]}).json()
     assert bad["code"] == "qty_invalid" and bad["params"] == {"value": "tanto"} and "tanto" in bad["error"]
 
 
@@ -45,12 +47,16 @@ def test_visibility_and_owner_only_edit(admin, client):
     assert titles == {"Condivisa"}
     assert bob.get(f"/recipes/{private['id']}").status_code == 404
     assert bob.get(f"/recipes/{shared['id']}").json()["can_edit"] is False
+    # recipes are public by default, also with an unknown visibility; "household" without a household stays private
+    assert shared["visibility"] == "shared"
+    assert admin.post("/recipes", RECIPE | {"title": "Strana", "visibility": "boh"}).json()["visibility"] == "shared"
+    assert admin.post("/recipes", RECIPE | {"title": "Fam", "visibility": "household"}).json()["visibility"] == "private"
     assert bob.put(f"/recipes/{shared['id']}", RECIPE).status_code == 403
     assert bob.delete(f"/recipes/{shared['id']}").status_code == 403
     assert admin.put(f"/recipes/{shared['id']}", RECIPE | {"title": "Nuovo titolo"}).json()["title"] == "Nuovo titolo"
     # search by ingredient, tag, title
     assert [r["title"] for r in admin.get("/recipes", params={"q": "pomodori"}).json()]
-    assert len(admin.get("/recipes", params={"q": "veloce"}).json()) == 2
+    assert len(admin.get("/recipes", params={"q": "veloce"}).json()) == 4
     assert admin.get("/recipes", params={"q": "zzz"}).json() == []
 
 
@@ -375,6 +381,17 @@ def test_language_preference(admin):
     assert admin.put("/me", {"lang": "de"}).json()["lang"] == "de"
     assert admin.get("/session").json()["user"]["lang"] == "de"
     assert admin.put("/me", {"lang": "klingon"}).json()["lang"] is None
+
+
+def test_theme_preference(admin):
+    assert admin.get("/session").json()["user"]["theme"] is None
+    t = {"light": "catppuccin-latte", "dark": "catppuccin-mocha", "mode": "auto"}
+    assert admin.put("/me", {"theme": t}).json()["theme"] == t
+    assert admin.get("/session").json()["user"]["theme"] == t
+    # the display name is kept, the mode falls back to auto, bad ids reset the preference
+    assert admin.put("/me", {"theme": t | {"mode": "purple"}}).json()["theme"]["mode"] == "auto"
+    assert admin.put("/me", {"theme": t | {"dark": "<script>"}}).json()["theme"] is None
+    assert admin.put("/me", {"theme": None}).json()["theme"] is None
     assert admin.put("/me", {"display": "Boss"}).json()["display"] == "Boss"
 
 
@@ -436,3 +453,41 @@ def test_menu_export_import(admin, client):
     assert carl.get(f"/menus/{res['created'][0]}").json()["visibility"] == "private"
     assert [x["code"] for x in res["messages"]][-2:] == ["import_invalid_item", "import_format"]
     assert carl.post("/menus/import", {"menus": []}).json()["code"] == "import_menus_empty"
+
+
+def test_facets(admin, client, server):
+    # saving from the editor needs course and diet; unknown values are dropped, multi facets keep the official order
+    bad = admin.post("/recipes", RECIPE | {"facets": {"course": "primo"}})
+    assert bad.status_code == 400 and bad.json()["code"] == "facets_required"
+    f = {"course": "secondo", "diet": "vegetariana", "base": ["uova", "pasta", "riso", "legumi", "verdure", "funghi", "boh"], "season": ["inverno", "estate"],
+         "serve": "bollente", "cuisine": "italiana"}
+    r = admin.post("/recipes", RECIPE | {"title": "Frittata", "facets": f}).json()
+    assert r["facets"] == {"course": "secondo", "diet": "vegetariana", "base": ["pasta", "riso", "legumi", "verdure", "funghi"], "dish": [],
+                           "serve": None, "season": ["estate", "inverno"], "cuisine": "italiana"}
+    vegan = admin.post("/recipes", RECIPE | {"title": "Ceci", "facets": {"course": "piatto_unico", "diet": "vegana", "base": ["legumi"]}}).json()
+    # filters: within a facet any value, across facets all; "vegetariana" also finds vegan dishes
+    titles = lambda **q: sorted(x["title"] for x in admin.get("/recipes", params=q).json())
+    assert titles(diet="vegetariana") == ["Ceci", "Frittata"]
+    assert titles(diet="vegana", base="legumi") == ["Ceci"]
+    assert titles(course="secondo,piatto_unico", season="inverno") == ["Frittata"]
+    assert titles(diet="carne") == []
+    assert "Frittata" in titles(q="secondo")  # facet values are searchable words too
+    assert admin.get("/recipes/facets").json()["diet"]["values"] == ["vegana", "vegetariana", "pesce", "carne"]
+    # an old file with a free-text category: it becomes the course (or a tag), on import and when read from disk
+    imp = admin.post("/recipes/import", {"recipes": [
+        {"format": "calderone-recipe/1", "title": "Vecchia", "category": "Primi", "ingredients": [], "steps": []},
+        {"format": "calderone-recipe/1", "title": "Strana", "category": "Cucina povera", "ingredients": [], "steps": []}]}).json()
+    assert [m["code"] for m in imp["messages"]] == ["import_facets_missing", "import_facets_missing"]
+    old = admin.get(f"/recipes/{imp['created'][0]}").json()
+    assert old["facets"]["course"] == "primo" and "category" not in old
+    odd = admin.get(f"/recipes/{imp['created'][1]}").json()
+    assert odd["facets"]["course"] is None and "cucina povera" in odd["tags"]
+    path = server.data / "recipes" / f"{vegan['id']}.json"
+    raw = json.loads(path.read_text())
+    raw.pop("facets"); raw["category"] = "Dolce"
+    path.write_text(json.dumps(raw))
+    (server.data / "index" / "recipes.json").unlink()
+    assert admin.get(f"/recipes/{vegan['id']}").json()["facets"]["course"] == "dolce"
+    # editing it saves the facets and drops the old field
+    admin.put(f"/recipes/{vegan['id']}", RECIPE | {"title": "Ceci", "facets": {"course": "dolce", "diet": "vegana"}})
+    assert "category" not in json.loads(path.read_text())

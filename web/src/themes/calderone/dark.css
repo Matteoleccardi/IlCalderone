@@ -1,0 +1,18 @@
+/* Calderone (dark): the original Il Calderone look. */
+[data-theme="calderone-dark"] {
+  --bg: #1c1714;
+  --surface: #26201b;
+  --surface-2: #2f2722;
+  --text: #f1e8df;
+  --muted: #b0a196;
+  --line: #3d332c;
+  --accent: #e0855a;
+  --accent-text: #1c1714;
+  --accent-soft: #3e2a20;
+  --ok: #7cc48d;
+  --danger: #ff8a80;
+  --shadow: none;
+  --on-danger: #1c1714;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

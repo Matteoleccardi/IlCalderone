@@ -22,7 +22,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from calderone_io import ROOT, base_of, fold, keys_of, load_json, load_recipes, proteins_of
+from calderone_io import ROOT, base_of, facets_of, fold, keys_of, load_json, load_recipes, proteins_of
 
 MEALS = ["colazione", "pranzo", "cena", "spuntino"]
 DAYS = ["lun", "mar", "mer", "gio", "ven", "sab", "dom"]
@@ -163,10 +163,12 @@ def resolve(pool: list[Info], keys: list[str]) -> set[str]:
 def cmd_summary(a):
     recipes = load_recipes(a.src)
     print(f"{len(recipes)} recipes in {a.src}\n")
-    print(f"{'id':10} {'base':8} {'proteins':16} {'serv':>4}  title — main ingredients")
+    print(f"{'id':10} {'course':12} {'diet':11} {'base':8} {'proteins':16} {'season':16} {'serv':>4}  title — main ingredients")
     for r in sorted(recipes, key=lambda r: fold(r["title"])):
         i = Info(r)
-        print(f"{(i.id or '-')[:8]:10} {i.base:8} {','.join(i.proteins) or '-':16} {i.servings or '?':>4}  "
+        f = facets_of(r)
+        print(f"{(i.id or '-')[:8]:10} {f['course'] or '?':12} {f['diet'] or '?':11} {i.base:8} {','.join(i.proteins) or '-':16} "
+              f"{','.join(f['season']) or 'all year':16} {i.servings or '?':>4}  "
               f"{i.title} — {', '.join(sorted(i.keys))}" + (f"  #{' #'.join(i.tags)}" if i.tags else ""))
     bases = Counter(Info(r).base for r in recipes)
     print("\nbases:", ", ".join(f"{b} {c}" for b, c in bases.most_common()))

@@ -84,7 +84,7 @@ def main():
             photo = f"{rid}.jpg"
             Image.open(io.BytesIO(ws._images[0]._data())).convert("RGB").save(out / "media" / photo, "JPEG", quality=88)
         rec = {"format": "calderone-recipe/1", "id": rid, "title": sentence_case(title), "servings": servings,
-               "time_minutes": p.get("time_minutes") or KNOWN_TIMES.get(title), "category": cats.get(title) or "Piatto unico",
+               "time_minutes": p.get("time_minutes") or KNOWN_TIMES.get(title), "facets": {"course": (cats.get(title) or "Piatto unico").lower().replace(" ", "_")},
                "tags": [], "ingredients": ingredients, "steps": steps, "notes": notes,
                "taken_from": "", "photo": photo, "parents": []}
         (out / "recipes" / f"{rid}.json").write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")

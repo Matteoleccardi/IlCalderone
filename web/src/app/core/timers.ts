@@ -15,17 +15,6 @@ export interface KitchenTimer {
 export const MAX_TIMERS = 5;
 const COOKIE = 'calderone_timers';
 
-/** "10" → 10 min, "1:30" → 1 min 30 s, "1.5" / "1,5" → 1 min 30 s. Null when not a time (or not 1 s – 24 h). */
-export function parseDuration(text: string): number | null {
-  const s = text.trim().replace(',', '.');
-  let ms: number;
-  const mmss = /^(\d{1,4}):([0-5]?\d)$/.exec(s);
-  if (mmss) ms = (Number(mmss[1]) * 60 + Number(mmss[2])) * 1000;
-  else if (/^\d+(\.\d+)?$/.test(s)) ms = Math.round(Number(s) * 60) * 1000;
-  else return null;
-  return ms >= 1000 && ms <= 24 * 3600 * 1000 ? ms : null;
-}
-
 /** 754 000 ms → "12:34", 3 723 000 → "1:02:03". Rounded up, so it shows 0:00 only when time is up. */
 export function formatLeft(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));

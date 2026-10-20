@@ -1,0 +1,18 @@
+/* Polar Night (Nord palette, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): danger #bf616a -> #d9a0a6. */
+[data-theme="nord-dark"] {
+  --bg: #2e3440;
+  --surface: #3b4252;
+  --surface-2: #434c5e;
+  --text: #e5e9f0;
+  --muted: #aeb5c3;
+  --line: #4c566a;
+  --accent: #88c0d0;
+  --accent-text: #000000;
+  --accent-soft: #4c5e6e;
+  --ok: #a3be8c;
+  --danger: #d9a0a6;
+  --shadow: none;
+  --on-danger: #000000;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

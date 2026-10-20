@@ -20,7 +20,7 @@ import re
 import sys
 from collections import defaultdict
 
-from calderone_io import ROOT, UNITS, clean_name, fold, load_recipes, stem
+from calderone_io import ROOT, UNITS, clean_name, facet_problems, facets_of, fold, load_recipes, stem, suggest_diet
 
 SPOONS = {"cucchiaino", "cucchiaini", "cucchiaio", "cucchiai", "cc", "cucchiaio raso"}
 
@@ -48,6 +48,13 @@ def audit(existing: list[dict], new: list[dict]) -> list[tuple[str, str]]:
             out.append(("ERROR", f"{label(r, is_new)}: contains '??' (unreadable text to check by hand)"))
         if re.search(r"IMG_|\.xlsx|screenshot", str(r.get("taken_from") or ""), re.I):
             out.append(("ERROR", f"{label(r, is_new)}: taken_from holds bookkeeping ({r['taken_from']!r}); leave it empty"))
+        # the classification: new recipes must be complete; existing ones are only reported
+        for level, text in facet_problems(r):
+            out.append((level if is_new or level == "WARN" and "category" in text else "WARN", f"{label(r, is_new)}: {text}"))
+        diet = facets_of(r)["diet"]
+        hint = suggest_diet([i["name"] for i in r.get("ingredients", [])])
+        if diet and hint and diet != hint:
+            out.append(("WARN", f"{label(r, is_new)}: diet {diet!r} but the ingredients suggest {hint!r}: check it"))
         for i in r.get("ingredients", []):
             u = (i.get("unit") or "").strip()
             if u and u not in UNITS:

@@ -83,6 +83,10 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   Then: "I ate it" for a whole day of the plan (today or yesterday) in the diary, batch import of recipes and menus
   (many files, a folder, drag-and-drop, sent in chunks under the server's upload limit) and up to 5 kitchen timers on
   every page (cookie, beep, notification).
+  Then: colour themes (Calderone, Catppuccin, Rosé Pine, Gruvbox, Nord, Solarized, Everforest; favourite light and dark
+  theme, automatic night switch, saved in the account), Lato + Literata fonts, and a wheel picker for timers.
+  Then: the title as a weekly logo per theme, navigation as icons at the bottom, and the recipe classification
+  (facets from a fixed list, filters, agents filling them in).
 - **v0.4: deploy and hardening**:
   - a first real Altervista deploy;
   - data backup as a zip from the admin page;

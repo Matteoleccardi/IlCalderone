@@ -26,6 +26,11 @@
               }
             ],
             "styles": [
+              "@fontsource/lato/400.css",
+              "@fontsource/lato/700.css",
+              "@fontsource/lato/900.css",
+              "@fontsource-variable/literata/wght.css",
+              "src/themes/index.css",
               "src/styles.css"
             ]
           },

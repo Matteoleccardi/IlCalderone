@@ -18,7 +18,7 @@ from jsonschema import Draft202012Validator
 
 from calderone_io import ROOT, load_json
 
-KEYS = ["format", "id", "title", "servings", "time_minutes", "category", "tags", "ingredients", "steps", "notes",
+KEYS = ["format", "id", "title", "servings", "time_minutes", "facets", "tags", "ingredients", "steps", "notes",
         "taken_from", "parents"]
 
 

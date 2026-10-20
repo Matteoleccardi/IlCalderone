@@ -11,12 +11,16 @@ public/*.html
 public/*.svg
 public/*.ico
 public/media/
+public/logos/
 public/.build-manifest.json
 public/3rdpartylicenses.txt
 public/prerendered-routes.json
 
 # Personal starter recipes transcribed from a commercial app: not redistributable
 seed/
+
+# Releases made by deploy.sh (may contain private data with --with-data)
+release/
 
 # Agent work folders: recipes being imported, generated menus and exports
 inbox/
@@ -28,6 +32,7 @@ legacy/data/
 # Tooling
 node_modules/
 web/dist/
+web/public/logos/logos.json
 web/.angular/
 __pycache__/
 .pytest_cache/

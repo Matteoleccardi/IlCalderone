@@ -22,6 +22,8 @@ import {
   parseSteps,
   stepsToText,
 } from '../../core/text-formats';
+import { Facets, FacetsService, blankFacets, facetValues, missingFacets, suggestDiet } from '../../core/facets';
+import { FacetPicker } from '../../shared/facet-picker';
 import { ScopePicker } from '../../shared/scope-picker';
 
 /** An ingredient row while editing: the quantity stays text ("1/2", "q.b.") until saving. */
@@ -36,7 +38,7 @@ interface Row {
 /** Create (/ricette/nuova) or edit (/ricette/:id/modifica) a recipe. */
 @Component({
   selector: 'app-recipe-form',
-  imports: [FormsModule, RouterLink, ScopePicker, TPipe],
+  imports: [FacetPicker, FormsModule, RouterLink, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-form.html',
 })
@@ -44,12 +46,23 @@ export class RecipeForm implements OnInit {
   readonly id = input<string>();
   protected loaded = signal(false);
   protected busy = signal(false);
-  protected vocab = signal<Vocabulary>({ ingredients: [], units: [], categories: [], tags: [] });
+  protected vocab = signal<Vocabulary>({ ingredients: [], units: [], tags: [] });
 
   protected title = '';
   protected servings = 4;
   protected time: number | null = null;
-  protected category = '';
+  private facetsSvc = inject(FacetsService);
+  protected facetDefs = this.facetsSvc.defs;
+  /** The classification being edited (the defaults are filled in once the definitions arrive). */
+  protected facets = signal<Facets>({});
+  /**
+   * Diet that the ingredients suggest, when it differs from the chosen one. A method, not a computed: the rows are
+   * edited in place by ngModel, so a signal would not notice.
+   */
+  protected dietHint(): string | null {
+    const d = suggestDiet(this.rows().map((r) => r.name));
+    return d && facetValues(this.facets(), 'diet')[0] !== d ? d : null;
+  }
   protected tags = '';
   protected notes = '';
   protected takenFrom = '';
@@ -79,6 +92,10 @@ export class RecipeForm implements OnInit {
   private i18n = inject(I18n);
 
   async ngOnInit(): Promise<void> {
+    this.facetsSvc.ensure().then(
+      (d) => this.facets.update((f) => ({ ...blankFacets(d), ...f })),
+      (e) => this.notify.error(e),
+    );
     this.api.get<Vocabulary>('recipes/vocabulary').then(
       (v) => this.vocab.set(v),
       () => {},
@@ -96,7 +113,7 @@ export class RecipeForm implements OnInit {
         this.title = r.title;
         this.servings = r.servings;
         this.time = r.time_minutes;
-        this.category = r.category;
+        this.facets.update((f) => ({ ...f, ...(r.facets ?? {}) }));
         this.tags = r.tags.join(', ');
         this.notes = r.notes;
         this.takenFrom = r.taken_from;
@@ -222,6 +239,10 @@ export class RecipeForm implements OnInit {
     this.iconPreview.set(URL.createObjectURL(file));
   }
 
+  protected useDiet(d: string): void {
+    this.facets.update((f) => ({ ...f, diet: d }));
+  }
+
   async save(): Promise<void> {
     let ingredients, steps;
     try {
@@ -232,11 +253,17 @@ export class RecipeForm implements OnInit {
       this.notify.error(e);
       return;
     }
+    const defs = this.facetDefs();
+    if (defs && missingFacets(defs, this.facets()).length) {
+      this.notify.error('err.facets_required');
+      document.getElementById('facets')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     const body = {
       title: this.title,
       servings: this.servings,
       time_minutes: this.time,
-      category: this.category,
+      facets: this.facets(),
       tags: this.tags
         .split(',')
         .map((t) => t.trim())

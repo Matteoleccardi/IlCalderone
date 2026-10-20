@@ -11,8 +11,8 @@ if (preg_match('#^/api(/|$)#', $path)) {
     require __DIR__ . '/index.php';
     return true;
 }
-$file = __DIR__ . '/..' . $path;
-if ($path !== '/' && is_file($file)) {
+$file = __DIR__ . '/..' . rawurldecode($path); // "Il-Calderone%20(1).png" → the file with a space
+if ($path !== '/' && !str_contains($path, '..') && is_file($file)) {
     return false; // let the built-in server send the static file
 }
 $index = __DIR__ . '/../index.html';

@@ -1,0 +1,18 @@
+/* Solarized Light (Solarized, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #586e75 -> #566c73; accent #cb4b16 -> #b34213; ok #859900 -> #606e00; danger #dc322f -> #c22c29. */
+[data-theme="solarized-light"] {
+  --bg: #eee8d5;
+  --surface: #fdf6e3;
+  --surface-2: #eee8d5;
+  --text: #073642;
+  --muted: #566c73;
+  --line: #cecfc3;
+  --accent: #b34213;
+  --accent-text: #ffffff;
+  --accent-soft: #f1d9c2;
+  --ok: #606e00;
+  --danger: #c22c29;
+  --shadow: 0 1px 2px rgb(7 54 66 / 7%), 0 4px 16px rgb(7 54 66 / 6%);
+  --on-danger: #ffffff;
+  --backdrop: rgb(0 0 0 / 45%);
+  color-scheme: light;
+}

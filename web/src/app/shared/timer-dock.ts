@@ -1,14 +1,16 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TPipe } from '../core/i18n';
-import { MAX_TIMERS, TimersService, formatLeft, parseDuration } from '../core/timers';
+import { MAX_TIMERS, TimersService, formatLeft } from '../core/timers';
+import { DurationWheel } from './duration-wheel';
 
 /**
  * Kitchen timers on every page: a thin tab on the right edge; tap it or swipe it left to slide out a narrow column
- * of up to 5 timers. Swipe right (or tap the tab) to put it away.
+ * of up to 5 timers. Swipe right (or tap the tab) to put it away. A new timer's length is chosen on wheels
+ * (shared/duration-wheel.ts).
  */
 @Component({
   selector: 'app-timer-dock',
-  imports: [TPipe],
+  imports: [DurationWheel, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <aside
@@ -52,20 +54,7 @@ import { MAX_TIMERS, TimersService, formatLeft, parseDuration } from '../core/ti
           </div>
         }
         @for (s of free(); track s) {
-          <form class="timer-row timer-new" (submit)="$event.preventDefault(); start(s)">
-            <input
-              [id]="'timer-new-' + s"
-              type="text"
-              inputmode="decimal"
-              autocomplete="off"
-              [placeholder]="'timer.minutes' | t"
-              [attr.aria-label]="'timer.minutes_label' | t"
-              [value]="draft()[s] ?? ''"
-              (input)="setDraft(s, $any($event.target).value)"
-              [class.bad]="bad() === s"
-            />
-            <button type="submit" class="timer-x" [attr.aria-label]="'timer.start' | t">▶</button>
-          </form>
+          <button type="button" class="timer-row timer-add" (click)="pick()" [attr.aria-label]="'timer.new' | t">＋</button>
         }
         @if (timers.permission() !== 'granted') {
           <p class="timer-note">
@@ -78,13 +67,15 @@ import { MAX_TIMERS, TimersService, formatLeft, parseDuration } from '../core/ti
         }
       </div>
     </aside>
+    @if (picking()) {
+      <app-duration-wheel (start)="start($event)" (cancel)="picking.set(false)" />
+    }
   `,
 })
 export class TimerDock {
   protected timers = inject(TimersService);
   protected open = signal(false);
-  protected draft = signal<Record<number, string>>({});
-  protected bad = signal<number | null>(null);
+  protected picking = signal(false);
   protected fmt = formatLeft;
 
   /** Empty rows up to 5 (an index per free slot). */
@@ -99,18 +90,15 @@ export class TimerDock {
     return formatLeft(Math.min(...run.map((t) => this.timers.left(t))));
   });
 
-  protected setDraft(slot: number, v: string): void {
-    this.draft.update((d) => ({ ...d, [slot]: v }));
-    if (this.bad() === slot) this.bad.set(null);
+  /** Opens the full-screen wheel picker for a new timer. */
+  protected pick(): void {
+    this.picking.set(true);
   }
 
-  protected async start(slot: number): Promise<void> {
-    const ms = parseDuration(this.draft()[slot] ?? '');
-    if (ms === null) {
-      this.bad.set(slot);
-      return;
-    }
-    this.draft.set({});
+  /** Started from the picker: a tap, so it can also unlock sound and ask for notifications. */
+  protected async start(ms: number): Promise<void> {
+    this.picking.set(false);
+    this.open.set(true);
     await this.timers.add(ms);
   }
 

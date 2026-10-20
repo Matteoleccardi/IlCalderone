@@ -4,7 +4,19 @@
   "title": "Spaghetti aglio, olio e peperoncino",
   "servings": 2,
   "time_minutes": 15,
-  "category": "Primo",
+  "facets": {
+    "course": "primo",
+    "diet": "vegana",
+    "base": [
+      "pasta"
+    ],
+    "dish": [
+      "sugo"
+    ],
+    "serve": "caldo",
+    "season": [],
+    "cuisine": "italiana"
+  },
   "tags": [
     "veloce",
     "dispensa"

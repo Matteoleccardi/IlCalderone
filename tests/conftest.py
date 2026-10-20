@@ -88,5 +88,7 @@ RECIPE = {
     "ingredients": [{"name": "Pasta", "qty": "180", "unit": "g"}, {"name": "Pomodori", "qty": "1 1/2", "unit": "p."},
                     {"name": "Sale", "qty": "q.b."}],
     "steps": [{"title": "Cuoci", "text": "In acqua salata."}],
+    "facets": {"course": "primo", "diet": "vegana", "base": ["pasta"]},
 }
+FACETS = RECIPE["facets"]
 PRIVATE = RECIPE | {"visibility": "private"}

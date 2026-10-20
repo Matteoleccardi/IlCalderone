@@ -57,7 +57,7 @@ return [
             return ['ok' => true];
         });
 
-        // Display name and interface language (only the fields that are sent change).
+        // Display name, interface language and colour theme (only the fields that are sent change).
         $app->put('/me', function (Request $r) use ($auth) {
             $u = $auth->require();
             $body = $r->json();
@@ -67,6 +67,9 @@ return [
             }
             if (array_key_exists('lang', $body)) {
                 $set['lang'] = in_array($body['lang'], Auth::LANGS, true) ? $body['lang'] : null;
+            }
+            if (array_key_exists('theme', $body)) {
+                $set['theme'] = Auth::cleanTheme($body['theme']);
             }
             return Auth::publicUser($auth->updateUser($u['id'], fn($x) => $set + $x));
         });

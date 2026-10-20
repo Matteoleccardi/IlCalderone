@@ -1,0 +1,106 @@
+{
+  "format": "calderone-facets/1",
+  "_comment": "Fixed recipe classification. Values are stored as these keys and translated in web/src/i18n (facet.<facet>.<value>). Order = display order. multi: several values (max: at most that many); required: needed when saving from the editor.",
+  "facets": {
+    "course": {
+      "multi": false,
+      "required": true,
+      "values": [
+        "antipasto",
+        "primo",
+        "secondo",
+        "contorno",
+        "piatto_unico",
+        "dolce",
+        "colazione",
+        "merenda",
+        "salsa",
+        "pane",
+        "bevanda"
+      ]
+    },
+    "diet": {
+      "multi": false,
+      "required": true,
+      "values": [
+        "vegana",
+        "vegetariana",
+        "pesce",
+        "carne"
+      ],
+      "_comment": "Filtering by \"vegetariana\" also finds vegan dishes; pesce and carne mean the dish contains them.",
+      "filter_includes": {
+        "vegetariana": [
+          "vegana"
+        ]
+      }
+    },
+    "base": {
+      "multi": true,
+      "max": 5,
+      "values": [
+        "pasta",
+        "riso",
+        "cereali",
+        "gnocchi",
+        "pane_pizza",
+        "legumi",
+        "verdure",
+        "funghi",
+        "uova",
+        "formaggi",
+        "soia_seitan",
+        "frutta",
+        "frutta_secca",
+        "carne",
+        "pesce"
+      ]
+    },
+    "dish": {
+      "multi": true,
+      "values": [
+        "zuppa",
+        "insalata",
+        "forno",
+        "fritto",
+        "umido",
+        "griglia",
+        "crudo",
+        "torta_salata",
+        "sugo",
+        "risotto",
+        "curry",
+        "ripieno"
+      ]
+    },
+    "serve": {
+      "multi": false,
+      "values": [
+        "caldo",
+        "tiepido",
+        "freddo"
+      ]
+    },
+    "season": {
+      "multi": true,
+      "values": [
+        "primavera",
+        "estate",
+        "autunno",
+        "inverno"
+      ]
+    },
+    "cuisine": {
+      "multi": false,
+      "values": [
+        "italiana",
+        "mediterranea",
+        "asiatica",
+        "indiana",
+        "mediorientale",
+        "messicana",
+        "altro"
+      ]
+    }
+  }
+}

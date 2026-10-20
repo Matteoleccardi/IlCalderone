@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
+import { FacetChips } from '../../shared/facet-chips';
 import { Ingredient, Recipe, Revision } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { fmtQty } from '../../core/text-formats';
@@ -27,7 +28,7 @@ interface Line {
  */
 @Component({
   selector: 'app-recipe-history',
-  imports: [RouterLink, TPipe],
+  imports: [FacetChips, RouterLink, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (recipe(); as r) {
@@ -83,10 +84,11 @@ interface Line {
             @if (s.time_minutes) {
               · {{ 'recipe.minutes' | t: { n: s.time_minutes } }}
             }
-            @if (s.category) {
-              · {{ s.category }}
+            @if ($any(s).category) {
+              · {{ $any(s).category }}
             }
           </p>
+          <app-facet-chips [facets]="s.facets" />
           <h3>{{ 'recipe.ingredients' | t }}</h3>
           <ul class="plain diff">
             @for (l of ingredientLines(); track $index) {

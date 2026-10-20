@@ -1,0 +1,18 @@
+/* Calderone (light): the original Il Calderone look. */
+[data-theme="calderone-light"] {
+  --bg: #faf6f0;
+  --surface: #ffffff;
+  --surface-2: #f3ece2;
+  --text: #2b211b;
+  --muted: #7a6a5e;
+  --line: #e6dccf;
+  --accent: #b5532f;
+  --accent-text: #ffffff;
+  --accent-soft: #f6e3d8;
+  --ok: #3f7d4e;
+  --danger: #b3261e;
+  --shadow: 0 1px 2px rgb(60 40 20 / 6%), 0 4px 16px rgb(60 40 20 / 6%);
+  --on-danger: #ffffff;
+  --backdrop: rgb(0 0 0 / 45%);
+  color-scheme: light;
+}

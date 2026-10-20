@@ -14,9 +14,11 @@ final class Recipes
 {
     public const FORMAT = 'calderone-recipe/1';
     public const INDEX = 'index/recipes.json';
+    /** Bumped when the summaries change shape: an index in another format is rebuilt. */
+    private const INDEX_FORMAT = 'calderone-index/2';
     public const KINDS = ['variant', 'adaptation', 'inspired'];
     /** The fields compared and restored by the history (content + who can see it). */
-    public const TRACKED = ['title', 'servings', 'time_minutes', 'category', 'tags', 'ingredients', 'steps', 'notes', 'taken_from',
+    public const TRACKED = ['title', 'servings', 'time_minutes', 'facets', 'tags', 'ingredients', 'steps', 'notes', 'taken_from',
         'visibility', 'household'];
     private const PHOTO_TYPES = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
     public const MIME = ['jpg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
@@ -53,6 +55,21 @@ final class Recipes
             $r['taken_from'] = str_starts_with((string) $r['source'], 'Ricette.xlsx') ? '' : $r['source'];
         }
         unset($r['source']);
+        // before the fixed classification (facets) there was one free-text "category": it becomes the course,
+        // or a tag when it isn't one
+        if (!isset($r['facets'])) {
+            $r['facets'] = Facets::clean([]);
+            $cat = trim((string) ($r['category'] ?? ''));
+            $course = $cat !== '' ? Facets::courseFromCategory($cat) : null;
+            if ($course) {
+                $r['facets']['course'] = $course;
+            } elseif ($cat !== '' && !in_array(Util::lower($cat), $r['tags'] ?? [], true)) {
+                $r['tags'][] = Util::lower($cat);
+            }
+        } else {
+            $r['facets'] = Facets::clean($r['facets']);
+        }
+        unset($r['category']);
         $r['rev'] = (int) ($r['rev'] ?? 1);
         $r['updated_by'] = $r['updated_by'] ?? $r['owner'] ?? null;
         return $r;
@@ -92,7 +109,7 @@ final class Recipes
     {
         return [
             'id' => $r['id'], 'title' => $r['title'], 'servings' => $r['servings'], 'time_minutes' => $r['time_minutes'] ?? null,
-            'category' => $r['category'] ?? '', 'tags' => $r['tags'] ?? [],
+            'facets' => $r['facets'] ?? Facets::blank(), 'tags' => $r['tags'] ?? [],
             'ingredients' => array_values(array_unique(array_map(fn($i) => $i['name'], $r['ingredients'] ?? []))),
             'units' => array_values(array_unique(array_filter(array_map(fn($i) => $i['unit'], $r['ingredients'] ?? [])))),
             'owner' => $r['owner'], 'visibility' => $r['visibility'], 'household' => $r['household'] ?? null,
@@ -105,7 +122,7 @@ final class Recipes
     {
         if ($this->index === null) {
             $idx = $this->store()->read(self::INDEX);
-            $this->index = is_array($idx) ? $idx['recipes'] : $this->rebuildIndex();
+            $this->index = is_array($idx) && ($idx['format'] ?? '') === self::INDEX_FORMAT ? $idx['recipes'] : $this->rebuildIndex();
         }
         return $this->index;
     }
@@ -120,7 +137,7 @@ final class Recipes
                     $all[$r['id']] = self::summary($r);
                 }
             }
-            $this->store()->write(self::INDEX, ['format' => 'calderone-index/1', 'recipes' => $all]);
+            $this->store()->write(self::INDEX, ['format' => self::INDEX_FORMAT, 'recipes' => $all]);
             $this->index = $all;
             return $all;
         });
@@ -140,7 +157,7 @@ final class Recipes
     private function writeIndex(array $idx): void
     {
         uasort($idx, fn($a, $b) => strcmp(Util::lower($a['title']), Util::lower($b['title'])));
-        $this->store()->write(self::INDEX, ['format' => 'calderone-index/1', 'recipes' => $idx]);
+        $this->store()->write(self::INDEX, ['format' => self::INDEX_FORMAT, 'recipes' => $idx]);
         $this->index = $idx;
     }
 
@@ -169,7 +186,8 @@ final class Recipes
 
     // ---------- listing / search ----------
 
-    public function visible(array $user, string $q = '', bool $mine = false): array
+    /** Recipes the user can see, matching the search words and the facet filters (Facets::filtersFromQuery). */
+    public function visible(array $user, string $q = '', bool $mine = false, array $filters = []): array
     {
         $terms = array_filter(preg_split('/\s+/u', Util::lower(trim($q))) ?: []);
         $names = $this->app->userNames();
@@ -178,7 +196,11 @@ final class Recipes
             if (!$this->app->canView($user, $s) || ($mine && $s['owner'] !== $user['id'])) {
                 continue;
             }
-            $hay = Util::lower(implode(' | ', [$s['title'], implode(' ', $s['tags']), implode(' ', $s['ingredients']), $s['category']]));
+            if ($filters && !Facets::matches($s['facets'] ?? [], $filters)) {
+                continue;
+            }
+            $facetWords = str_replace('_', ' ', implode(' ', array_merge(...array_map(fn($v) => (array) $v, array_values($s['facets'] ?? [])))));
+            $hay = Util::lower(implode(' | ', [$s['title'], implode(' ', $s['tags']), implode(' ', $s['ingredients']), $facetWords]));
             foreach ($terms as $t) {
                 if (!str_contains($hay, $t)) {
                     continue 2;
@@ -260,13 +282,24 @@ final class Recipes
                 $tags[] = $t;
             }
         }
+        // the fixed classification; files from before it may still send a free-text "category"
+        $facets = Facets::clean($d['facets'] ?? null);
+        $cat = Util::squash($str($d['category'] ?? '', 60));
+        if ($cat !== '' && $facets['course'] === null) {
+            $course = Facets::courseFromCategory($cat);
+            if ($course) {
+                $facets['course'] = $course;
+            } elseif (!in_array(Util::lower($cat), $tags, true)) {
+                $tags[] = Util::lower($cat);
+            }
+        }
         $time = $d['time_minutes'] ?? null;
         $servings = (int) ($d['servings'] ?? 4);
         return [
             'title' => $title,
             'servings' => max(1, min(100, $servings ?: 4)),
             'time_minutes' => is_numeric($time) && (int) $time > 0 ? min(10000, (int) $time) : null,
-            'category' => Util::squash($str($d['category'] ?? '', 60)),
+            'facets' => $facets,
             'tags' => array_slice($tags, 0, 30),
             'ingredients' => array_slice($ingredients, 0, 200),
             'steps' => array_slice($steps, 0, 100),
@@ -279,7 +312,7 @@ final class Recipes
     /** New recipes are visible to every user unless the creator picks otherwise. */
     public function create(array $user, array $input, ?string $id = null): array
     {
-        [$vis, $hh] = $this->app->cleanScope($user, $input['visibility'] ?? 'shared', $input['household'] ?? null);
+        [$vis, $hh] = $this->app->cleanScope($user, $input['visibility'] ?? 'shared', $input['household'] ?? null, 'shared');
         $now = Util::now();
         $r = ['format' => self::FORMAT, 'id' => $id ?? Util::id()] + self::cleanContent($input) + [
             'photo' => null, 'icon' => null, 'parents' => [],
@@ -301,6 +334,7 @@ final class Recipes
             [$vis, $hh] = [$r['visibility'], $r['household']];
         }
         $new = array_replace($r, self::cleanContent($input), ['visibility' => $vis, 'household' => $hh]);
+        unset($new['category']);
         if (!self::changes($r, $new)) {
             return $r;
         }
@@ -436,7 +470,7 @@ final class Recipes
     public function createVariant(array $user, array $parent, string $suffix = ' (variante)'): array
     {
         return $this->store()->locked(function () use ($user, $parent, $suffix) {
-            $content = array_intersect_key($parent, array_flip(['servings', 'time_minutes', 'category', 'tags', 'ingredients', 'steps', 'notes', 'taken_from']));
+            $content = array_intersect_key($parent, array_flip(['servings', 'time_minutes', 'facets', 'tags', 'ingredients', 'steps', 'notes', 'taken_from']));
             $child = $this->create($user, $content + ['title' => Util::clip($parent['title'] . $suffix, 200),
                 'visibility' => $parent['visibility'], 'household' => $parent['household'] ?? null]);
             if (!empty($parent['photo'])) {
@@ -590,7 +624,7 @@ final class Recipes
     /** Exchange-format copy of a recipe; with $photos the dish photo is embedded as photo_data (data: URI). */
     public function toExchange(array $r, bool $photos = false): array
     {
-        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'category', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'icon', 'parents'];
+        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'facets', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'icon', 'parents'];
         $out = [];
         foreach ($keys as $k) {
             $out[$k] = $r[$k] ?? null;
@@ -645,6 +679,9 @@ final class Recipes
                     } catch (HttpError $e) {
                         $msgs[] = ['code' => 'import_failed', 'params' => ['title' => $title, 'reason' => $e->errorCode]];
                     }
+                }
+                if (Facets::missing($r['facets'])) {
+                    $msgs[] = ['code' => 'import_facets_missing', 'params' => ['title' => $r['title']]];
                 }
                 $created[] = $r['id'];
                 $pending[$r['id']] = is_array($d['parents'] ?? null) ? $d['parents'] : [];

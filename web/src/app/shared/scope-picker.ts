@@ -14,15 +14,18 @@ import { Visibility } from '../core/models';
       <label>
         {{ (allowShared() ? 'scope.who_sees' : 'scope.whose') | t }}
         <select [ngModel]="visibility()" (ngModelChange)="setVisibility($event)" name="visibility">
+          @if (allowShared()) {
+            <option value="shared">{{ 'scope.shared' | t }}</option>
+          }
           <option value="private">{{ 'scope.private' | t }}</option>
           <option value="household" [disabled]="!households.list().length">
             {{ 'scope.household' | t
             }}{{ households.list().length ? '' : ' ' + ('scope.no_household' | t) }}
           </option>
-          @if (allowShared()) {
-            <option value="shared">{{ 'scope.shared' | t }}</option>
-          }
         </select>
+        @if (allowShared()) {
+          <span class="muted small hint">{{ (visibility() === 'shared' ? 'scope.shared_hint' : 'scope.not_shared_hint') | t }}</span>
+        }
       </label>
       @if (visibility() === 'household' && households.list().length > 1) {
         <label>
