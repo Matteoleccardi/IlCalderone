@@ -59,6 +59,15 @@ def main():
                 (data / "media" / r["icon"]).write_bytes(base64.b64decode(icon_data.split(",", 1)[1]))
             else:
                 r["icon"] = None
+            model_data = r.pop("model_data", None)
+            if r.get("model") and (src / ".." / "media" / r["model"]).exists():
+                shutil.copy2(src / ".." / "media" / r["model"], data / "media" / f"{r['id']}.model.vox")
+                r["model"] = f"{r['id']}.model.vox"
+            elif model_data and ";base64," in model_data:
+                r["model"] = f"{r['id']}.model.vox"
+                (data / "media" / r["model"]).write_bytes(base64.b64decode(model_data.split(",", 1)[1]))
+            else:
+                r["model"] = None
             # files from before v0.3 call it "source"; the spreadsheet export put bookkeeping there, which is not a source
             taken = r.pop("source", r.get("taken_from", "")) or ""
             r["taken_from"] = "" if taken.startswith("Ricette.xlsx") else taken

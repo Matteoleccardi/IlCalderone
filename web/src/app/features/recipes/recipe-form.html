@@ -119,6 +119,19 @@
           <p class="muted small">{{ 'form.icon_hint' | t }}</p>
         </div>
       </div>
+      <h3>{{ 'form.model' | t }}</h3>
+      <div>
+        @if (newModel(); as m) {
+          <p class="small">{{ m.name }}</p>
+        } @else if (existing()?.model && !removeModel()) {
+          <p class="small">✔ {{ 'form.model_set' | t }}</p>
+        }
+        <input type="file" accept=".vox" (change)="pickModel($event)" [attr.aria-label]="'form.model' | t" />
+        @if ((existing()?.model || newModel()) && !removeModel()) {
+          <button type="button" class="link" (click)="removeModel.set(true); newModel.set(null)">{{ 'form.remove_model' | t }}</button>
+        }
+        <p class="muted small">{{ 'form.model_hint' | t }}</p>
+      </div>
     </section>
 
     <section class="card">

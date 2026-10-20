@@ -1,9 +1,8 @@
 @if (recipe(); as r) {
   <article class="recipe">
     <header class="recipe-head">
-      @if (r.photo) {
-        <img class="hero-photo" [src]="api.photoUrl(r.id, r.updated)" [alt]="'recipe.photo_alt' | t: { title: r.title }" />
-      }
+      <app-dish-stage [recipeId]="r.id" [version]="r.updated" [photo]="!!r.photo" [icon]="!!r.icon" [hasModel]="!!r.model"
+        [alt]="'recipe.photo_alt' | t: { title: r.title }" />
       <div>
         <h1 class="with-icon">
           @if (r.icon) { <img class="recipe-icon" [src]="api.iconUrl(r.id, r.updated)" alt="" /> }

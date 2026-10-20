@@ -2,8 +2,8 @@
 """Bundle reviewed recipes from an inbox folder into one file to import on the website (Ricette -> Importa).
 
 Usage: python tools/pack_recipes.py inbox/ [-o exports/calderone-ricette-<date>.json] [--only SLUG …]
-Each inbox/<slug>/ holds recipe.json (calderone-recipe/1), and optionally photo.jpg and icon.png: they are embedded
-as photo_data / icon_data. Recipes without an id get a new random one. Everything is checked against
+Each inbox/<slug>/ holds recipe.json (calderone-recipe/1), and optionally photo.jpg/.png, icon.png and model.vox: they
+are embedded as photo_data / icon_data / model_data. Recipes without an id get a new random one. Everything is checked against
 schema/recipe.schema.json; the file is not written if anything is invalid.
 """
 import argparse
@@ -56,8 +56,14 @@ def main():
             if icon.stat().st_size > 65536:
                 errs.append(f"{d.name}: icon.png is larger than 64 KB")
             rec["icon_data"] = data_uri(icon, "image/png")
+        model = d / "model.vox"
+        if model.is_file():
+            if model.stat().st_size > 262144:
+                errs.append(f"{d.name}: model.vox is larger than 256 KB")
+            rec["model_data"] = data_uri(model, "application/octet-stream")
         out.append(rec)
-        print(f"{d.name}: «{rec['title']}»{' + photo' if photo else ''}{' + icon' if icon.is_file() else ''}")
+        print(f"{d.name}: «{rec['title']}»{' + photo' if photo else ''}{' + icon' if icon.is_file() else ''}"
+              f"{' + 3D model' if model.is_file() else ''}")
     if errs:
         print("\n".join("ERROR " + e for e in errs))
         return 1

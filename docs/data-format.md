@@ -12,6 +12,7 @@ data/
   history/<id>/<rev>.json        calderone-recipe/1       earlier versions of a recipe (full copies)
   media/<id>.jpg|png|webp                                 dish photos
   media/<id>.icon.png                                     optional 8-bit dish icons (PNG, ≤ 64 KB, ≤ 512 px; usually 128×128)
+  media/<id>.model.vox                                    optional voxel models of the dish (MagicaVoxel .vox, ≤ 256 KB)
   collections/<id>.json          calderone-collection/1
   meallog/<userId>/<YYYY-MM>.json  calderone-meallog/1    one file per user per month
   menus/<id>.json                calderone-menu/1         one file per menu
@@ -40,6 +41,12 @@ Every file has a `"format": "<name>/<version>"` field, so a later version of the
 The same shape is used for the stored files and for **exchange files** (import/export). Exchange files leave out `owner`,
 `visibility`, `household`, `created` and `updated`, and may carry the photo inline as `photo_data` (a `data:image/...;base64,` URI)
 and the icon as `icon_data` (`data:image/png;base64,…`). `icon` is the icon's file name in `media/` (or `null`).
+
+**3D model.** `model` is the file name of an optional voxel model of the dish in `media/` (`<id>.model.vox`, or `null`),
+in MagicaVoxel's `.vox` format (≤ 256 KB; only the first model, its size, voxels and palette are read). Axes: x to the
+right, y to the back, z up; the model is seen from above (−z) at the start of the animation. Palette alpha < 255 means
+see-through (steam). By convention of `tools/dish_kit.py`, palette slots 200–239 are cutlery and 240–255 steam.
+Exchange files carry it as `model_data` (`data:application/octet-stream;base64,…`).
 
 ```json
 {

@@ -76,6 +76,11 @@ See [docs/data-format.md](docs/data-format.md) and `schema/`. In short: `users.j
   items to the household list, and the interface in Italian, English, German and French.
   Then, after the first phone test: a phone-friendly recipe picker in the menu editor (alphabetical, ignores case) and
   "Add to menu" on every recipe card and recipe page (choose menu, week, day and meal).
+  Then (2026-10-20): `deploy.sh --altervista` (PHP 8.4 via `AddHandler av-php84` in `.htaccess`), and the 3D dish on
+  the recipe page: optional MagicaVoxel models per recipe, built from a short description by `tools/dish_kit.py` (with
+  the minimal cutlery: chopsticks black wood, metal gold/silver/steel), which also renders the icon (40°) and the
+  picture (top view); Three.js is loaded only on the recipe page. A first try that raised the 45° icons into a height
+  map was dropped: a drawing seen at an angle doesn't make a sensible 3D shape.
   Then: menu import/export (`calderone-menu/1` exchange files, recipes matched by id or title), the JSON file name
   shown on recipe, menu and collection pages, optional 8-bit recipe icons, and two Claude Code agents with their
   tools: `menu-planner` (`tools/menu_tool.py`) and `recipe-importer` (`tools/audit_recipes.py`,

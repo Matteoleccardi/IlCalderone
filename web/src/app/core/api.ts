@@ -49,6 +49,10 @@ export class Api {
     return this.url(`recipes/${recipeId}/photo`) + (version ? `?v=${encodeURIComponent(version)}` : '');
   }
 
+  modelUrl(recipeId: string, version?: string): string {
+    return this.url(`recipes/${recipeId}/model`) + (version ? `?v=${encodeURIComponent(version)}` : '');
+  }
+
   iconUrl(recipeId: string, version?: string): string {
     return this.url(`recipes/${recipeId}/icon`) + (version ? `?v=${encodeURIComponent(version)}` : '');
   }

@@ -419,6 +419,34 @@ def test_recipe_icon(admin, client, server):
     assert not (server.data / "media" / f"{v['id']}.icon.png").exists()
 
 
+def test_recipe_model(admin, client, server):
+    import struct
+    bob = make_user(admin, client, "bob")
+    r = admin.post("/recipes", PRIVATE).json()
+    assert r["model"] is None
+    ch = lambda tag, body: tag + struct.pack("<ii", len(body), 0) + body
+    kids = ch(b"SIZE", struct.pack("<iii", 2, 2, 1)) + ch(b"XYZI", struct.pack("<i", 1) + bytes([0, 0, 0, 1]))
+    VOX = b"VOX " + struct.pack("<i", 150) + b"MAIN" + struct.pack("<ii", 0, len(kids)) + kids
+    up = admin.post(f"/recipes/{r['id']}/model", files={"model": ("m.vox", VOX, "application/octet-stream")})
+    assert up.status_code == 200, up.text
+    assert up.json()["model"] == f"{r['id']}.model.vox"
+    assert admin.get(f"/recipes/{r['id']}/model").content == VOX
+    assert bob.get(f"/recipes/{r['id']}/model").status_code == 404     # same rule as the photo
+    assert admin.post(f"/recipes/{r['id']}/model", files={"model": ("m.vox", b"nope" * 10, "application/octet-stream")}).json()["code"] == "model_type"
+    assert admin.post(f"/recipes/{r['id']}/model", files={"model": ("m.vox", VOX + b"0" * 270000, "application/octet-stream")}).status_code == 413
+    # variants copy it, export embeds it and import restores it
+    v = admin.post(f"/recipes/{r['id']}/variant").json()
+    assert admin.get(f"/recipes/{v['id']}/model").content == VOX
+    ex = admin.get(f"/recipes/{r['id']}/json").json()
+    assert ex["model_data"].startswith("data:application/octet-stream;base64,")
+    imp = bob.post("/recipes/import", {"recipes": [ex | {"id": None}]}).json()
+    assert bob.get(f"/recipes/{imp['created'][0]}/model").content == VOX
+    assert admin.delete(f"/recipes/{r['id']}/model").json()["model"] is None
+    assert not (server.data / "media" / f"{r['id']}.model.vox").exists()
+    admin.delete(f"/recipes/{v['id']}")
+    assert not (server.data / "media" / f"{v['id']}.model.vox").exists()
+
+
 def test_menu_export_import(admin, client):
     bob = make_user(admin, client, "bob")
     carl = make_user(admin, client, "carl")

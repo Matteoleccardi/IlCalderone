@@ -11,7 +11,7 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
 
 ## Commands
 
-- Release for a server: `./deploy.sh [--base-href /sub/] [--data-dir PATH] [--with-data]` → `release/IlCalderone-<version>/`
+- Release for a server: `./deploy.sh [--altervista] [--base-href /sub/] [--data-dir PATH] [--with-data]` (`--altervista` = `AddHandler av-php84 .php` in `.htaccess`: Altervista picks PHP by that line, and uploading our `.htaccess` replaces theirs; keep `.htaccess` files ASCII-only) → `release/IlCalderone-<version>/`
   (+ zip, with `docs/install.md` as INSTALL.md); it builds into `web/dist` and never touches `public/`. Keep `docs/install.md` in sync with it.
 - Build the front end: `cd web && npm run build`. This is `ng build` plus `scripts/publish.mjs`, which copies `web/dist/web/browser` into
   `public/`. **Never point `ng build` output at `public/`**: the builder empties its output folder (api/ + data/).
@@ -27,7 +27,11 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   - `python tools/export_from_ricette.py --xlsx PATH`: spreadsheet → `seed/`.
   - `python tools/menu_tool.py summary|draft|check …`: balanced menu planning (used by the menu-planner agent).
   - `python tools/audit_recipes.py [--existing SRC] [--new inbox/]`: spelling/unit/duplicate audit.
-  - `python tools/recipe_media.py crop|icon …`: dish photo from a cover screenshot, and the Inkscape export of 8-bit icons.
+  - `python tools/recipe_media.py crop|icon|photo …`: dish photo from a cover screenshot, the Inkscape export of hand-drawn
+    8-bit icons, the photo made from an icon.
+  - `python tools/dish_kit.py build inbox/<slug>/dish.json` / `render MODEL.vox`: the voxel model of a dish with its cutlery
+    (dish.json format in `.claude/agents/recipe-importer.md` step 4) → `model.vox`, `icon.png` (40° view, no cutlery),
+    `photo.png` (top view, 4:3, framed like the 3D view's start) and `preview.png`. Slow-ish (≈25 s, pure Python ray casting).
   - `python tools/pack_recipes.py inbox/`: `inbox/<slug>/{recipe.json,photo.jpg,icon.png}` → one import file in `exports/`.
   - SRC for these is a data folder, a folder of recipe files or a site export file (`tools/calderone_io.py`).
 - PHP CLI: `php public/api/bin/create-user.php NAME [--admin]` (password via `CALDERONE_PASSWORD` or a prompt),
@@ -91,6 +95,13 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
 - `seed/` (the owner's 9 recipes transcribed from a commercial app) is git-ignored and must not be published; `examples/` is the public sample.
   "seed" = starter data loaded once with `tools/seed_data.py`; the live copy is `public/data/`, and app edits never go back to `seed/`.
 - Recipe icons: optional `icon` = `<id>.icon.png` in `media/` (PNG ≤ 64 KB, ≤ 512 px), routes `/recipes/{id}/icon`, `icon_data` in exchange files.
+- 3D dish: optional `model` = `<id>.model.vox` (MagicaVoxel, ≤ 256 KB) in `media/`, routes `/recipes/{id}/model`,
+  `model_data` in exchange files, copied to variants, uploaded in the editor. `shared/dish-stage.ts` shows the picture and,
+  with a model, loads `core/vox.ts` + `shared/dish-scene.ts` (Three.js, a lazy chunk: never import `three` elsewhere):
+  visible faces only with vertex AO, palette alpha < 255 = see-through steam. One tilt + turn from the top view,
+  crossfading with the picture via `--dish-fade`; the top-view framing must stay equal to `dish_kit.py render_top`
+  (FILL 0.92, whole pixels per voxel on 1024×768, centred). Lights: hemisphere "overcast" (bright on light themes, dim on
+  dark), warm key with shadows, golden highlight. No model / no WebGL / reduced motion → just the picture.
 - Every recipe, menu and collection page shows its JSON file name (`shared/file-name.ts`).
 - Batch import (`shared/json-batch.ts`): many files / a folder / drag-and-drop, sent in chunks under the server's
   `post_max_size` (exposed as `max_upload` in `GET /session`; a body PHP dropped gives 413 `request_too_large`).

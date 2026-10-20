@@ -10,6 +10,7 @@ require __DIR__ . '/lib/Util.php';
 require __DIR__ . '/lib/Messages.php';
 require __DIR__ . '/lib/Http.php';
 require __DIR__ . '/lib/Store.php';
+require __DIR__ . '/lib/FileSessions.php';
 require __DIR__ . '/lib/Auth.php';
 require __DIR__ . '/lib/App.php';
 

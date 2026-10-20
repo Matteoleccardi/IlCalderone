@@ -4,7 +4,8 @@ declare(strict_types=1);
 /**
  * Accounts, sessions and CSRF.
  *  - users.json holds every account; passwords use PHP password_hash (bcrypt/argon, portable across hosts).
- *  - Session files live in data/sessions so they survive host quirks and move with the data folder.
+ *  - Session files live in data/sessions (lib/FileSessions.php, not PHP's handler) so they survive host quirks and
+ *    move with the data folder.
  *  - CSRF: Angular's HttpClient reads the XSRF-TOKEN cookie and echoes it in X-XSRF-TOKEN on every mutating request.
  */
 final class Auth
@@ -42,9 +43,14 @@ final class Auth
     {
         $dir = $this->store->path('sessions');
         if (!is_dir($dir)) {
-            mkdir($dir, 0770, true);
+            @mkdir($dir, 0775, true);
         }
-        session_save_path($dir);
+        if (!is_dir($dir) || !is_writable($dir)) {
+            // without this the login would fail later with a puzzling "security token expired"
+            throw new HttpError(500, 'data_not_writable');
+        }
+        // our own handler: some hosts (Altervista) quietly drop sessions saved by PHP's handler in a custom folder
+        session_set_save_handler(new FileSessions($dir), true);
         session_name('calderone');
         session_set_cookie_params([
             'lifetime' => 60 * 60 * 24 * 30,

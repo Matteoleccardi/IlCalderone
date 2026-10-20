@@ -19,6 +19,7 @@ import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { scaleQty } from '../../core/text-formats';
 import { AppTitle } from '../../core/title';
+import { DishStage } from '../../shared/dish-stage';
 import { FacetChips } from '../../shared/facet-chips';
 import { FileName } from '../../shared/file-name';
 import { QtyPipe, UnitPipe } from '../../shared/qty.pipe';
@@ -26,7 +27,7 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
 
 @Component({
   selector: 'app-recipe-detail',
-  imports: [FormsModule, RouterLink, NgComponentOutlet, FacetChips, FileName, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
+  imports: [FormsModule, RouterLink, NgComponentOutlet, DishStage, FacetChips, FileName, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-detail.html',
 })

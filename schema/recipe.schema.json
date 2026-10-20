@@ -243,6 +243,18 @@
       ],
       "description": "Optional pixel-art picture of the dish: file name inside data/media/ (<id>.icon.png, a PNG of at most 512x512, usually 128x128)."
     },
+    "model": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional voxel model of the dish (and its cutlery), shown in 3D on the recipe page: file name inside data/media/ (<id>.model.vox, a MagicaVoxel .vox of at most 256 KB, usually made by tools/dish_kit.py)."
+    },
+    "model_data": {
+      "type": "string",
+      "pattern": "^data:[a-z0-9./+-]*;base64,",
+      "description": "Exchange files only: the .vox model embedded as a data: URI."
+    },
     "photo_data": {
       "type": "string",
       "pattern": "^data:image/",

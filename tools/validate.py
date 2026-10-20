@@ -41,6 +41,12 @@ def validate_dir(d: Path) -> list[str]:
             errs.append(f"{p}: photo {r['photo']} missing in media/")
         if r.get("icon") and not (d / "media" / r["icon"]).exists():
             errs.append(f"{p}: icon {r['icon']} missing in media/")
+        if r.get("model"):
+            m = d / "media" / r["model"]
+            if not m.exists():
+                errs.append(f"{p}: model {r['model']} missing in media/")
+            elif m.read_bytes()[:4] != b"VOX " or m.stat().st_size > 262144:
+                errs.append(f"{p}: model {r['model']} is not a .vox file of at most 256 KB")
         # unknown facet values are errors; a missing course/diet is not (old files: completed in the editor)
         errs += [f"{p}: facets: {t}" for lvl, t in facet_problems(r) if lvl == "ERROR" and "missing" not in t]
         recipes[p.stem] = r

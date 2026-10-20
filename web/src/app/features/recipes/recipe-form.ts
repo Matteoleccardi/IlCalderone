@@ -85,6 +85,9 @@ export class RecipeForm implements OnInit {
   protected newIcon = signal<File | null>(null);
   protected iconPreview = signal<string | null>(null);
   protected removeIcon = signal(false);
+  // voxel model (MagicaVoxel .vox, uploaded as is)
+  protected newModel = signal<File | null>(null);
+  protected removeModel = signal(false);
 
   protected api = inject(Api);
   private router = inject(Router);
@@ -239,6 +242,20 @@ export class RecipeForm implements OnInit {
     this.iconPreview.set(URL.createObjectURL(file));
   }
 
+  async pickModel(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+    if (file.size > 262144 || String.fromCharCode(...head) !== 'VOX ') {
+      this.notify.error(this.i18n.t(file.size > 262144 ? 'err.model_too_large' : 'err.model_type'));
+      input.value = '';
+      return;
+    }
+    this.newModel.set(file);
+    this.removeModel.set(false);
+  }
+
   protected useDiet(d: string): void {
     this.facets.update((f) => ({ ...f, diet: d }));
   }
@@ -296,6 +313,14 @@ export class RecipeForm implements OnInit {
         r = await this.api.post<Recipe>(`recipes/${r.id}/icon`, fd);
       } else if (this.removeIcon() && r.icon) {
         r = await this.api.delete<Recipe>(`recipes/${r.id}/icon`);
+      }
+      const model = this.newModel();
+      if (model) {
+        const fd = new FormData();
+        fd.append('model', model, 'model.vox');
+        r = await this.api.post<Recipe>(`recipes/${r.id}/model`, fd);
+      } else if (this.removeModel() && r.model) {
+        r = await this.api.delete<Recipe>(`recipes/${r.id}/model`);
       }
       this.notify.ok(id ? 'form.saved' : 'form.created');
       this.router.navigate(['/ricette', r.id]);

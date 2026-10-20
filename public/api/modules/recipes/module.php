@@ -184,6 +184,28 @@ return [
             return $detail($u, $svc->save($svc->deleteIcon($svc->editableOr403($u, $p['id']))));
         });
 
+        $app->get('/recipes/{id}/model', function (Request $r, array $p) use ($auth, $svc, $app) {
+            $rec = $svc->visibleOr404($auth->require(), $p['id']);
+            $file = !empty($rec['model']) ? $app->store->path('media/' . basename($rec['model'])) : null;
+            if (!$file || !is_file($file)) {
+                throw new HttpError(404, 'model_none');
+            }
+            Response::file($file, 'application/octet-stream');
+        });
+
+        $app->post('/recipes/{id}/model', function (Request $r, array $p) use ($auth, $svc, $detail) {
+            $u = $auth->require();
+            if (empty($_FILES['model'])) {
+                throw new HttpError(400, 'photo_missing');
+            }
+            return $detail($u, $svc->saveModel($svc->editableOr403($u, $p['id']), $_FILES['model']));
+        });
+
+        $app->delete('/recipes/{id}/model', function (Request $r, array $p) use ($auth, $svc, $detail) {
+            $u = $auth->require();
+            return $detail($u, $svc->save($svc->deleteModel($svc->editableOr403($u, $p['id']))));
+        });
+
         $app->delete('/recipes/{id}/photo', function (Request $r, array $p) use ($auth, $svc, $detail) {
             $u = $auth->require();
             return $detail($u, $svc->save($svc->deletePhoto($svc->editableOr403($u, $p['id']))));

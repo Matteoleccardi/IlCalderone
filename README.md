@@ -37,6 +37,9 @@ Runs on any cheap PHP hosting (even free ones) or on your own PC. **No database*
 - **Import/export** in an open JSON format (`calderone-recipe/1`), with photos embedded. A backup is a copy of one folder.
 - **Themes**: 17 colour themes (Calderone, Catppuccin, Rosé Pine, Gruvbox, Nord, Solarized, Everforest). Pick a favourite
   light and dark one; the site switches with the phone's night mode. Lato for the interface, Literata for reading recipes.
+- **3D dish**: a recipe can have a small voxel model of the dish with its cutlery (MagicaVoxel `.vox`). Opening the
+  recipe, the camera leaves the top view, circles the table once and comes back (tap to replay; off with the phone's
+  "reduce motion" setting). The agent builds the models with `tools/dish_kit.py`, which also renders the pictures.
 - **Kitchen timers** on every page: up to 5, set with wheels, with a beep and a notification.
 - **Modular**: each feature is a PHP module plus an Angular feature folder, and features can be switched off in the config.
 
@@ -86,7 +89,7 @@ Two [Claude Code](https://claude.com/claude-code) subagents in `.claude/agents/`
 
 - **menu-planner**: builds a balanced menu for N weeks from your recipes (no repeats in a week, legumes spread out, no
   pasta after pasta…). Import it under *Menu → Importa / esporta menu*. Its helper is `tools/menu_tool.py`.
-- **recipe-importer**: turns recipe screenshots into recipes, with the dish photo and an 8-bit icon drawn with Inkscape.
+- **recipe-importer**: turns recipe screenshots into recipes, with a voxel model of the dish and its cutlery (`tools/dish_kit.py`), and the 8-bit icon and picture rendered from it.
   It checks names and units against your recipes (`tools/audit_recipes.py`). Import the result under *Ricette → Importa / esporta*.
 
 ## Documentation

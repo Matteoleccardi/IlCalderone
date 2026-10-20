@@ -73,6 +73,8 @@ export interface Recipe extends RecipeContent, Scoped {
   photo: string | null;
   /** Pixel-art picture of the dish (<id>.icon.png), if any. */
   icon?: string | null;
+  /** Voxel model of the dish (<id>.model.vox, MagicaVoxel), if any: shown in 3D on the recipe page. */
+  model?: string | null;
   parents: ParentLink[];
   owner: string;
   created: string;

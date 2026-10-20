@@ -1,6 +1,6 @@
 ---
 name: recipe-importer
-description: Turns recipe screenshots (one or many recipes, natural filename order) into Il Calderone recipes - faithful transcription, dish photo, a happy 8-bit 128x128 icon drawn with Inkscape - audits them against the existing recipes (spelling, units, duplicates), fixes the new ones and packs a JSON file to import on the website. Also runs the audit alone on the existing recipes.
+description: Turns recipe screenshots (one or many recipes, natural filename order) into Il Calderone recipes - faithful transcription, dish photo, a voxel model of the dish with its cutlery (tools/dish_kit.py) and the 8-bit icon and picture rendered from it - audits them against the existing recipes (spelling, units, duplicates), fixes the new ones and packs a JSON file to import on the website. Also runs the audit alone on the existing recipes.
 tools: Read, Write, Edit, Bash, Glob
 model: sonnet
 ---
@@ -89,37 +89,95 @@ If the caller only wants a check, run `tools/audit_recipes.py --existing SRC` an
 - Look at the result: it must show **the dish only**, with no status bar, buttons, title card or icons.
 - If needed, adjust `--top` / `--bottom` (fractions of the height) and crop again.
 
-## 4. Icon → `inbox/<slug>/icon.svg` → `icon.png` (8-bit, 128×128)
-Look at the dish photo and decide what makes the dish recognisable: the container (bowl, plate, pot), the colour of
-the base, and the 2–3 key ingredients on top (green broccoli florets, orange pumpkin cubes, yellow chickpeas, a leaf
-of mint…).
+## 4. The dish in voxels → `inbox/<slug>/dish.json` → `model.vox`, `icon.png`, `photo.png`
+Each recipe gets a small 3D model of the dish, made of voxels, with its cutlery on the table. The website turns it on
+the recipe page, and its pictures are rendered from it, so picture and model always match. Don't place voxels by hand:
+describe the dish in `dish.json` and `tools/dish_kit.py` builds it.
 
-**Drawing**
-- Draw it as **pixel art on a 32×32 grid**: an SVG with `viewBox="0 0 32 32"`, `shape-rendering="crispEdges"` and one
-  `<rect x y width="1" height="1" fill>` per pixel.
-  - Horizontal runs may be merged into one wider rect.
-  - Integer coordinates only; no circles or paths.
-- The easiest way is a small Python script: a list of 32 strings of 32 characters plus a character → colour palette,
-  which writes the rects. Keep the script in the scratchpad.
+Look at the dish photo and decide what makes the dish recognisable: the container, the colour of the food, and the
+2–4 key ingredients on top (green broccoli florets, orange pumpkin cubes, yellow chickpeas, a leaf of mint…).
 
-**Style: happy, colourful, elegant**
-- A limited palette of **12–16 colours**: bright and warm, with one darker outline colour (deep purple-brown, not
-  pure black) around the main shape.
-- Light from the top-left: one highlight tone and one shadow tone per main colour.
-- The dish is centred and fills about 70–80% of the canvas, with a transparent background.
-- A cheerful touch is welcome: rising steam, a sparkle, a tiny garnish. No faces or text.
-- **Convey the core of the dish**: someone should guess "pumpkin soup" or "pasta with pesto and nuts" at 48 px.
+```json
+{
+  "size": 36, "seed": 3,
+  "container": {"type": "deep_plate", "color": "#fff3e0", "rim": "#f8d9b4", "inner": "#ecd5bc",
+                "pattern": {"type": "dots", "color": "#3f6fc4"}},
+  "under": {"color": "#c98a4b", "margin": 4},
+  "filling": {"shape": "dome", "height": 4, "texture": "pieces", "colors": ["#f7e7a6", "#c4964a", "#bcd97c"], "level": 0.5},
+  "toppings": [
+    {"type": "floret", "color": "#5aa13c", "color2": "#8fcf5a", "count": 6, "size": 3, "spread": 0.65},
+    {"type": "crumb", "color": "#a8622f", "color2": "#d9a07f", "count": 40, "spread": 0.8}
+  ],
+  "steam": true,
+  "cutlery": {"tools": ["fork"], "metal": "gold"}
+}
+```
+- `size`: the container's width in voxels (30–40; 36 is the usual). `seed` changes the random details.
+- `container.type`:
+  - `plate`: flat, with a low rim;
+  - `deep_plate`: pasta plate, with a wide rim;
+  - `bowl`: round, on a foot;
+  - `pot`: straight walls and two handles (`handle` colour);
+  - `pan`: low, with a long handle;
+  - `board`: wooden board, food lies on top.
 
-**Export and check**
-- Export and check with `tools/recipe_media.py icon inbox/<slug>/icon.svg`. It runs Inkscape with no anti-aliasing
-  at 128×128 and warns about the grid, the palette and the size, which must be ≤ 64 KB.
-- **View the PNG.** If it doesn't read clearly or doesn't look appealing, redraw it; up to 3 attempts.
+  Optional: `rim` and `inner` colours, and `pattern` (`dots`, `band`, `stripes`) on the outside wall.
+- `under` (optional): a round board or placemat under the container.
+- `filling`, the food in the container:
+  - `shape`: `flat` (soups), `dome` (pasta, risotto) or `heap` (high piles); `height` is how much the dome rises;
+  - `level`: 0–1 of the container's depth;
+  - `texture`: `smooth`, `ripples` (soup), `grain` (rice, couscous), `pieces` (short pasta, gnocchi, stews),
+    `strands` (spaghetti, noodles) or `leaves` (salads);
+  - `colors`: 1–3 colours, main first.
+- `toppings`, each with `count`, `size` (voxels), `spread` (0–1 of the food's radius) and `color`/`color2`:
 
-**Picture instead of the photo**
-- The owner's recipes use the 8-bit picture as the photo too, because the app photos are not ours to publish.
-- Unless the user asks to keep the real photo: run `tools/recipe_media.py photo inbox/<slug>/icon.png inbox/<slug>/photo.png`
-  (the pixel art enlarged on a 4:3 transparent canvas) and delete `photo.jpg`.
-- `pack_recipes.py` embeds whichever photo file is there.
+  | Type | For |
+  |---|---|
+  | `cube` | pumpkin, tofu |
+  | `ball` | chickpeas, peas, gnocchi |
+  | `floret` | broccoli, cauliflower |
+  | `leaf` | basil, spinach, mint, sage |
+  | `sprig` | a standing herb |
+  | `slice` | lemon, carrot rounds, mushroom |
+  | `strip` | spring onion, nori, peppers |
+  | `dollop` | a spoon of rice, cream or pesto |
+  | `crumb` | chopped nuts, grated cheese, quinoa, ragù |
+- `steam: true` for hot soups and stews.
+- **Cutlery (`cutlery.tools`): the minimal set you would eat the dish with.**
+  - **Tools:** `fork`, `knife`, `spoon` (cucchiaio), `teaspoon` (cucchiaino) or `chopsticks`.
+  - **Examples:**
+    - pasta, gnocchi, risotto: `fork`;
+    - soup or a runny curry: `spoon`;
+    - meat or anything to cut: `fork` + `knife`;
+    - desserts and creams: `teaspoon`;
+    - Japanese, Chinese or Korean dishes: `chopsticks`, plus `spoon` only for noodle soups that need one.
+  - **Placement:** the fork lies on the left, the others on the right.
+  - **Material:**
+    - chopsticks are always black wood;
+    - metal tools take `metal`, chosen by the plate's general colour: `gold` with warm, cream, wooden or terracotta
+      dishes; `silver` with white, blue, green or cool dishes; `steel` with dark, grey or rustic ones (iron pans, stone).
+
+**Build and check**
+- Run `tools/dish_kit.py build inbox/<slug>/dish.json`. It writes:
+  - `model.vox`, the model;
+  - `icon.png`, the 8-bit icon (128×128): the dish at 40°, without cutlery;
+  - `photo.png`, the recipe picture (4:3): the whole table from above;
+  - `preview.png`, four views of the table plus the icon.
+- **Look at `preview.png` and `photo.png`.**
+  - The dish must be recognisable at icon size.
+  - Food must sit inside the container, and the key ingredients must stand out.
+  - The colours must be happy and warm, like a cheerful 8-bit game.
+  - **No outlines:** the pictures have no dark outline around the dish, the cutlery or anything else (the owner's
+    choice: outlines merge the chopsticks and make the plates look worse). Never add one, by hand or by editing the kit.
+- If something is wrong, change the description and build again, up to 3 times. Typical fixes:
+  - a bigger `size` for toppings;
+  - a different `seed` when toppings clump;
+  - other colours when two parts blend.
+- The owner's recipes use `photo.png` as the picture, because the app photos are not ours to publish. Delete the
+  cropped `photo.jpg` unless the user asks to keep the real photo.
+- `model.vox` opens in MagicaVoxel (free) for hand fixes. Then run `tools/dish_kit.py render inbox/<slug>/model.vox` to
+  remake the pictures. Palette slots 200–239 mark cutlery (left out of the icon), 240–255 steam (see-through).
+- `pack_recipes.py` embeds `photo.png`, `icon.png` and `model.vox`.
 
 ## 5. Audit and fix
 Run `tools/audit_recipes.py --existing SRC --new inbox/`.
@@ -138,13 +196,13 @@ Run `tools/audit_recipes.py --existing SRC --new inbox/`.
   - new ingredient names and units;
   - the classification of each recipe (course · diet · base), so the user can correct it;
   - the fixes you made, and the edits suggested for existing recipes;
-  - the icons, as paths to view.
+  - the icons and `preview.png` files, as paths to view.
 - **Wait for the user's OK.** Then run `tools/pack_recipes.py inbox/ [--only slug …]`, which writes
-  `exports/calderone-ricette-<date>.json` with the photos and icons embedded and checks it against the schema.
+  `exports/calderone-ricette-<date>.json` with the photos, icons and 3D models embedded and checks it against the schema.
 - **How to load it**: on the website (local, or `https://<name>.altervista.org/`), go to **Ricette → Importa /
   esporta**.
   1. Under **File**, pick the file.
   2. Choose **Chi può vederla**: Solo io, La mia famiglia or Tutti gli utenti (the default).
   3. Tap **Importa**.
   - Re-importing is safe: ids that already exist are skipped.
-  - An icon can also be changed later in the recipe editor (**Icona 8-bit**).
+  - An icon or 3D model can also be changed later in the recipe editor (**Icona 8-bit**, **Modello 3D**).

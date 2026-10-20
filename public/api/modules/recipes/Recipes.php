@@ -7,6 +7,7 @@ declare(strict_types=1);
  *  data/index/recipes.json  derived summaries for listing/search (rebuilt automatically if missing)
  *  data/media/<id>.<ext>    the dish photo
  *  data/media/<id>.icon.png an optional small pixel-art picture of the dish (128×128 PNG)
+ *  data/media/<id>.model.vox an optional voxel model of the dish (MagicaVoxel .vox), shown in 3D on the recipe page
  *  data/history/<id>/<rev>.json  earlier versions (full copies), written every time the recipe is changed in place
  * Variants form a DAG: each child lists its parents ({id, kind, note}); children are found through the index.
  */
@@ -25,6 +26,8 @@ final class Recipes
     /** Icons are small PNGs (pixel art), at most this many bytes and pixels per side. */
     public const ICON_MAX_BYTES = 65536;
     public const ICON_MAX_SIDE = 512;
+    /** Voxel models (MagicaVoxel .vox): at most this many bytes. */
+    public const MODEL_MAX_BYTES = 262144;
 
     private ?array $index = null;
 
@@ -175,6 +178,7 @@ final class Recipes
             }
             $this->deletePhoto($r);
             $this->deleteIcon($r);
+            $this->deleteModel($r);
             $this->store()->delete("recipes/{$id}.json");
             $this->store()->deleteDir("history/{$id}");
             $idx = $this->index();
@@ -315,7 +319,7 @@ final class Recipes
         [$vis, $hh] = $this->app->cleanScope($user, $input['visibility'] ?? 'shared', $input['household'] ?? null, 'shared');
         $now = Util::now();
         $r = ['format' => self::FORMAT, 'id' => $id ?? Util::id()] + self::cleanContent($input) + [
-            'photo' => null, 'icon' => null, 'parents' => [],
+            'photo' => null, 'icon' => null, 'model' => null, 'parents' => [],
             'owner' => $user['id'], 'visibility' => $vis, 'household' => $hh, 'created' => $now, 'updated' => $now,
             'rev' => 1, 'updated_by' => $user['id'],
         ];
@@ -484,6 +488,10 @@ final class Recipes
                 && copy($this->store()->path("media/{$parent['icon']}"), $this->store()->path("media/{$child['id']}.icon.png"))) {
                 $child['icon'] = "{$child['id']}.icon.png";
             }
+            if (!empty($parent['model']) && is_file($this->store()->path("media/{$parent['model']}"))
+                && copy($this->store()->path("media/{$parent['model']}"), $this->store()->path("media/{$child['id']}.model.vox"))) {
+                $child['model'] = "{$child['id']}.model.vox";
+            }
             return $this->save($this->withParent($child, $parent['id'], 'variant'));
         });
     }
@@ -577,6 +585,47 @@ final class Recipes
         return $r;
     }
 
+    // ---------- voxel models ----------
+
+    /** Save a voxel model from raw .vox bytes (an upload or an exchange file's model_data). */
+    public function saveModelBytes(array $r, string $bin): array
+    {
+        if (strlen($bin) > self::MODEL_MAX_BYTES) {
+            throw new HttpError(413, 'model_too_large');
+        }
+        if (strlen($bin) < 20 || substr($bin, 0, 4) !== 'VOX ' || strpos($bin, 'MAIN') !== 8) {
+            throw new HttpError(415, 'model_type');
+        }
+        $name = "{$r['id']}.model.vox";
+        $this->store()->locked(function () use ($name, $bin) {
+            $dest = $this->store()->path("media/{$name}");
+            if (!is_dir(dirname($dest))) {
+                mkdir(dirname($dest), 0775, true);
+            }
+            file_put_contents($dest, $bin);
+        });
+        $r['model'] = $name;
+        $r['updated'] = Util::now();
+        return $this->save($r);
+    }
+
+    public function saveModel(array $r, array $file): array
+    {
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+            throw new HttpError(400, 'photo_upload_failed');
+        }
+        return $this->saveModelBytes($r, (string) file_get_contents($file['tmp_name']));
+    }
+
+    public function deleteModel(array $r): array
+    {
+        if (!empty($r['model'])) {
+            $this->store()->delete('media/' . basename($r['model']));
+        }
+        $r['model'] = null;
+        return $r;
+    }
+
     // ---------- icons ----------
 
     /** Save an icon from raw PNG bytes (an upload or an exchange file's icon_data). */
@@ -624,7 +673,7 @@ final class Recipes
     /** Exchange-format copy of a recipe; with $photos the dish photo is embedded as photo_data (data: URI). */
     public function toExchange(array $r, bool $photos = false): array
     {
-        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'facets', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'icon', 'parents'];
+        $keys = ['format', 'id', 'title', 'servings', 'time_minutes', 'facets', 'tags', 'ingredients', 'steps', 'notes', 'taken_from', 'photo', 'icon', 'model', 'parents'];
         $out = [];
         foreach ($keys as $k) {
             $out[$k] = $r[$k] ?? null;
@@ -638,6 +687,10 @@ final class Recipes
         if ($photos && !empty($r['icon']) && $this->store()->exists('media/' . basename($r['icon']))) {
             $out['icon_data'] = 'data:image/png;base64,'
                 . base64_encode((string) file_get_contents($this->store()->path('media/' . basename($r['icon']))));
+        }
+        if ($photos && !empty($r['model']) && $this->store()->exists('media/' . basename($r['model']))) {
+            $out['model_data'] = 'data:application/octet-stream;base64,'
+                . base64_encode((string) file_get_contents($this->store()->path('media/' . basename($r['model']))));
         }
         return $out;
     }
@@ -676,6 +729,13 @@ final class Recipes
                 if (is_string($d['icon_data'] ?? null) && preg_match('#^data:image/png;base64,(.+)$#s', $d['icon_data'], $im)) {
                     try {
                         $r = $this->saveIconBytes($r, (string) base64_decode($im[1], true));
+                    } catch (HttpError $e) {
+                        $msgs[] = ['code' => 'import_failed', 'params' => ['title' => $title, 'reason' => $e->errorCode]];
+                    }
+                }
+                if (is_string($d['model_data'] ?? null) && preg_match('#^data:[a-z0-9./+-]*;base64,(.+)$#s', $d['model_data'], $mm)) {
+                    try {
+                        $r = $this->saveModelBytes($r, (string) base64_decode($mm[1], true));
                     } catch (HttpError $e) {
                         $msgs[] = ['code' => 'import_failed', 'params' => ['title' => $title, 'reason' => $e->errorCode]];
                     }
