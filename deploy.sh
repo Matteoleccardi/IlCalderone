@@ -19,6 +19,7 @@ WITH_DATA=""
 INSTALL_DEPS="auto"
 MAKE_ZIP=1
 RUN_TESTS=0
+PHP_HANDLER=""
 
 usage() {
   cat <<'EOF'
@@ -34,6 +35,8 @@ Options:
   --with-data [DIR]  also copy an existing data folder (default: public/data) into the release, to move a
                      local installation to a server. It contains the accounts (password hashes), recipes,
                      photos, menus and diaries; login sessions are left out.
+  --altervista       Altervista: select PHP 8.4 in .htaccess (same as --php-handler av-php84)
+  --php-handler NAME add "AddHandler NAME .php" to .htaccess, for hosts that pick the PHP version that way
   --out DIR          where to write the release (default: release/IlCalderone-<version>)
   --install          always run "npm ci" first      --no-install  never run it (default: only if needed)
   --test             run the front-end tests before building
@@ -52,6 +55,8 @@ while [[ $# -gt 0 ]]; do
     --data-dir)  DATA_DIR="${2:?--data-dir needs a path}"; shift 2 ;;
     --with-data)
       if [[ -n "${2:-}" && "${2:0:1}" != "-" ]]; then WITH_DATA="$2"; shift 2; else WITH_DATA="$PUB/data"; shift; fi ;;
+    --altervista)  PHP_HANDLER="av-php84"; shift ;;
+    --php-handler) PHP_HANDLER="${2:?--php-handler needs a name, e.g. av-php84}"; shift 2 ;;
     --out)        OUT="${2:?--out needs a folder}"; shift 2 ;;
     --install)    INSTALL_DEPS="yes"; shift ;;
     --no-install) INSTALL_DEPS="no"; shift ;;
@@ -149,7 +154,15 @@ mkdir -p "$OUT/data"
 touch "$OUT/.ilcalderone-release"
 
 cp -R "$BUILT/." "$OUT/"                         # index.html, *.js, *.css, favicon.svg, sw.js …
-cp "$PUB/.htaccess" "$OUT/.htaccess"
+if [[ -n "$PHP_HANDLER" ]]; then
+  [[ "$PHP_HANDLER" =~ ^[A-Za-z0-9._-]+$ ]] || die "--php-handler: only letters, digits, '.', '_' and '-'"
+  { echo "# PHP version chosen by the host (deploy.sh --php-handler / --altervista)"
+    echo "AddHandler $PHP_HANDLER .php"
+    echo
+    cat "$PUB/.htaccess"; } > "$OUT/.htaccess"
+else
+  cp "$PUB/.htaccess" "$OUT/.htaccess"
+fi
 cp -R "$PUB/api" "$OUT/api"
 rm -f "$OUT/api/router-dev.php"                  # only for "php -S" on a PC
 rm -f "$OUT/api/config.local.php"                # never ship your local settings
@@ -181,6 +194,7 @@ Il Calderone $VERSION
 commit:     $commit${dirty:+ (with uncommitted changes)}
 built:      $(date '+%Y-%m-%d %H:%M %Z')
 base href:  $BASE_HREF
+php:        $( [[ -n "$PHP_HANDLER" ]] && echo "AddHandler $PHP_HANDLER .php (in .htaccess)" || echo "the host's default" )
 data:       $( [[ -n "$WITH_DATA" ]] && echo "copied from $WITH_DATA" || echo "empty (new installation)" )
 data_dir:   $( [[ -n "$DATA_DIR" ]] && echo "$DATA_DIR (api/config.local.php)" || echo "data/ next to index.html (default)" )
 EOF

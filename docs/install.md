@@ -113,7 +113,9 @@ That's all Il Calderone needs. There is no shell, so everything goes through the
 ### 2.1 Create and set up the site
 1. Sign up and create a site; its name becomes `<name>.altervista.org`.
 2. In the **control panel**:
-   - **PHP version:** in the PHP settings, choose **8.1 or newer**. Use the newest version offered.
+   - **PHP version:** Altervista stores it as a line in the site's `.htaccess`, and uploading Il Calderone's
+     `.htaccess` replaces that file. So the version is set by the build instead (`--altervista`, next step). The
+     panel setting no longer matters.
    - **HTTPS:** turn on the free certificate. It can take a few minutes to become active.
 3. Note your **FTP details**, shown in the panel:
    - host `ftp.<name>.altervista.org`;
@@ -123,8 +125,11 @@ That's all Il Calderone needs. There is no shell, so everything goes through the
 ### 2.2 Build
 On your computer:
 ```bash
-./deploy.sh
+./deploy.sh --altervista
 ```
+`--altervista` adds `AddHandler av-php84 .php` at the top of `.htaccess`, which makes Altervista run PHP 8.4. Without it
+the site runs Altervista's default (8.0 at the time of writing) and the API answers *"Il Calderone needs PHP 8.1 or
+newer"*. For another version, use e.g. `--php-handler av-php83`.
 If you want the app in a sub-folder (e.g. `https://<name>.altervista.org/ricette/`), use
 `./deploy.sh --base-href /ricette/` and upload into that folder in the next step.
 
@@ -353,7 +358,7 @@ Everything lives in **one folder**: `data/`, or your `--data-dir`. A backup is a
 | White page, or "404" when reloading a page | `.htaccess` is missing or `mod_rewrite` is off. On Nginx, use the `try_files` line. |
 | The page loads, but no styles/scripts (in a sub-folder) | Build again with `--base-href /your-folder/`. |
 | "Cartella dati scrivibile" (data folder writable) is red | Set the permissions of `data/` (755/775). On your own server, check the owner. On Fedora, check SELinux ([3.4](#34-data-folder-outside-the-web-root)). |
-| "Versione PHP" (PHP version) is red, or a 500 error with a syntax error in the log | Choose PHP 8.1 or newer in the host's panel. |
+| "Versione PHP" (PHP version) is red, the API says "needs PHP 8.1 or newer", or a 500 error with a syntax error in the log | Choose PHP 8.1 or newer in the host's panel. On Altervista (and hosts that pick the version in `.htaccess`), build with `./deploy.sh --altervista` (or `--php-handler NAME`) and upload `.htaccess` again. |
 | An import with many photos fails | It is sent in parts, so this is rare. A single recipe with a huge photo can still be over the host's limit: export it without photos, or use a smaller one. On Nginx, raise `client_max_body_size`. |
 | The timer doesn't notify | Notifications need HTTPS and your permission (browser site settings). iPhones allow web notifications only for apps installed on the home screen, which Il Calderone doesn't support yet: there you get the beep and the flashing tab. On any phone, keep the site open: a closed tab can't ring. |
 | Forgot the admin password | Another admin can reset it under Amministrazione. With a shell, create a new admin with `php api/bin/create-user.php NAME --admin` (run as the web server user). |

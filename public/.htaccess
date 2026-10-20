@@ -1,4 +1,4 @@
-# Il Calderone — Apache configuration (also used by Altervista and most shared PHP hosts).
+# Il Calderone - Apache configuration (also used by Altervista and most shared PHP hosts).
 Options -Indexes
 DirectoryIndex index.html index.php
 
