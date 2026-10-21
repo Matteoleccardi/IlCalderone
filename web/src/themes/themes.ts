@@ -8,6 +8,8 @@ export interface ThemeInfo {
 }
 
 export const THEMES: readonly ThemeInfo[] = [
+  { id: 'dispensa-light', pack: 'Dispensa', name: 'Dispensa', kind: 'light' },
+  { id: 'dispensa-dark', pack: 'Dispensa', name: 'Dispensa', kind: 'dark' },
   { id: 'calderone-light', pack: 'Calderone', name: 'Calderone', kind: 'light' },
   { id: 'calderone-dark', pack: 'Calderone', name: 'Calderone', kind: 'dark' },
   { id: 'catppuccin-latte', pack: 'Catppuccin', name: 'Latte', kind: 'light' },
@@ -27,5 +29,5 @@ export const THEMES: readonly ThemeInfo[] = [
   { id: 'everforest-dark', pack: 'Everforest', name: 'Everforest Dark', kind: 'dark' },
 ];
 
-export const DEFAULT_LIGHT = 'calderone-light';
-export const DEFAULT_DARK = 'calderone-dark';
+export const DEFAULT_LIGHT = 'dispensa-light';
+export const DEFAULT_DARK = 'dispensa-dark';

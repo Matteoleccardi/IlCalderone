@@ -1,4 +1,6 @@
 /* Every theme. Generated list: keep it in sync with themes.ts. */
+@import "./dispensa/light.css";
+@import "./dispensa/dark.css";
 @import "./calderone/light.css";
 @import "./calderone/dark.css";
 @import "./catppuccin/latte.css";

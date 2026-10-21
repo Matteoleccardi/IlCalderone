@@ -1,0 +1,22 @@
+/* Dispensa (dark): the default look (docs/design.md). */
+[data-theme="dispensa-dark"] {
+  --bg: #121212;
+  --surface: #1d1d1d;
+  --surface-2: #272727;
+  --text: #f1eee6;
+  --muted: #a9a59b;
+  --line: #333333;
+  --accent: #9ad36b;
+  --accent-text: #121212;
+  --accent-soft: #2a3a1f;
+  --ok: #9ad36b;
+  --danger: #ff8f80;
+  --shadow: none;
+  --primary: #f2b01e;
+  --primary-text: #121212;
+  --line-strong: #7a7a7a;
+  --placeholder: #a9a59b;
+  --on-danger: #121212;
+  --backdrop: rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}

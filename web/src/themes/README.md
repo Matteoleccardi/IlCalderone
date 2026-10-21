@@ -10,7 +10,8 @@ Each theme is one CSS file, `<pack>/<variant>.css`. It sets Il Calderone's colou
 
 | Pack | Light | Dark | Source (MIT licence) |
 |---|---|---|---|
-| Calderone | Calderone | Calderone | the original Il Calderone look |
+| Dispensa | Dispensa | Dispensa | the default look, see `docs/design.md` (pantry green-grey, saffron main action; the dark one is colours only) |
+| Calderone | Calderone | Calderone | the original Il Calderone look (cream + terracotta) |
 | Catppuccin | Latte | Frappé, Macchiato, Mocha | [catppuccin/palette](https://github.com/catppuccin/palette) © Catppuccin |
 | Rosé Pine | Dawn | Moon, Rosé Pine | [rosepinetheme.com](https://rosepinetheme.com/palette) © Rosé Pine |
 | Gruvbox | Gruvbox Light | Gruvbox Dark | [morhetz/gruvbox](https://github.com/morhetz/gruvbox) © Pavel Pertsev |
@@ -24,10 +25,13 @@ Each theme is one CSS file, `<pack>/<variant>.css`. It sets Il Calderone's colou
 | `--bg` | page background |
 | `--surface` | cards |
 | `--surface-2` | buttons, chips |
-| `--line` | borders |
+| `--line` | dividers |
+| `--line-strong` | borders of fields and buttons (3:1) |
 | `--text`, `--muted` | text, secondary text |
 | `--accent` | links and primary buttons |
 | `--accent-text` | text on accent |
+| `--primary`, `--primary-text` | the one main button (saffron in Dispensa; other themes use their accent) |
+| `--placeholder` | placeholder text |
 | `--accent-soft` | soft accent background |
 | `--ok`, `--danger` | success and error colours |
 | `--on-danger` | text on danger |

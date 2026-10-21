@@ -74,6 +74,16 @@ CALDERONE = {
                  shadow='none'),
 }
 
+# ---- Dispensa (the default look, docs/design.md): pantry green-grey, saffron for the one main action
+DISPENSA = {
+    'light': dict(bg='#f2f4ec', surface='#e6ebdb', surface2='#d9e1cb', text='#1b2a1c', muted='#4d5c4a', line='#c3cdb4',
+                  line_strong='#6f7d66', accent='#2b6a1d', accent_text='#ffffff', accent_soft='#d6e6c6', ok='#2b6a1d',
+                  danger='#a7231b', primary='#f2b01e', primary_text='#1b2a1c', shadow='none'),
+    'dark': dict(bg='#121212', surface='#1d1d1d', surface2='#272727', text='#f1eee6', muted='#a9a59b', line='#333333',
+                 line_strong='#7a7a7a', accent='#9ad36b', accent_text='#121212', accent_soft='#2a3a1f', ok='#9ad36b',
+                 danger='#ff8f80', primary='#f2b01e', primary_text='#121212', shadow='none'),
+}
+
 # ---- Catppuccin (MIT, https://github.com/catppuccin/palette)
 for fl, nm, kind in [('latte', 'Latte', 'light'), ('frappe', 'Frappé', 'dark'), ('macchiato', 'Macchiato', 'dark'),
                      ('mocha', 'Mocha', 'dark')]:
@@ -132,7 +142,10 @@ MIN_SOFT = 6  # percent: the faintest tint worth showing
 # Muted text on --accent-soft is not enforced: it only appears on the selected row of the recipe history.
 PAIRS = [('text', ('bg', 'surface', 'surface2', 'accent_soft')), ('muted', ('bg', 'surface', 'surface2')),
          ('accent', ('bg', 'surface', 'surface2', 'accent_soft')), ('ok', ('bg', 'surface', 'surface2')),
-         ('danger', ('bg', 'surface', 'surface2')), ('accent_text', ('accent',)), ('on_danger', ('danger',))]
+         ('danger', ('bg', 'surface', 'surface2')), ('accent_text', ('accent',)), ('on_danger', ('danger',)),
+         ('placeholder', ('bg', 'surface', 'surface2')), ('primary_text', ('primary',))]
+# Borders of controls and icons need 3:1 (WCAG 1.4.11), not 4.5:1.
+UI_PAIRS = [('line_strong', ('bg', 'surface'))]
 
 
 def gate(t, soft=None):
@@ -171,6 +184,16 @@ def gate(t, soft=None):
     return dict(text=text, muted=muted, ok=ok, danger=danger, accent=accent, accent_soft=soft), notes
 
 
+def extras(tok, dark):
+    """Tokens added with the Dispensa redesign, derived for themes that do not set them: the main button takes the
+    accent, borders of controls are the divider colour pushed toward the text until 3:1, placeholders are the muted text."""
+    tok.setdefault('primary', tok['accent'])
+    tok.setdefault('primary_text', tok['accent_text'])
+    tok.setdefault('line_strong', push(tok['line'], (tok['bg'], tok['surface']), 3.0, tok['text']))
+    tok.setdefault('placeholder', tok['muted'])
+    return tok
+
+
 def build(t):
     """Token values for one theme; colours are only nudged when needed for readability (noted in the file)."""
     dark = t['kind'] == 'dark'
@@ -187,13 +210,15 @@ def build(t):
     shadow = 'none' if dark else f'0 1px 2px rgb({" ".join(map(str, rgb(text)))} / 7%), 0 4px 16px rgb({" ".join(map(str, rgb(text)))} / 6%)'
     tokens = dict(bg=bg, surface=sf, surface2=t['surface2'], text=text, muted=g['muted'], line=line, accent=accent,
                   accent_text=acc_text, accent_soft=g['accent_soft'], ok=g['ok'], danger=g['danger'], shadow=shadow)
+    extras(tokens, dark)
     return tokens, on_danger, notes
 
 
 def css(tid, kind, tok, on_danger, header):
     names = [('bg', 'bg'), ('surface', 'surface'), ('surface2', 'surface-2'), ('text', 'text'), ('muted', 'muted'),
              ('line', 'line'), ('accent', 'accent'), ('accent_text', 'accent-text'), ('accent_soft', 'accent-soft'),
-             ('ok', 'ok'), ('danger', 'danger'), ('shadow', 'shadow')]
+             ('ok', 'ok'), ('danger', 'danger'), ('shadow', 'shadow'), ('primary', 'primary'),
+             ('primary_text', 'primary-text'), ('line_strong', 'line-strong'), ('placeholder', 'placeholder')]
     body = '\n'.join(f'  --{css_name}: {tok[k]};' for k, css_name in names)
     backdrop = 'rgb(0 0 0 / 45%)' if kind == 'light' else 'rgb(0 0 0 / 60%)'
     return (f'{header}\n[data-theme="{tid}"] {{\n{body}\n  --on-danger: {on_danger};\n  --backdrop: {backdrop};\n'
@@ -202,18 +227,22 @@ def css(tid, kind, tok, on_danger, header):
 
 reg = []
 report = []
-for kind in ('light', 'dark'):
-    c = CALDERONE[kind]
-    tid = f'calderone-{kind}'
-    on_danger = '#ffffff' if kind == 'light' else '#1c1714'
-    g, notes = gate(dict(c, kind=kind), soft=c['accent_soft'])
-    tok = dict(c, **g)
-    header = f'/* Calderone {"(light)" if kind == "light" else "(dark)"}: the original Il Calderone look'
-    header += '; nudged for readability (WCAG AA): ' + '; '.join(notes) + '. */' if notes else '. */'
-    (OUT / 'calderone').mkdir(parents=True, exist_ok=True)
-    (OUT / 'calderone' / f'{kind}.css').write_text(css(tid, kind, tok, on_danger, header))
-    reg.append((tid, 'Calderone', 'Calderone', kind))
-    report.append((tid, dict(tok, on_danger=on_danger), notes))
+for pack, pack_name, palettes, intro in (('dispensa', 'Dispensa', DISPENSA, 'the default look (docs/design.md)'),
+                                         ('calderone', 'Calderone', CALDERONE, 'the original Il Calderone look')):
+    for kind in ('light', 'dark'):
+        c = palettes[kind]
+        tid = f'{pack}-{kind}'
+        on_danger = c.get('on_danger') or ('#ffffff' if pack == 'calderone' and kind == 'light' else
+                                           '#1c1714' if pack == 'calderone' else
+                                           '#ffffff' if kind == 'light' else '#121212')
+        g, notes = gate(dict(c, kind=kind), soft=c['accent_soft'])
+        tok = extras(dict(c, **g), kind == 'dark')
+        header = f'/* {pack_name} ({kind}): {intro}'
+        header += '; nudged for readability (WCAG AA): ' + '; '.join(notes) + '. */' if notes else '. */'
+        (OUT / pack).mkdir(parents=True, exist_ok=True)
+        (OUT / pack / f'{kind}.css').write_text(css(tid, kind, tok, on_danger, header))
+        reg.append((tid, pack_name, pack_name, kind))
+        report.append((tid, dict(tok, on_danger=on_danger), notes))
 
 for t in THEMES:
     tid = f"{t['pack']}-{t['variant']}"
@@ -236,9 +265,10 @@ ts = ['// Generated by tools/make_themes.py: do not edit by hand.',
       "export interface ThemeInfo {\n  id: string;\n  pack: string;\n  name: string;\n  kind: 'light' | 'dark';\n}", '',
       'export const THEMES: readonly ThemeInfo[] = [']
 ts += [f"  {{ id: '{tid}', pack: '{pack}', name: '{name}', kind: '{kind}' }}," for tid, pack, name, kind in reg]
-ts += ['];', '', "export const DEFAULT_LIGHT = 'calderone-light';", "export const DEFAULT_DARK = 'calderone-dark';", '']
+ts += ['];', '', "export const DEFAULT_LIGHT = 'dispensa-light';", "export const DEFAULT_DARK = 'dispensa-dark';", '']
 (OUT / 'themes.ts').write_text('\n'.join(ts))
 
 for tid, tok, notes in report:
     worst = min(contrast(tok[fg], tok[bg]) for fg, bgs in PAIRS for bg in bgs)
-    print(f'{tid:24} worst {worst:4.2f}  ' + ('; '.join(notes) if notes else 'as published'))
+    ui = min(contrast(tok[fg], tok[bg]) for fg, bgs in UI_PAIRS for bg in bgs)
+    print(f'{tid:24} worst {worst:4.2f}  borders {ui:4.2f}  ' + ('; '.join(notes) if notes else 'as published'))

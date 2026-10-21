@@ -54,8 +54,8 @@ describe('themes', () => {
   });
   it('falls back to the Calderone themes for unknown or wrong-kind ids', () => {
     expect(cleanPref({ light: 'nope', dark: 'catppuccin-latte', mode: 'x' as never })).toEqual({
-      light: 'calderone-light',
-      dark: 'calderone-dark',
+      light: 'dispensa-light',
+      dark: 'dispensa-dark',
       mode: 'auto',
     });
     expect(cleanPref(null).mode).toBe('auto');

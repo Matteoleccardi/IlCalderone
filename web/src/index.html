@@ -4,20 +4,21 @@
   <meta charset="utf-8">
   <title>Il Calderone</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Ricettario condiviso per famiglie e amici">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#faf6f0">
+  <meta name="theme-color" content="#f2f4ec">
   <script>
     // Colour theme before the first paint (same rule as core/theme.ts): favourite light/dark theme, auto = follow the phone.
     (function () {
       var p = {};
       try { p = JSON.parse(localStorage.getItem('calderone.theme') || '{}') || {}; } catch (e) {}
       var dark = p.mode === 'dark' || (p.mode !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.setAttribute('data-theme', dark ? (p.dark || 'calderone-dark') : (p.light || 'calderone-light'));
+      document.documentElement.setAttribute('data-theme', dark ? (p.dark || 'dispensa-dark') : (p.light || 'dispensa-light'));
     })();
   </script>
   <meta name="robots" content="noindex">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <!-- iPhone/iPad home-screen icon (180x180, no transparency: iOS would fill it with black) -->
   <link rel="apple-touch-icon" href="apple-touch-icon.png">

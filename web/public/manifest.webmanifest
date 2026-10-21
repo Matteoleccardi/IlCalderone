@@ -1,0 +1,14 @@
+{
+  "name": "Il Calderone",
+  "short_name": "Il Calderone",
+  "description": "Ricettario condiviso per famiglie e amici",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f2f4ec",
+  "theme_color": "#f2f4ec",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

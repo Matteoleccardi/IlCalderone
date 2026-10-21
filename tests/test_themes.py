@@ -20,7 +20,11 @@ PAIRS = [
     ("danger", ("bg", "surface", "surface-2")),
     ("accent-text", ("accent",)),
     ("on-danger", ("danger",)),
+    ("placeholder", ("bg", "surface", "surface-2")),
+    ("primary-text", ("primary",)),
 ]
+# borders of controls: 3:1 (WCAG 1.4.11)
+UI_PAIRS = [("line-strong", ("bg", "surface"))]
 
 
 def luminance(hex_colour: str) -> float:
@@ -58,3 +62,10 @@ def test_theme_text_is_readable(css):
         if contrast(t[fg], t[bg]) < 4.5
     ]
     assert not low, "below 4.5:1 -> " + "; ".join(low)
+
+
+@pytest.mark.parametrize("css", THEMES, ids=lambda p: f"{p.parent.name}-{p.stem}")
+def test_theme_control_borders_are_visible(css):
+    t = tokens(css)
+    low = [f"{fg} on {bg}: {contrast(t[fg], t[bg]):.2f}" for fg, bgs in UI_PAIRS for bg in bgs if contrast(t[fg], t[bg]) < 3.0]
+    assert not low, "below 3:1 -> " + "; ".join(low)

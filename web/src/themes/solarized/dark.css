@@ -12,6 +12,10 @@
   --ok: #a5b442;
   --danger: #ec908f;
   --shadow: none;
+  --primary: #e29a7d;
+  --primary-text: #000000;
+  --line-strong: #6a7d83;
+  --placeholder: #9eacad;
   --on-danger: #000000;
   --backdrop: rgb(0 0 0 / 60%);
   color-scheme: dark;

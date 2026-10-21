@@ -36,7 +36,7 @@ Runs on any cheap PHP hosting (even free ones) or on your own PC. **No database*
 - **Households** and **accounts**: made for about 30 people. The first user is the admin and creates the other accounts.
 - **Import/export** in an open JSON format (`calderone-recipe/1`), with photos embedded. A backup is a copy of one folder.
 - **Themes**: 17 colour themes (Calderone, Catppuccin, Rosé Pine, Gruvbox, Nord, Solarized, Everforest). Pick a favourite
-  light and dark one; the site switches with the phone's night mode. Lato for the interface, Literata for reading recipes.
+  light and dark one; the site switches with the phone's night mode. Bricolage Grotesque for the interface, Literata for reading recipes.
 - **3D dish**: a recipe can have a small voxel model of the dish with its cutlery (MagicaVoxel `.vox`). Opening the
   recipe, the camera leaves the top view, circles the table once and comes back (tap to replay; off with the phone's
   "reduce motion" setting). The agent builds the models with `tools/dish_kit.py`, which also renders the pictures.
