@@ -8,6 +8,7 @@ export const fr: Dict = {
   'app.logout': 'Se déconnecter',
   'app.language': 'Langue',
   'app.close': 'Fermer',
+  'nav.more': 'Plus',
   'nav.recipes': 'Recettes',
   'nav.menus': 'Menus',
   'nav.shopping': 'Courses',

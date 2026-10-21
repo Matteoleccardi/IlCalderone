@@ -11,6 +11,7 @@ export const it = {
   'app.logout': 'Esci',
   'app.language': 'Lingua',
   'app.close': 'Chiudi',
+  'nav.more': 'Altro',
   'nav.recipes': 'Ricette',
   'nav.menus': 'Menu',
   'nav.shopping': 'Spesa',

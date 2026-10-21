@@ -28,6 +28,17 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
           <!-- star -->
           <path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.6l6-.9z" />
         }
+        @case ('more') {
+          <!-- three dots -->
+          <circle cx="5" cy="12" r="1.6" fill="currentColor" />
+          <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+          <circle cx="19" cy="12" r="1.6" fill="currentColor" />
+        }
+        @case ('/account') {
+          <!-- person -->
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M4.5 20.5v-1A5.5 5.5 0 0 1 10 14h4a5.5 5.5 0 0 1 5.5 5.5v1" />
+        }
         @case ('/spesa') {
           <!-- bullet list -->
           <path d="M9.5 6h11M9.5 12h11M9.5 18h11" />

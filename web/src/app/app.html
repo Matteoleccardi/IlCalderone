@@ -4,20 +4,6 @@
   <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
     <app-brand />
   </a>
-  @if (session.user(); as u) {
-    <div class="who">
-      <a routerLink="/account" routerLinkActive="active" [title]="'account.title' | t">{{ u.display }}</a>
-      <span class="who-dot" aria-hidden="true"></span>
-      <button type="button" class="logout" (click)="logout()" [title]="'app.logout' | t" [attr.aria-label]="'app.logout' | t">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
-          <path d="M15 8l4 4-4 4" />
-          <path d="M19 12H9" />
-        </svg>
-      </button>
-    </div>
-  }
 </header>
 
 <main id="main" tabindex="-1" #mainEl>
@@ -26,12 +12,6 @@
 
 <footer class="foot">
   <span>Il Calderone {{ session.state()?.version }}</span>
-  <label class="lang">
-    <span class="sr-only">{{ 'app.language' | t }}</span>
-    <select [value]="i18n.lang" (change)="setLang($any($event.target).value)" [attr.aria-label]="'app.language' | t">
-      @for (l of langs; track l.code) { <option [value]="l.code" [selected]="l.code === i18n.lang">{{ l.name }}</option> }
-    </select>
-  </label>
 </footer>
 
 @if (session.user()) {
@@ -39,14 +19,39 @@
 }
 
 @if (session.user()) {
-  <!-- the most used control: at the bottom, where the thumb is -->
+  <!-- the most used control: at the bottom, where the thumb is. Three tabs and "More" (docs/design.md) -->
   <nav class="bottom-nav" #bottomNav [attr.aria-label]="'app.nav_label' | t">
-    @for (n of navItems(); track n.path) {
-      <a [routerLink]="n.path" routerLinkActive="active" ariaCurrentWhenActive="page" [title]="n.label | t" [attr.aria-label]="n.label | t">
+    @for (n of tabs(); track n.path) {
+      <a [routerLink]="n.path" routerLinkActive="active" ariaCurrentWhenActive="page">
         <app-nav-icon [name]="n.path" />
+        <span class="tab-label">{{ n.label | t }}</span>
       </a>
     }
+    <button type="button" class="tab" [class.active]="moreActive()" [attr.aria-current]="moreActive() ? 'page' : null"
+      aria-haspopup="dialog" (click)="openMore()">
+      <app-nav-icon name="more" />
+      <span class="tab-label">{{ 'nav.more' | t }}</span>
+    </button>
   </nav>
+
+  <dialog class="sheet more" #more aria-labelledby="more-h" (click)="$event.target === more && closeMore()">
+    <h2 id="more-h">{{ session.user()?.display }}</h2>
+    <ul class="more-list">
+      @for (n of moreItems(); track n.path) {
+        <li><a [routerLink]="n.path" (click)="closeMore()"><app-nav-icon [name]="n.path" /> {{ n.label | t }}</a></li>
+      }
+      <li><a routerLink="/account" (click)="closeMore()"><app-nav-icon name="/account" /> {{ 'account.title' | t }}</a></li>
+    </ul>
+    <label class="lang">{{ 'app.language' | t }}
+      <select [value]="i18n.lang" (change)="setLang($any($event.target).value)">
+        @for (l of langs; track l.code) { <option [value]="l.code" [selected]="l.code === i18n.lang">{{ l.name }}</option> }
+      </select>
+    </label>
+    <div class="actions">
+      <button type="button" (click)="logout()">{{ 'app.logout' | t }}</button>
+      <button type="button" class="link" (click)="closeMore()">{{ 'app.close' | t }}</button>
+    </div>
+  </dialog>
 }
 
 <div class="toasts" aria-live="polite">

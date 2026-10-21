@@ -1,5 +1,6 @@
-import { Component, ElementRef, computed, effect, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { Api } from './core/api';
 import { FEATURES } from './core/features';
 import { HouseholdsService } from './core/households';
@@ -11,8 +12,9 @@ import { NavIcon } from './shared/nav-icon';
 import { TimerDock } from './shared/timer-dock';
 import { ThemeService } from './core/theme';
 
-/** Order of the bottom navigation icons, by page path (other pages come after). */
-const NAV_ORDER = ['/ricette', '/menu', '/raccolte', '/spesa', '/diario', '/famiglie', '/admin'];
+/** The bottom tabs, by page path (docs/design.md): everything else lives in the "More" sheet, in this order. */
+const TABS = ['/ricette', '/menu', '/spesa'];
+const MORE_ORDER = ['/raccolte', '/diario', '/famiglie', '/admin'];
 
 @Component({
   selector: 'app-root',
@@ -42,15 +44,29 @@ export class App {
       .filter((n) => !n.admin || user?.admin);
   });
 
-  /** The bottom navigation: one row of icons in a fixed order. */
-  protected navItems = computed(() => {
-    const rank = (p: string) => (NAV_ORDER.includes(p) ? NAV_ORDER.indexOf(p) : NAV_ORDER.length);
-    return [...this.nav()].sort((a, b) => rank(a.path) - rank(b.path));
+  /** The labelled tabs next to "More". */
+  protected tabs = computed(() => TABS.flatMap((p) => this.nav().filter((n) => n.path === p)));
+
+  /** What "More" holds: the other pages of the enabled features. */
+  protected moreItems = computed(() => {
+    const rank = (p: string) => (MORE_ORDER.includes(p) ? MORE_ORDER.indexOf(p) : MORE_ORDER.length);
+    return this.nav()
+      .filter((n) => !TABS.includes(n.path))
+      .sort((a, b) => rank(a.path) - rank(b.path));
+  });
+
+  private url = signal(this.router.url);
+  /** "More" is the current tab when the page is one of its pages (or the account). */
+  protected moreActive = computed(() => {
+    const u = this.url();
+    return u.startsWith('/account') || this.moreItems().some((n) => u.startsWith(n.path));
   });
 
   private bottomNav = viewChild<ElementRef<HTMLElement>>('bottomNav');
+  private more = viewChild<ElementRef<HTMLDialogElement>>('more');
 
   constructor() {
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => this.url.set(e.urlAfterRedirects));
     // keep room at the bottom of every page for the navigation (its height depends on the rows and the font)
     let ro: ResizeObserver | undefined;
     effect(() => {
@@ -66,7 +82,16 @@ export class App {
     });
   }
 
+  protected openMore(): void {
+    this.more()?.nativeElement.showModal();
+  }
+
+  protected closeMore(): void {
+    this.more()?.nativeElement.close();
+  }
+
   protected async logout(): Promise<void> {
+    this.closeMore();
     await this.session.logout();
     this.households.reset();
     this.router.navigateByUrl('/login');

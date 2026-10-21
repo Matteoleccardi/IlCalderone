@@ -8,6 +8,7 @@ export const en: Dict = {
   'app.logout': 'Log out',
   'app.language': 'Language',
   'app.close': 'Close',
+  'nav.more': 'More',
   'nav.recipes': 'Recipes',
   'nav.menus': 'Menus',
   'nav.shopping': 'Shopping',

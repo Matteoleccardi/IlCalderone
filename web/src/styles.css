@@ -73,40 +73,40 @@ a.with-icon { display: inline-flex; align-items: center; gap: .35rem; }
 .skip:focus { left: 8px; top: 8px; background: var(--surface); padding: 8px; z-index: 10; }
 
 /* layout */
-.topbar {
-  display: flex; flex-direction: column; align-items: center; gap: .3rem;
-  padding: .75rem 16px .6rem; background: var(--surface); border-bottom: 1px solid var(--line);
-}
-.brand { display: flex; justify-content: center; width: 80%; max-width: 480px; font-family: var(--font-title); font-weight: 900;
-  font-size: var(--t-lg); color: var(--text); text-decoration: none; }
-.brand-box { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; height: 52px; max-width: 100%; min-width: 0; }
-.brand-img { display: block; width: auto; height: auto; max-height: 52px; max-width: 100%; object-fit: contain; }
-.who { display: flex; align-items: center; gap: .55rem; font-size: var(--t-sm); }
-.who a { color: var(--muted); text-decoration: none; padding: .15rem .4rem; border-radius: 8px; }
-.who-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .7; }
-button.logout { padding: .2rem; border: 0; background: none; color: var(--ok); border-radius: 50%; min-height: 0; }
+.topbar { display: flex; align-items: center; justify-content: flex-start; padding: .5rem 16px; background: var(--bg);
+  padding-top: max(.5rem, env(safe-area-inset-top)); }
+.brand { display: flex; max-width: 70%; font-family: var(--font-title); font-weight: 800; font-size: var(--t-lg); color: var(--text); text-decoration: none; }
+.brand-box { display: inline-flex; align-items: center; justify-content: flex-start; gap: .35rem; height: 40px; max-width: 100%; min-width: 0; }
+.brand-img { display: block; width: auto; height: auto; max-height: 40px; max-width: 100%; object-fit: contain; }
 
-/* page navigation: one row of icons fixed at the bottom on every screen (shared/nav-icon.ts) */
+/* page navigation: three labelled tabs and "More", fixed at the bottom on every screen size (docs/design.md) */
 :root { --nav-h: 0px; }
 body { padding-bottom: var(--nav-h); }
 .bottom-nav {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; justify-content: space-between; gap: .15rem;
-  padding: .3rem max(8px, calc((100vw - 560px) / 2)) calc(.3rem + env(safe-area-inset-bottom));
-  background: var(--surface); border-top: 1px solid var(--line);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; justify-content: space-between; gap: 4px;
+  padding: 4px max(8px, calc((100vw - 560px) / 2)) calc(4px + env(safe-area-inset-bottom));
+  background: var(--surface); border-top: 2px solid var(--line);
 }
-.bottom-nav a {
-  flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-width: 0; height: 2.9rem; border-radius: 12px;
-  color: var(--accent); text-decoration: none; position: relative; transition: background .15s;
+.bottom-nav a, .bottom-nav button.tab {
+  flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0;
+  min-height: 3.5rem; padding: 4px 2px; border: 0; border-radius: var(--r-1); background: none; font: inherit;
+  color: var(--text); text-decoration: none; position: relative;
 }
-.bottom-nav a.active { background: var(--accent-soft); }
-.bottom-nav a.active::after { content: ""; position: absolute; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-.bottom-nav a.active svg { stroke-width: 2.3; transform: translateY(-3px); }
+.bottom-nav .tab-label { font-size: var(--t-sm); font-weight: 600; line-height: 1.1; max-width: 100%; overflow-wrap: anywhere; hyphens: auto; text-align: center; }
+.bottom-nav a.active, .bottom-nav button.tab.active { color: var(--accent); }
+/* the selected tab: a 4px bar on top (not colour alone) */
+.bottom-nav a.active::before, .bottom-nav button.tab.active::before { content: ""; position: absolute; top: -6px; left: 8px; right: 8px; height: 4px; background: var(--accent); }
+.bottom-nav a.active svg, .bottom-nav button.tab.active svg { stroke-width: 2.4; }
 .bottom-nav svg { display: block; }
+/* "More" sheet */
+.more-list { list-style: none; margin: 0 0 .5rem; padding: 0; }
+.more-list a { display: flex; align-items: center; gap: .75rem; min-height: 3.25rem; padding: 0 .25rem; color: var(--text); text-decoration: none;
+  border-bottom: 1px solid var(--line); font-weight: 600; }
+.more-list a svg { color: var(--accent); flex: none; }
+dialog.more .lang { margin: .75rem 0 0; }
 main:focus { outline: none; } /* the skip link moves focus here */
 main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 16px 3rem; }
 .foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem 1rem; color: var(--muted); font-size: var(--t-sm); padding: 1rem; }
-.foot .lang { margin: 0; }
-.foot select { width: auto; margin: 0; padding: .2rem .4rem; font-size: var(--t-sm); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 label.inline { display: inline-flex; align-items: center; gap: .5rem; margin: 0; }
 label.inline select { width: auto; margin: 0; }
@@ -373,9 +373,7 @@ app-recipe-card { display: block; }
 .card-actions button.icon { padding: .45rem .6rem; background: var(--surface); box-shadow: var(--shadow); border-radius: 999px; }
 
 @media (hover: hover) {
-  .who a:hover { color: var(--accent); }
-  button.logout:hover { background: var(--surface-2); }
-  .bottom-nav a:hover { background: var(--surface-2); }
+  .bottom-nav a:hover, .bottom-nav button.tab:hover { background: var(--surface-2); }
   button:hover, .button:hover { border-color: var(--accent); }
   .recipe-card:hover { border-color: var(--line-strong); }
   .picker-list li:hover { background: var(--accent-soft); }
@@ -383,7 +381,6 @@ app-recipe-card { display: block; }
 }
 
 /* touch has no hover: the active states stay outside the media query above */
-.who a.active { color: var(--accent); }
 .picker-list li.active { background: var(--accent-soft); }
 
 /* dialog: a bottom sheet on phones, a centred box on wider screens */
@@ -409,7 +406,7 @@ fieldset.choice.days button { min-width: 0; padding: .35rem .1rem; }
 
 @media print {
   body { padding-bottom: 0; }
-  .topbar, .bottom-nav, .foot, .actions, .toasts, .graph, .tabs, .add-extra, .card-actions, app-add-to-menu, ul.shop .tools, details, app-collection-panel, app-meallog-panel { display: none !important; }
+  .topbar, .bottom-nav, dialog.more, .foot, .actions, .toasts, .graph, .tabs, .add-extra, .card-actions, app-add-to-menu, ul.shop .tools, details, app-collection-panel, app-meallog-panel { display: none !important; }
   .card { box-shadow: none; border: 0; padding: 0; }
 }
 
@@ -551,9 +548,8 @@ section.filters > button.chip-btn { margin-bottom: .9rem; }
 a, button, input, select, textarea, label, summary { touch-action: manipulation; }
 @media (pointer: coarse) {
   button, .button, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select { min-height: 2.75rem; }
-  button.icon, button.logout, .stepper button, .dish-play { min-width: 2.75rem; min-height: 2.75rem; justify-content: center; }
+  button.icon, .stepper button, .dish-play { min-width: 2.75rem; min-height: 2.75rem; justify-content: center; }
   button.link { min-height: 2.75rem; padding-inline: .5rem; }
-  .who a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: .6rem; }
   .facet-chip { min-height: 2.75rem; padding-inline: .8rem; }
   button.chip-btn, .facet-chips button.chip-btn, .segmented button { min-height: 2.75rem; }
   label.check { min-height: 2.75rem; }
