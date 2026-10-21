@@ -32,6 +32,8 @@ export function formatLeft(ms: number): string {
 export class TimersService {
   private i18n = inject(I18n);
   readonly timers = signal<KitchenTimer[]>([]);
+  /** True while the new-timer wheels are open (asked from the cooking mode or the More sheet; shown by the timer strip). */
+  readonly picking = signal(false);
   /** Ticks every second while a timer runs, to refresh the displayed times. */
   readonly now = signal(Date.now());
   readonly ringing = computed(() => this.timers().filter((t) => this.isDone(t)));

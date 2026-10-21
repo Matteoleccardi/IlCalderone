@@ -34,6 +34,11 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
           <circle cx="12" cy="12" r="1.6" fill="currentColor" />
           <circle cx="19" cy="12" r="1.6" fill="currentColor" />
         }
+        @case ('timer') {
+          <!-- stopwatch -->
+          <circle cx="12" cy="13.5" r="7.5" />
+          <path d="M12 9.5v4l2.5 1.5M9.5 3h5M12 3v3" />
+        }
         @case ('/account') {
           <!-- person -->
           <circle cx="12" cy="8" r="3.5" />

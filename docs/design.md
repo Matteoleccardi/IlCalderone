@@ -73,7 +73,7 @@ Fonts are bundled by `@fontsource` (listed in `web/angular.json`), no CDN.
 |---|---|---|---|
 | UI + titles | Bricolage Grotesque Variable | `--font` / `--font-title` | headings, buttons, labels, navigation |
 | Reading | Literata Variable | `--font-read` | ingredients, steps, notes (long text) |
-| Figures | Pixelify Sans | `--font-pixel` | timer digits, quantities in cooking mode, day numbers. Never body text, never below 16 px |
+| Figures | Bricolage Grotesque, 800, `tabular-nums` | `--font-figure` | timer digits, quantities in cooking mode, servings, step numbers. A pixel face (Pixelify Sans) was tried and dropped: its 5 reads as S and its 9 as 8 at timer sizes |
 
 Stack tails: `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` / `Georgia, serif` / `monospace`.
 
@@ -107,12 +107,12 @@ Weights: 400 body, 600 UI emphasis, 800 titles (Bricolage). Titles may wrap to t
 - **Recipe card.** `--surface` tile, dish icon 160 px (integer scale, `pixelated`), full title 16 px / 600 below, one 14 px meta line (time · diet). The "add to menu" action is a 44 px button in a row under the title, never over the picture. Two columns at 390 px, three from 640 px.
 - **Buttons.** Primary: `--primary` fill, `--primary-text`, 44 px high, one per screen. Secondary: 2 px `--line-strong` outline, `--text`. Tertiary/link: `--accent` text, underline, 44 px hit area. Destructive: `--danger` outline, filled `--danger`/`--on-danger` only inside the confirm sheet.
 - **Chips / filters.** 14 px, 44 px hit area (visual 32 px + padding), selected = `--accent-soft` fill + `--accent` text + a check glyph. Filters collapse into one "Filter" row that opens a sheet; applied filters show as removable chips ("Filter entfernen: Vegan").
-- **Stepper (servings).** Pill with − / value / +, 44 px buttons, value in `--font-pixel` in cooking mode.
+- **Stepper (servings).** Pill with − / value / +, 44 px buttons, value in `--font-figure`.
 - **Fields.** `--surface-2` fill, 2 px `--line-strong` border, 16 px text, label above (14 px / 600), `--placeholder` colour, required marker `*` (`aria-hidden`) plus `aria-required`. Errors are inline under the field: 14 px `--danger` with an icon, `aria-invalid="true"`, `aria-describedby`, focus moves to the first invalid field; a toast is only a summary.
 - **Sheet (bottom dialog).** `<dialog class="sheet">`, slides from the bottom, `--surface`, top corners `--r-2`, grabber 32×4 px, `overscroll-behavior: contain`, safe-area padding, close on backdrop and Escape. Replaces every native `confirm()`/`prompt()`.
 - **Confirm + undo.** Destructive actions ask once in a sheet (title names the object, the destructive button says what it does: "Rezept löschen"). Where reversible, skip the sheet and show an **undo toast** for 8 s instead.
 - **Toast.** Above the timer strip and tab bar; 14 px; `role="status"`, errors `role="alert"`; never the only error channel.
-- **Timer strip.** Replaces the right-edge tab. A bar above the tab bar showing running timers as 44 px chips (Pixelify digits, pause glyph + label for paused, word "Fertig" when ringing, pulse by background step). Tap = pause/resume, trailing "+" opens the duration wheel. Hidden when no timer runs. Ringing sets `role="alert"`.
+- **Timer strip.** Replaces the right-edge tab. A bar above the tab bar showing running timers as 44 px chips (bold tabular digits, pause label + label for paused, word "Fertig" when ringing, pulse by background step). Tap = pause/resume, trailing "+" opens the duration wheel. Hidden when no timer runs. Ringing sets `role="alert"`.
 - **Shopping row.** 56 px minimum, two lines: name + amount (amount `white-space: nowrap`, tabular), second line 12 px source. Check target is the whole row. "Always at home" and "move to household" live in the row's "…" sheet, not as extra lines.
 - **Menu day row.** Day name + date, dish icon 96 px, dish title, servings. **Today** = the word "Heute"/"Oggi" in a badge plus a 4 px leading bar (never colour alone).
 - **Empty / loading / error.** Empty: the dish icon of the section at 128 px, one sentence, one action. Loading: static skeleton tiles in `--surface-2` (no shimmer). Error: sentence + "Retry", inline.
@@ -138,7 +138,7 @@ Entry: the primary button **Cucina** on the recipe page. State lives in the rout
 Layout, top to bottom (390 px):
 
 1. **Header** (sticky, 56 px): back arrow, recipe title (single line, ellipsis), servings stepper.
-2. **Ingredients band** (sticky under the header): collapsed it is a 44 px row "Zutaten (8) ▾"; expanded it is a compact two-column list (name left, quantity + unit right in `--font-pixel`), max 40 % of the viewport height, scrolls inside. Tap a row to tick it off (strike + `--muted`, local only); servings rescale quantities in place.
+2. **Ingredients band** (sticky under the header): collapsed it is a 44 px row "Zutaten (8) ▾"; expanded it is a compact two-column list (name left, quantity + unit in bold tabular figures), max 40 % of the viewport height, scrolls inside. Tap a row to tick it off (strike + `--muted`, local only); servings rescale quantities in place.
 3. **Steps**, all visible in one scroll (`<ol>`):
    - **current**: Literata 20 px / 30, 4 px `--primary` bar on the left, title in 600, full text, an inline **Timer mm:ss** button (44 px) per duration found in the text;
    - **previous** and **next**: normal 16 px, full text, `--text` colour;

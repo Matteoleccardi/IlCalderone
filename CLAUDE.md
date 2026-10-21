@@ -115,8 +115,8 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   `core/theme.ts` (`ThemeService`) picks the favourite light/dark theme (auto = `prefers-color-scheme`), saves it in
   localStorage `calderone.theme` and the account (`PUT /me {theme}`); the inline script in `index.html` applies it before
   the first paint. Never hard-code colours in CSS: use the tokens. The `:where(:root)` fallback in `styles.css` must keep zero specificity.
-- **Fonts** (bundled via `@fontsource`, listed in `angular.json` styles): Bricolage Grotesque (`--font`, titles and UI), Literata
-  (`--font-read`, recipe ingredients/steps/notes) and Pixelify Sans (`--font-pixel`, figures only). No external font CDN. The style manifest is `docs/design.md`.
+- **Fonts** (bundled via `@fontsource`, listed in `angular.json` styles): Bricolage Grotesque (`--font`, titles and UI; `--font-figure` = the same, bold tabular, for timers and quantities) and Literata
+  (`--font-read`, recipe ingredients/steps/notes). No external font CDN. The style manifest is `docs/design.md`.
 - The top-bar title is `shared/brand.ts`: this week's logo from `web/public/logos/{light,dark,medium}/` (light logos on dark themes, medium on both),
   listed by `web/scripts/logos.mjs` into `logos.json` (git-ignored, run by build/start/deploy.sh) and chosen by `core/logo.ts`
   (continuous week count, seeded shuffle per cycle). `router-dev.php` URL-decodes static paths (file names with spaces).

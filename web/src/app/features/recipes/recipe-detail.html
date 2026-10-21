@@ -1,43 +1,50 @@
 @if (recipe(); as r) {
+  @if (cooking()) {
+    <app-recipe-cook [recipe]="r" [(servings)]="servings" (leave)="cook(false)" />
+  } @else {
   <article class="recipe">
     <header class="recipe-head">
       <app-dish-stage [recipeId]="r.id" [version]="r.updated" [photo]="!!r.photo" [icon]="!!r.icon" [hasModel]="!!r.model"
         [alt]="'recipe.photo_alt' | t: { title: r.title }" />
       <div>
-        <h1 class="with-icon">
-          @if (r.icon) { <img class="recipe-icon" [src]="api.iconUrl(r.id, r.updated)" alt="" /> }
-          {{ r.title }}
-        </h1>
+        <h1>{{ r.title }}</h1>
         <p class="meta">
-          @if (r.time_minutes) { <span><span aria-hidden="true">⏱</span> {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
+          @if (r.time_minutes) { <span>{{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
+          @if (diet(); as d) { <span>{{ d | t }}</span> }
           <app-visibility [value]="r.visibility" />
-          @if (r.visibility === 'household') { <span>{{ households.name(r.household) }}</span> }
-          @if (r.rev > 1 && r.updated_by !== r.owner) {
-            <span class="muted">{{ 'recipe.edited_by' | t: { name: r.updated_by_name ?? ('common.deleted_user' | t) } }}</span>
-          }
         </p>
-        <app-facet-chips [facets]="r.facets" [time]="r.time_minutes" />
-        @if (r.tags.length) {
-          <p class="tags">
-            @for (t of r.tags; track t) { <a class="tag" [routerLink]="['/ricette']" [queryParams]="{ q: t }">#{{ t }}</a> }
-          </p>
-        }
-        <div class="actions">
-          @if (r.can_edit) {
-            <a class="button primary" [routerLink]="['/ricette', r.id, 'modifica']">{{ 'common.edit' | t }}</a>
-          }
+        <div class="actions main-actions">
+          <button type="button" class="primary" (click)="cook(true)" [disabled]="!r.steps.length">{{ 'recipe.cook' | t }}</button>
           @for (a of actions(); track $index) {
             <ng-container *ngComponentOutlet="a; inputs: { recipe: r, compact: false }" />
           }
-          <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t"><span aria-hidden="true">⑂</span> {{ 'recipe.make_variant' | t }}</button>
-          <a class="button" [href]="api.url('recipes/' + r.id + '/json')" download>{{ 'recipe.download_json' | t }}</a>
-          @if (r.rev > 1) {
-            <a class="button" [routerLink]="['/ricette', r.id, 'cronologia']">{{ 'history.link' | t: { n: r.rev } }}</a>
-          }
-          @if (r.is_owner) {
-            <button type="button" class="danger" (click)="remove()">{{ 'common.delete' | t }}</button>
-          }
         </div>
+        <details class="recipe-details">
+          <summary>{{ 'recipe.details' | t }}</summary>
+          @if (r.visibility === 'household') { <p class="meta"><span>{{ households.name(r.household) }}</span></p> }
+          @if (r.rev > 1 && r.updated_by !== r.owner) {
+            <p class="meta">{{ 'recipe.edited_by' | t: { name: r.updated_by_name ?? ('common.deleted_user' | t) } }}</p>
+          }
+          <app-facet-chips [facets]="r.facets" [time]="r.time_minutes" />
+          @if (r.tags.length) {
+            <p class="tags">
+              @for (t of r.tags; track t) { <a class="tag" [routerLink]="['/ricette']" [queryParams]="{ q: t }">#{{ t }}</a> }
+            </p>
+          }
+          <div class="actions">
+            @if (r.can_edit) {
+              <a class="button" [routerLink]="['/ricette', r.id, 'modifica']">{{ 'common.edit' | t }}</a>
+            }
+            <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t">{{ 'recipe.make_variant' | t }}</button>
+            <a class="button" [href]="api.url('recipes/' + r.id + '/json')" download>{{ 'recipe.download_json' | t }}</a>
+            @if (r.rev > 1) {
+              <a class="button" [routerLink]="['/ricette', r.id, 'cronologia']">{{ 'history.link' | t: { n: r.rev } }}</a>
+            }
+            @if (r.is_owner) {
+              <button type="button" class="danger" (click)="remove()">{{ 'common.delete' | t }}</button>
+            }
+          </div>
+        </details>
       </div>
     </header>
 
@@ -142,6 +149,7 @@
       <ng-container *ngComponentOutlet="p; inputs: { recipe: r }" />
     }
   </article>
+  }
 } @else {
   <p class="muted">{{ 'common.loading' | t }}</p>
 }

@@ -19,6 +19,7 @@ import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { scaleQty } from '../../core/text-formats';
 import { AppTitle } from '../../core/title';
+import { RecipeCook } from './recipe-cook';
 import { DishStage } from '../../shared/dish-stage';
 import { FacetChips } from '../../shared/facet-chips';
 import { FileName } from '../../shared/file-name';
@@ -27,12 +28,15 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
 
 @Component({
   selector: 'app-recipe-detail',
-  imports: [FormsModule, RouterLink, NgComponentOutlet, DishStage, FacetChips, FileName, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
+  imports: [FormsModule, RouterLink, NgComponentOutlet, DishStage, RecipeCook, FacetChips, FileName, QtyPipe, UnitPipe, VisibilityBadge, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './recipe-detail.html',
 })
 export class RecipeDetail {
   readonly id = input.required<string>();
+  /** ?cucina=1: the cooking mode (docs/design.md §8). Back leaves it. */
+  readonly cucina = input<string>('');
+  protected cooking = computed(() => this.cucina() === '1' && !!this.recipe()?.steps.length);
   protected recipe = signal<Recipe | null>(null);
   protected servings = signal(4);
   protected kinds = ['variant', 'adaptation', 'inspired'];
@@ -87,6 +91,16 @@ export class RecipeDetail {
       this.notify.error(e);
       this.router.navigateByUrl('/ricette');
     }
+  }
+
+  /** The diet as a translation key (one value, e.g. "vegan"). */
+  protected diet = computed(() => {
+    const d = this.recipe()?.facets['diet'];
+    return typeof d === 'string' && d ? `facet.diet.${d}` : null;
+  });
+
+  cook(on: boolean): void {
+    this.router.navigate([], { queryParams: { cucina: on ? 1 : null }, queryParamsHandling: 'merge' });
   }
 
   changeServings(delta: number): void {

@@ -27,7 +27,6 @@
             ],
             "styles": [
               "@fontsource-variable/bricolage-grotesque/wght.css",
-              "@fontsource/pixelify-sans/latin-600.css",
               "@fontsource-variable/literata/wght.css",
               "src/themes/index.css",
               "src/styles.css"

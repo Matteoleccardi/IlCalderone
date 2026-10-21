@@ -7,6 +7,7 @@ import { HouseholdsService } from './core/households';
 import { I18n, LANGS, Lang, TPipe } from './core/i18n';
 import { Notify } from './core/notify';
 import { SessionService } from './core/session';
+import { TimersService } from './core/timers';
 import { Brand } from './shared/brand';
 import { NavIcon } from './shared/nav-icon';
 import { TimerDock } from './shared/timer-dock';
@@ -33,6 +34,7 @@ export class App {
   private api = inject(Api);
   // started here so the theme follows the phone's light/dark setting on every page
   private theme = inject(ThemeService);
+  private timers = inject(TimersService);
 
   /** Navigation of the enabled features (+ admin entries for admins). */
   protected nav = computed(() => {
@@ -84,6 +86,12 @@ export class App {
 
   protected openMore(): void {
     this.more()?.nativeElement.showModal();
+  }
+
+  /** From the More sheet: the new-timer wheels (the strip appears once a timer runs). */
+  protected newTimer(): void {
+    this.closeMore();
+    this.timers.picking.set(true);
   }
 
   protected closeMore(): void {

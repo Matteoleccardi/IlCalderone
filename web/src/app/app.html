@@ -40,6 +40,7 @@
       @for (n of moreItems(); track n.path) {
         <li><a [routerLink]="n.path" (click)="closeMore()"><app-nav-icon [name]="n.path" /> {{ n.label | t }}</a></li>
       }
+      <li><button type="button" class="more-btn" (click)="newTimer()"><app-nav-icon name="timer" /> {{ 'timer.new' | t }}</button></li>
       <li><a routerLink="/account" (click)="closeMore()"><app-nav-icon name="/account" /> {{ 'account.title' | t }}</a></li>
     </ul>
     <label class="lang">{{ 'app.language' | t }}

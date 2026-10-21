@@ -9,7 +9,7 @@ All three directions build on the same identity: the hand-drawn 8-bit dish icons
 **Status: adopted** (light theme `dispensa-light` is the default; see `docs/design.md`).
 
 - **Idea:** the app is a pantry shelf where each dish stands as a specimen of its own pixel icon, and the pixel grid sets spacing, radii and corners.
-- **Type:** Bricolage Grotesque (titles, UI), Literata (reading), Pixelify Sans only for quantities, timers and day numbers.
+- **Type:** Bricolage Grotesque (titles, UI, tabular figures), Literata (reading). A pixel face for digits was tried (Pixelify Sans) and dropped: 5 reads as S, 9 as 8.
 - **Palette:** ground `#F2F4EC`, tile `#E6EBDB`, ink `#1B2A1C`, muted `#4D5C4A`, basil `#2B6A1D` (links), saffron `#F2B01E` (the one primary action, ink text), danger `#A7231B`.
 - **Layout:** two-up grid of 160 px icons with the full title at 16 px; "+" in a row under the title; menu as seven day rows with a 96 px icon; shopping as two-line rows.
 - **Recipe page:** voxel dish on a flat field; title, time, one diet line, two buttons ("Cucina", "Aggiungi"); filter chips folded into one "Dettagli" row; ingredients in two columns.
@@ -30,7 +30,7 @@ All three directions build on the same identity: the hand-drawn 8-bit dish icons
 **Status: partly adopted.** The dark palette became `dispensa-dark` (colours only); the cooking reading mode is built into the recipe page (not a separate step-by-step wizard).
 
 - **Idea:** a dark-first mode for cooking with wet hands: big type, timers the loudest thing on screen.
-- **Type:** Atkinson Hyperlegible Next, Pixelify Sans in saffron for timer digits.
+- **Type:** Atkinson Hyperlegible Next, tabular bold figures for timer digits.
 - **Palette:** ground `#121212` (true neutral, no navy), surface `#1D1D1D`, surface-2 `#272727`, ink `#F1EEE6` (16.2:1), muted `#A9A59B` (≥ 6.1:1), saffron `#F2B01E` (actions, timers), lime `#9AD36B` (done), danger `#FF8F80`.
 - **Layout:** two-up 160 px icons; shopping as a 56 px-row checklist; menu highlights tonight's dish.
 - **Not taken:** the exclusive one-step-at-a-time view (while cooking you want the previous and next steps and the ingredients in sight), and Atkinson as a second UI face.
@@ -38,7 +38,7 @@ All three directions build on the same identity: the hand-drawn 8-bit dish icons
 ## Other ideas
 
 - Per-recipe colour sampled from the icon at runtime via `<canvas>` (direction 2 light).
-- Pixel digits (Pixelify Sans) for servings and day numbers.
+- Pixel digits: tried Pixelify Sans in the timer strip, illegible (5/S, 9/8). Maybe for non-critical decoration only.
 - Screen Wake Lock while the cooking mode is open (adopted in the plan; iOS support varies).
 - Timer detection in step text ("10 Minuten") as an inline button (adopted for the cooking mode).
 - Per-step ingredient matching (show only the quantities a step uses). Fragile without data changes: would need an `ingredients` list per step in the recipe schema.

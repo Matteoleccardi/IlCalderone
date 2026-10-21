@@ -33,18 +33,19 @@
   --t-md: 1rem;
   --t-lg: 1.375rem;
   --t-xl: 1.875rem;
-  /* fonts (bundled, see angular.json): Bricolage Grotesque for titles and the interface, Literata for reading recipes,
-     Pixelify Sans only for figures (timers, quantities in the cooking mode) */
+  /* fonts (bundled, see angular.json): Bricolage Grotesque for titles and the interface, Literata for reading recipes.
+     Figures (timers, quantities in the cooking mode) are Bricolage with tabular numerals: a pixel face was tried and
+     dropped, its 5 reads as S and its 9 as 8 at timer sizes. */
   --font: "Bricolage Grotesque Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-title: var(--font);
   --font-read: "Literata Variable", Georgia, "Iowan Old Style", "Palatino Linotype", serif;
-  --font-pixel: "Pixelify Sans", ui-monospace, monospace;
+  --font-figure: var(--font);
 }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 /* a focused field scrolls into view above the fixed bottom navigation and the sticky save bar */
-html { scroll-padding-bottom: calc(var(--nav-h, 0px) + 5.5rem); }
+html { scroll-padding-bottom: calc(var(--bottom-h, 0px) + 5.5rem); }
 body { margin: 0; background: var(--bg); color: var(--text); font: var(--t-md)/1.5 var(--font); }
 h1, h2, h3 { font-family: var(--font-title); font-weight: 700; line-height: 1.2; margin: 0 0 .5em; }
 h1 { font-weight: 800; font-size: var(--t-xl); line-height: 1.15; }
@@ -78,7 +79,7 @@ a.with-icon { display: inline-flex; align-items: center; gap: .35rem; }
 
 /* page navigation: three labelled tabs and "More", fixed at the bottom on every screen size (docs/design.md) */
 :root { --nav-h: 0px; }
-body { padding-bottom: var(--nav-h); }
+body { padding-bottom: var(--bottom-h); }
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; justify-content: space-between; gap: 4px;
   padding: 4px max(8px, calc((100vw - 560px) / 2)) calc(4px + env(safe-area-inset-bottom));
@@ -97,9 +98,10 @@ body { padding-bottom: var(--nav-h); }
 .bottom-nav svg { display: block; }
 /* "More" sheet */
 .more-list { list-style: none; margin: 0 0 .5rem; padding: 0; }
-.more-list a { display: flex; align-items: center; gap: .75rem; min-height: 3.25rem; padding: 0 .25rem; color: var(--text); text-decoration: none;
+.more-list a, .more-list .more-btn { display: flex; align-items: center; gap: .75rem; min-height: 3.25rem; padding: 0 .25rem; color: var(--text); text-decoration: none;
   border-bottom: 1px solid var(--line); font-weight: 600; }
-.more-list a svg { color: var(--accent); flex: none; }
+.more-list .more-btn { width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; font-size: var(--t-md); }
+.more-list a svg, .more-list .more-btn svg { color: var(--accent); flex: none; }
 dialog.more .lang { margin: .75rem 0 0; }
 main:focus { outline: none; } /* the skip link moves focus here */
 main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 16px 3rem; }
@@ -117,7 +119,7 @@ section.narrow.card { margin-inline: auto; }
 .row { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: end; }
 .row > label { flex: 1 1 160px; }
 .actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
-.actions.sticky { position: sticky; bottom: var(--nav-h); background: var(--bg); padding: .75rem 0; border-top: 1px solid var(--line); }
+.actions.sticky { position: sticky; bottom: var(--bottom-h); background: var(--bg); padding: .75rem 0; border-top: 1px solid var(--line); }
 ul.plain { list-style: none; padding: 0; margin: 0; }
 ul.plain li { padding: .25rem 0; }
 
@@ -340,7 +342,7 @@ ul.diff li.removed::before { content: "− "; }
 .source { margin-top: 1rem; }
 
 /* toasts */
-.toasts { position: fixed; right: 16px; bottom: calc(var(--nav-h) + 12px); display: flex; flex-direction: column; gap: .5rem; z-index: 20; max-width: min(420px, calc(100vw - 32px)); }
+.toasts { position: fixed; right: 16px; bottom: calc(var(--bottom-h) + 12px); display: flex; flex-direction: column; gap: .5rem; z-index: 20; max-width: min(420px, calc(100vw - 32px)); }
 .toast { display: flex; gap: .75rem; justify-content: space-between; align-items: start; padding: .75rem 1rem; border-radius: 10px;
   background: var(--text); color: var(--bg); }
 .toast.error { background: var(--danger); color: var(--on-danger); }
@@ -362,7 +364,6 @@ ul.diff li.removed::before { content: "− "; }
   button:hover, .button:hover { border-color: var(--accent); }
   .recipe-card-wrap:hover { border-color: var(--line-strong); }
   .picker-list li:hover { background: var(--accent-soft); }
-  button.timer-row.timer-add:hover { color: var(--accent); }
 }
 
 /* touch has no hover: the active states stay outside the media query above */
@@ -416,41 +417,26 @@ ul.batch-list button { grid-column: 2; grid-row: 1 / span 2; }
 ul.batch-list li.bad .muted { color: var(--danger); }
 progress.batch { width: 100%; }
 
-/* kitchen timers: a thin tab on the right edge that slides out a narrow column */
-.timer-dock {
-  --tab: 28px; --panel: 8.5rem;
-  position: fixed; right: 0; top: 34dvh; z-index: 40; display: flex; align-items: flex-start;
-  transform: translateX(var(--panel)); transition: transform .2s ease; touch-action: pan-y;
-}
-.timer-dock.open { transform: none; }
-.timer-tab {
-  width: var(--tab); min-height: 56px; padding: .35rem 0; flex-direction: column; justify-content: center; gap: .25rem;
-  border-radius: 10px 0 0 10px; border-right: 0; background: var(--accent); color: var(--accent-text); border-color: var(--accent);
-  box-shadow: var(--shadow); font-size: 1rem; position: relative;
-}
-/* the visible tab is 28px wide; the tappable area reaches 44px (16px further into the page) */
-.timer-tab::before { content: ""; position: absolute; top: 0; bottom: 0; left: -16px; right: 0; }
-.timer-tab-left { writing-mode: vertical-rl; font-variant-numeric: tabular-nums; font-size: var(--t-xs); letter-spacing: .02em; }
-.timer-dock.ringing .timer-tab { animation: timer-pulse 1s ease-in-out infinite; }
-@keyframes timer-pulse { 50% { filter: brightness(1.35); transform: scale(1.08); } }
-.timer-panel {
-  width: var(--panel); background: var(--surface); border: 1px solid var(--line); border-right: 0;
-  border-radius: 0 0 0 10px; box-shadow: var(--shadow); padding: .3rem; display: flex; flex-direction: column; gap: .3rem;
-}
-.timer-row { display: grid; grid-template-columns: minmax(0, 1fr) 2.75rem; gap: .2rem; align-items: stretch; margin: 0; }
-.timer-row button { padding: .2rem; justify-content: center; }
-.timer-time { flex-direction: column; gap: 0; line-height: 1.1; }
-.timer-time .big { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.timer-time .small { font-size: var(--t-xs); color: var(--muted); font-weight: 400; }
-.timer-row.paused .big { color: var(--muted); }
-.timer-row.done .timer-time { background: var(--accent); color: var(--accent-text); border-color: var(--accent); animation: timer-pulse 1s ease-in-out infinite; }
-.timer-row.done .timer-time .small { color: inherit; }
-.timer-note { margin: 0; font-size: var(--t-xs); color: var(--muted); line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }
-.timer-note button.link { padding: 0; font-size: inherit; text-align: left; overflow-wrap: anywhere; hyphens: auto; }
-@media (prefers-reduced-motion: reduce) { .timer-dock { transition: none; } .timer-dock.ringing .timer-tab, .timer-row.done .timer-time { animation: none; } }
-button.timer-row.timer-add { display: flex; justify-content: center; height: 2.75rem; font-size: 1.2rem; color: var(--muted);
-  border-style: dashed; background: transparent; }
-@media print { .timer-dock, .wheel-overlay { display: none !important; } }
+/* kitchen timers: a strip above the bottom tabs while at least one timer exists (shared/timer-dock.ts) */
+:root { --strip-h: 0px; --bottom-h: calc(var(--nav-h) + var(--strip-h)); }
+.timer-strip { position: fixed; left: 0; right: 0; bottom: var(--nav-h); z-index: 30; height: 3.5rem; display: flex; align-items: center; gap: 8px;
+  padding: 0 max(8px, calc((100vw - 560px) / 2)); background: var(--bg); border-top: 2px solid var(--line-strong); }
+.timer-strip ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.timer-chip { flex: none; display: inline-flex; border: 2px solid var(--line-strong); border-radius: 999px; overflow: hidden; background: var(--surface); }
+.timer-chip button { border: 0; border-radius: 0; min-height: var(--hit); justify-content: center; background: none; }
+.timer-time { flex-direction: column; gap: 0; line-height: 1.05; padding: 0 .75rem; }
+.timer-time .big { font-family: var(--font-figure); font-size: var(--t-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+.timer-time .small { font-size: var(--t-xs); color: var(--muted); font-weight: 600; }
+.timer-x { min-width: var(--hit); padding: 0; border-left: 2px solid var(--line) !important; }
+.timer-chip.paused .big { color: var(--muted); }
+.timer-chip.done { background: var(--primary); border-color: var(--primary); animation: timer-ring 1s steps(1) infinite; }
+.timer-chip.done button { color: var(--primary-text); }
+.timer-chip.done .small, .timer-chip.done .big { color: var(--primary-text); }
+@keyframes timer-ring { 50% { background: var(--surface); } }
+.timer-chip.done .timer-time { font-weight: 700; }
+button.timer-add { flex: none; min-width: var(--hit); min-height: var(--hit); justify-content: center; padding: 0; font-size: var(--t-lg); }
+@media (prefers-reduced-motion: reduce) { .timer-chip.done { animation: none; } }
+@media print { .timer-strip, .wheel-overlay { display: none !important; } }
 
 /* new timer: full-screen wheels (shared/duration-wheel.ts); one row = 44px */
 .wheel-overlay {
@@ -542,5 +528,53 @@ a, button, input, select, textarea, label, summary { touch-action: manipulation;
   details summary { padding-block: .65rem; }
   .picker-list li { min-height: 2.75rem; display: flex; align-items: center; }
   .tags .tag { display: inline-block; padding-block: .6rem; }
-  .timer-note button.link { min-height: 2.75rem; }
 }
+
+/* recipe page header: title, one meta line, the main button and "add", the rest behind "Details" */
+.recipe-head h1 { margin-bottom: .25rem; }
+.main-actions { margin: .75rem 0; }
+.main-actions .primary { min-height: 3rem; padding-inline: 1.5rem; font-size: var(--t-md); }
+details.recipe-details { margin-bottom: .5rem; }
+details.recipe-details summary { min-height: var(--hit); display: flex; align-items: center; color: var(--accent); }
+.dish-stage { border: 1px solid var(--line); border-radius: var(--r-2); }
+
+/* cooking mode (features/recipes/recipe-cook.ts): ingredients, steps, timers; the logo and footer step aside */
+body.cooking .topbar, body.cooking .foot { display: none; }
+body.cooking main { padding-top: 0; padding-bottom: calc(5.5rem + var(--bottom-h)); }
+.cook-head { position: sticky; top: 0; z-index: 12; display: flex; align-items: center; gap: 8px; min-height: 3.5rem;
+  padding-top: env(safe-area-inset-top); background: var(--bg); border-bottom: 1px solid var(--line); }
+.cook-title { flex: 1; min-width: 0; margin: 0; font-size: var(--t-md); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cook-servings { font-family: var(--font-figure); font-weight: 800; font-variant-numeric: tabular-nums; font-size: var(--t-lg); min-width: 1.5rem; text-align: center; }
+.cook-ing { position: sticky; top: calc(3.5rem + env(safe-area-inset-top)); z-index: 11; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 0 0 var(--r-2) var(--r-2); margin-bottom: 12px; }
+.cook-ing-toggle { width: 100%; justify-content: space-between; border: 0; min-height: var(--hit); font-weight: 700; }
+.cook-ing ul { list-style: none; margin: 0; padding: 0 8px 8px; max-height: 40dvh; overflow-y: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
+.cook-ing ul[hidden] { display: none; }
+.ing-tick { width: 100%; min-height: 3.5rem; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0;
+  text-align: left; border-width: 1px; border-color: var(--line); padding: 4px 8px; }
+.ing-name { font-size: var(--t-sm); line-height: 1.2; overflow-wrap: anywhere; hyphens: auto; }
+.ing-qty { font-family: var(--font-figure); font-size: var(--t-md); font-weight: 800; font-variant-numeric: tabular-nums; }
+.ing-tick.done { background: var(--accent-soft); }
+.ing-tick.done .ing-name { text-decoration: line-through; color: var(--muted); }
+.ing-tick[aria-pressed="true"]::after { content: "✓"; position: absolute; }
+.ing-tick { position: relative; }
+.ing-tick[aria-pressed="true"]::after { right: 8px; top: 4px; color: var(--accent); font-weight: 700; }
+.cook-steps { list-style: none; margin: 0; padding: 0; font-family: var(--font-read); }
+.cook-steps li { padding: 12px 12px 12px 16px; border-left: 4px solid transparent; margin-bottom: 4px; scroll-margin-block: 8rem; }
+.cook-steps p { margin: 4px 0 0; font-size: var(--t-md); line-height: 1.55; overflow-wrap: anywhere; hyphens: auto; }
+.step-pick { display: flex; align-items: baseline; gap: 8px; width: 100%; min-height: var(--hit); border: 0; padding: 0; text-align: left; font-family: var(--font);
+  font-weight: 700; }
+.step-n { font-family: var(--font-figure); font-weight: 800; font-size: var(--t-lg); color: var(--accent); min-width: 1.5rem; }
+.cook-steps li.current { border-left-color: var(--primary); background: var(--surface); border-radius: 0 var(--r-2) var(--r-2) 0; }
+.cook-steps li.current p { font-size: 1.25rem; line-height: 1.5; }
+.cook-steps li.current .step-pick { font-size: var(--t-lg); }
+.cook-steps li.far { color: var(--muted); }
+.cook-steps li.far p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.cook-timer { margin: 8px 8px 0 0; min-height: 3rem; font-family: var(--font-figure); font-weight: 700; font-variant-numeric: tabular-nums; border-color: var(--primary); }
+.cook-notes { margin-top: 16px; font-family: var(--font-read); }
+.cook-bar { position: fixed; left: 0; right: 0; bottom: var(--bottom-h); z-index: 29; display: flex; gap: 8px; padding: 8px max(16px, calc((100vw - 560px) / 2));
+  background: var(--bg); border-top: 1px solid var(--line); }
+.cook-bar button { min-height: 3.5rem; flex: 1; justify-content: center; font-size: var(--t-md); }
+.cook-bar button.primary { flex: 2; }
+@media (min-width: 760px) { .cook { max-width: 720px; margin: 0 auto; } }
