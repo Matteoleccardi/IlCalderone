@@ -70,7 +70,7 @@ interface Row {
         </ul>
         @if (todo() > 0) {
           <button type="button" class="primary" (click)="save()" [disabled]="busy() || !picked().size">
-            🍽 {{ 'diary.confirm' | t: { n: picked().size } }}
+            <span aria-hidden="true">🍽</span> {{ 'diary.confirm' | t: { n: picked().size } }}
           </button>
         } @else {
           <p class="ok small">{{ 'diary.all_done' | t }}</p>

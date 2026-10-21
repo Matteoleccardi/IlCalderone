@@ -142,6 +142,15 @@ export class RecipeForm implements OnInit {
     return { name: '', qty: '', unit: '', optional: false, note: '' };
   }
 
+  /** Names a row for screen readers while its name is still empty ("Zutat 2"). */
+  protected rowLabel(r: Row, i: number): string {
+    return r.name.trim() || `${this.i18n.t('form.ingredient')} ${i + 1}`;
+  }
+
+  protected stepLabel(s: Step, i: number): string {
+    return s.title.trim() || `${this.i18n.t('form.step')} ${i + 1}`;
+  }
+
   addRow(): void {
     this.rows.update((r) => [...r, this.emptyRow()]);
   }

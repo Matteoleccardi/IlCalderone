@@ -33,11 +33,11 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
         </strong>
         <span class="meta">
           @if (recipe().time_minutes) {
-            <span>⏱ {{ 'recipe.minutes' | t: { n: recipe().time_minutes } }}</span>
+            <span><span aria-hidden="true">⏱</span> {{ 'recipe.minutes' | t: { n: recipe().time_minutes } }}</span>
           }
-          <span [title]="'recipe.servings_title' | t">👥 {{ recipe().servings }}</span>
+          <span [title]="'recipe.servings_title' | t"><span aria-hidden="true">👥</span> {{ recipe().servings }}<span class="sr-only"> {{ 'recipe.servings_title' | t }}</span></span>
           @if (recipe().parents.length) {
-            <span [title]="'recipe.is_variant' | t">⑂ {{ 'kind.variant' | t }}</span>
+            <span [title]="'recipe.is_variant' | t"><span aria-hidden="true">⑂</span> {{ 'kind.variant' | t }}</span>
           }
           <app-visibility [value]="recipe().visibility" />
         </span>

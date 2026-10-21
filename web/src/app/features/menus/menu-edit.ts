@@ -31,7 +31,7 @@ import { ScopePicker } from '../../shared/scope-picker';
   template: `
     @if (menu(); as m) {
       <p>
-        <a routerLink="/menu">← {{ 'nav.menus' | t }}</a>
+        <a routerLink="/menu"><span aria-hidden="true">←</span> {{ 'nav.menus' | t }}</a>
       </p>
       <div class="page-head">
         <h1>{{ name }}</h1>
@@ -120,13 +120,12 @@ import { ScopePicker } from '../../shared/scope-picker';
         </div>
       </details>
 
-      <div class="tabs" role="tablist">
+      <div class="tabs">
         @for (w of weekList(); track w) {
           <button
             type="button"
-            role="tab"
             [class.active]="w === week()"
-            [attr.aria-selected]="w === week()"
+            [attr.aria-pressed]="w === week()"
             (click)="week.set(w)"
           >
             {{ 'menus.week_n' | t: { n: w } }}
@@ -173,14 +172,14 @@ import { ScopePicker } from '../../shared/scope-picker';
                         (ngModelChange)="touch()"
                         [placeholder]="it.recipe_servings ?? ''"
                         [title]="'diary.servings' | t"
-                        [attr.aria-label]="'diary.servings' | t"
+                        [attr.aria-label]="'menus.servings_of' | t: { name: dishName(it) }"
                       />
                     }
                     <button
                       type="button"
                       class="icon"
                       (click)="remove(it)"
-                      [attr.aria-label]="'common.remove' | t"
+                      [attr.aria-label]="'common.remove_named' | t: { name: dishName(it) }"
                     >
                       ✕
                     </button>
@@ -193,6 +192,7 @@ import { ScopePicker } from '../../shared/scope-picker';
                 <app-recipe-picker
                   [recipes]="candidates()"
                   [placeholder]="'menus.add_dish' | t"
+                  [label]="'menus.add_dish_to' | t: { day: dn, meal: ('meal.' + x | t) }"
                   [dashed]="true"
                   (picked)="add(d + 1, x, $event)"
                 />
@@ -312,6 +312,11 @@ export class MenuEdit {
     return this.items().filter(
       (it) => it.week === this.week() && it.day === day && it.meal === meal,
     );
+  }
+
+  /** What a dish is called for screen readers: its recipe title or its free text. */
+  protected dishName(it: MenuItem): string {
+    return it.recipe ? (it.title ?? this.i18n.t('common.unavailable_recipe')) : it.text;
   }
 
   protected touch(): void {

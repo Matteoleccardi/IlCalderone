@@ -37,10 +37,10 @@ const LAST_MENU = 'calderone.lastMenu';
       📅 @if (!compact()) { {{ 'addmenu.button' | t }} } @else { + }
     </button>
 
-    <dialog #dlg class="sheet" (close)="opened.set(false)" (click)="backdrop($event)">
+    <dialog #dlg class="sheet" [attr.aria-labelledby]="uid + '-title'" (close)="opened.set(false)" (click)="backdrop($event)">
       @if (opened()) {
         <form method="dialog" (submit)="$event.preventDefault(); add()">
-          <h2>{{ 'addmenu.title' | t }}</h2>
+          <h2 [id]="uid + '-title'">{{ 'addmenu.title' | t }}</h2>
           <p class="muted">{{ recipe().title }}</p>
 
           @if (loading()) {
@@ -149,6 +149,8 @@ export class AddToMenu implements RecipeActionComponent {
   readonly recipe = input.required<RecipeRef>();
   readonly compact = input(false);
 
+  private static next = 0;
+  protected uid = `atm-${AddToMenu.next++}`;
   private api = inject(Api);
   private i18n = inject(I18n);
   private notify = inject(Notify);

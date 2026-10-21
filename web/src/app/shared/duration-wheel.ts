@@ -43,7 +43,7 @@ interface Col {
   host: { '(document:keydown)': 'onKey($event)' },
   template: `
     <div class="wheel-overlay" role="dialog" aria-modal="true" aria-labelledby="wheel-title" #box>
-      <h2 id="wheel-title">⏱ {{ 'timer.new' | t }}</h2>
+      <h2 id="wheel-title"><span aria-hidden="true">⏱</span> {{ 'timer.new' | t }}</h2>
       <p class="wheel-total" aria-live="polite">{{ fmt(total()) }}</p>
       <div class="wheels">
         <div class="wheel-band" aria-hidden="true"></div>

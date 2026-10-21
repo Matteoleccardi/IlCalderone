@@ -14,6 +14,7 @@ import { SessionService } from '../../core/session';
     <h1>{{ 'nav.admin' | t }}</h1>
     <section class="card">
       <h2>{{ 'admin.accounts' | t }}</h2>
+      <div class="table-wrap" tabindex="0" role="region" [attr.aria-label]="'admin.accounts' | t">
       <table class="table">
         <thead>
           <tr>
@@ -47,6 +48,7 @@ import { SessionService } from '../../core/session';
           }
         </tbody>
       </table>
+      </div>
       <h3>{{ 'admin.new_account' | t }}</h3>
       <form class="row" (ngSubmit)="create()">
         <label

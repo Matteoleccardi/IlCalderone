@@ -16,7 +16,7 @@ import { FACET_ORDER, Facets, QUICK_MINUTES, facetValues } from '../core/facets'
             [queryParams]="c.params" [title]="'facet.' + c.name | t">{{ 'facet.' + c.name + '.' + c.value | t }}</a>
         }
         @if (quick()) {
-          <a class="facet-chip" [routerLink]="['/ricette']" [queryParams]="{ quick: 1 }">⚡ {{ 'facet.quick' | t }}</a>
+          <a class="facet-chip" [routerLink]="['/ricette']" [queryParams]="{ quick: 1 }"><span aria-hidden="true">⚡</span> {{ 'facet.quick' | t }}</a>
         }
       </p>
     }

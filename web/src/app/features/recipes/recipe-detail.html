@@ -9,7 +9,7 @@
           {{ r.title }}
         </h1>
         <p class="meta">
-          @if (r.time_minutes) { <span>⏱ {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
+          @if (r.time_minutes) { <span><span aria-hidden="true">⏱</span> {{ 'recipe.minutes' | t: { n: r.time_minutes } }}</span> }
           <app-visibility [value]="r.visibility" />
           @if (r.visibility === 'household') { <span>{{ households.name(r.household) }}</span> }
           @if (r.rev > 1 && r.updated_by !== r.owner) {
@@ -29,7 +29,7 @@
           @for (a of actions(); track $index) {
             <ng-container *ngComponentOutlet="a; inputs: { recipe: r, compact: false }" />
           }
-          <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t">⑂ {{ 'recipe.make_variant' | t }}</button>
+          <button type="button" (click)="variant()" [title]="'recipe.variant_title' | t"><span aria-hidden="true">⑂</span> {{ 'recipe.make_variant' | t }}</button>
           <a class="button" [href]="api.url('recipes/' + r.id + '/json')" download>{{ 'recipe.download_json' | t }}</a>
           @if (r.rev > 1) {
             <a class="button" [routerLink]="['/ricette', r.id, 'cronologia']">{{ 'history.link' | t: { n: r.rev } }}</a>
@@ -100,7 +100,7 @@
           @for (p of r.parents_info; track p.id) {
             <span class="chip">
               <a [routerLink]="['/ricette', p.id]">{{ p.title }}</a> <span class="muted small">({{ 'kind.' + p.kind | t }})</span>
-              @if (r.is_owner) { <button type="button" class="link" (click)="unlink(p.id)" [title]="'recipe.unlink' | t">✕</button> }
+              @if (r.is_owner) { <button type="button" class="link" (click)="unlink(p.id)" [title]="'recipe.unlink' | t" [attr.aria-label]="('recipe.unlink' | t) + ': ' + p.title"><span aria-hidden="true">✕</span></button> }
             </span>
           }
         </p>

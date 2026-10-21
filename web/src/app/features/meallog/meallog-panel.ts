@@ -21,7 +21,7 @@ import { today } from './dates';
           {{ 'diary.never' | t }}
         }
       </p>
-      <button type="button" (click)="ate()">🍽 {{ 'diary.ate_tonight' | t }}</button>
+      <button type="button" (click)="ate()"><span aria-hidden="true">🍽</span> {{ 'diary.ate_tonight' | t }}</button>
     </section>
   `,
 })

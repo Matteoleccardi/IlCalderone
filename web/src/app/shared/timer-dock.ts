@@ -33,6 +33,8 @@ import { DurationWheel } from './duration-wheel';
           <span class="timer-tab-left">{{ s }}</span>
         }
       </button>
+      <!-- announces a ringing timer to screen readers (the beep and the pulse are not enough) -->
+      <p class="sr-only" role="alert">@if (timers.ringing().length) { {{ 'timer.ringing' | t }} }</p>
       <div class="timer-panel" [attr.inert]="open() ? null : ''">
         @for (t of timers.timers(); track t.id) {
           @let done = timers.isDone(t);
@@ -59,9 +61,9 @@ import { DurationWheel } from './duration-wheel';
         @if (timers.permission() !== 'granted') {
           <p class="timer-note">
             @if (timers.permission() === 'default') {
-              <button type="button" class="link" (click)="timers.askPermission()">🔔 {{ 'timer.allow' | t }}</button>
+              <button type="button" class="link" (click)="timers.askPermission()"><span aria-hidden="true">🔔</span> {{ 'timer.allow' | t }}</button>
             } @else {
-              🔕 {{ 'timer.no_notify' | t }}
+              <span aria-hidden="true">🔕</span> {{ 'timer.no_notify' | t }}
             }
           </p>
         }

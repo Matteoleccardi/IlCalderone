@@ -64,7 +64,7 @@ import { RecipeIcon } from '../../shared/recipe-icon';
                     >
                     @if (first && session.has('meallog') && (o.available || !o.recipe)) {
                       <button type="button" class="link" (click)="ate(o, m.meal)">
-                        🍽 {{ 'home.ate' | t }}
+                        <span aria-hidden="true">🍽</span> {{ 'home.ate' | t }}
                       </button>
                     }
                   </li>

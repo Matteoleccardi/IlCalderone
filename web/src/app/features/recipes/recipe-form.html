@@ -60,9 +60,9 @@
               <input [name]="'x' + i" [(ngModel)]="row.note" [placeholder]="'form.note' | t" class="note" [attr.aria-label]="'form.note' | t" />
               <label class="check" [title]="'recipe.optional' | t"><input type="checkbox" [name]="'o' + i" [(ngModel)]="row.optional" /> {{ 'form.optional_short' | t }}</label>
               <span class="tools">
-                <button type="button" class="icon" (click)="move(rows, i, -1)" [attr.aria-label]="'common.move_up' | t">↑</button>
-                <button type="button" class="icon" (click)="move(rows, i, 1)" [attr.aria-label]="'common.move_down' | t">↓</button>
-                <button type="button" class="icon" (click)="removeRow(i)" [attr.aria-label]="'common.remove' | t">✕</button>
+                <button type="button" class="icon" (click)="move(rows, i, -1)" [attr.aria-label]="'common.move_up_named' | t: { name: rowLabel(row, i) }">↑</button>
+                <button type="button" class="icon" (click)="move(rows, i, 1)" [attr.aria-label]="'common.move_down_named' | t: { name: rowLabel(row, i) }">↓</button>
+                <button type="button" class="icon" (click)="removeRow(i)" [attr.aria-label]="'common.remove_named' | t: { name: rowLabel(row, i) }">✕</button>
               </span>
             </div>
           }
@@ -76,9 +76,9 @@
               <strong class="step-n">{{ i + 1 }}</strong>
               <input [name]="'st' + i" [(ngModel)]="s.title" [placeholder]="'form.step_title' | t" [attr.aria-label]="'form.step_title' | t" />
               <span class="tools">
-                <button type="button" class="icon" (click)="move(steps, i, -1)" [attr.aria-label]="'common.move_up' | t">↑</button>
-                <button type="button" class="icon" (click)="move(steps, i, 1)" [attr.aria-label]="'common.move_down' | t">↓</button>
-                <button type="button" class="icon" (click)="removeStep(i)" [attr.aria-label]="'common.remove' | t">✕</button>
+                <button type="button" class="icon" (click)="move(steps, i, -1)" [attr.aria-label]="'common.move_up_named' | t: { name: stepLabel(s, i) }">↑</button>
+                <button type="button" class="icon" (click)="move(steps, i, 1)" [attr.aria-label]="'common.move_down_named' | t: { name: stepLabel(s, i) }">↓</button>
+                <button type="button" class="icon" (click)="removeStep(i)" [attr.aria-label]="'common.remove_named' | t: { name: stepLabel(s, i) }">✕</button>
               </span>
             </div>
             <textarea [name]="'sx' + i" [(ngModel)]="s.text" rows="3" [attr.aria-label]="'form.step_text' | t"></textarea>
@@ -124,7 +124,7 @@
         @if (newModel(); as m) {
           <p class="small">{{ m.name }}</p>
         } @else if (existing()?.model && !removeModel()) {
-          <p class="small">✔ {{ 'form.model_set' | t }}</p>
+          <p class="small"><span aria-hidden="true">✔</span> {{ 'form.model_set' | t }}</p>
         }
         <input type="file" accept=".vox" (change)="pickModel($event)" [attr.aria-label]="'form.model' | t" />
         @if ((existing()?.model || newModel()) && !removeModel()) {

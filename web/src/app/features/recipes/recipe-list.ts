@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, input, signal, ChangeDetectionStra
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
-import { TPipe } from '../../core/i18n';
+import { I18n, TPipe } from '../../core/i18n';
 import { RecipeSummary } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { FACET_ORDER, Facets, FacetsService, QUICK_MINUTES } from '../../core/facets';
@@ -40,14 +40,14 @@ import { RecipeCard } from './recipe-card';
       >
       <button type="button" class="filter-toggle" [class.on]="showFilters()" [attr.aria-expanded]="showFilters()"
         (click)="showFilters.set(!showFilters())">
-        ⚙ {{ 'facet.filters' | t }}@if (active().length) { <span class="count">{{ active().length }}</span> }
+        <span aria-hidden="true">⚙</span> {{ 'facet.filters' | t }}@if (active().length) { <span class="count">{{ active().length }}</span> }
       </button>
     </form>
     @if (active().length) {
       <p class="facet-list active-filters">
         @for (a of active(); track a.name + a.value) {
-          <button type="button" class="facet-chip on" (click)="drop(a.name, a.value)" [attr.aria-label]="'facet.remove' | t">
-            {{ a.name === 'quick' ? '⚡ ' + ('facet.quick' | t) : ('facet.' + a.name + '.' + a.value | t) }} ✕
+          <button type="button" class="facet-chip on" (click)="drop(a.name, a.value)" [attr.aria-label]="chipLabel(a)">
+            {{ chipText(a) }} <span aria-hidden="true">✕</span>
           </button>
         }
         <button type="button" class="link" (click)="clearFilters()">{{ 'facet.clear' | t }}</button>
@@ -56,7 +56,7 @@ import { RecipeCard } from './recipe-card';
     @if (showFilters() && defs(); as d) {
       <section class="card filters">
         <button type="button" class="chip-btn" [class.on]="quick() === '1'" [attr.aria-pressed]="quick() === '1'" (click)="toggleQuick()">
-          ⚡ {{ 'facet.quick_long' | t: { n: quickMinutes } }}
+          <span aria-hidden="true">⚡</span> {{ 'facet.quick_long' | t: { n: quickMinutes } }}
         </button>
         <app-facet-picker [defs]="d" mode="filter" [value]="filters()" (valueChange)="setFilters($event)" />
       </section>
@@ -109,9 +109,20 @@ export class RecipeList {
   protected recipes = signal<RecipeSummary[]>([]);
   protected loading = signal(true);
   private api = inject(Api);
+  private i18n = inject(I18n);
   private router = inject(Router);
   private notify = inject(Notify);
   private timer?: ReturnType<typeof setTimeout>;
+
+  /** The text of an active-filter chip. */
+  protected chipText(a: { name: string; value: string }): string {
+    return a.name === 'quick' ? '⚡ ' + this.i18n.t('facet.quick') : this.i18n.t('facet.' + a.name + '.' + a.value);
+  }
+
+  /** Its accessible name: says which filter it removes. */
+  protected chipLabel(a: { name: string; value: string }): string {
+    return this.i18n.t('facet.remove_named', { name: this.chipText(a) });
+  }
 
   constructor() {
     this.facetsSvc.ensure().catch(() => {});

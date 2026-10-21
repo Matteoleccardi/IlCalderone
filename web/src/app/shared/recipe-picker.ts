@@ -39,8 +39,11 @@ const fold = (s: string) =>
         [class.add]="dashed()"
         [value]="query()"
         [placeholder]="placeholder()"
-        [attr.aria-label]="placeholder()"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+        [attr.aria-label]="label() || placeholder()"
         [attr.aria-expanded]="open()"
+        [attr.aria-controls]="open() ? uid + '-list' : null"
         [attr.aria-activedescendant]="active() >= 0 ? uid + '-' + active() : null"
         (input)="query.set(box.value); active.set(-1); open.set(true)"
         (focus)="open.set(true)"
@@ -48,7 +51,7 @@ const fold = (s: string) =>
         (keydown)="key($event)"
       />
       @if (open() && (matches().length || offerText())) {
-        <ul class="picker-list" role="listbox">
+        <ul class="picker-list" role="listbox" [id]="uid + '-list'">
           @for (r of matches(); track r.id; let i = $index) {
             <li
               role="option"
@@ -81,6 +84,8 @@ const fold = (s: string) =>
 export class RecipePicker {
   readonly recipes = input.required<RecipeSummary[]>();
   readonly placeholder = input('');
+  /** Accessible name when it should say more than the placeholder (e.g. which day and meal). */
+  readonly label = input('');
   /** Accept free text as well as recipes. */
   readonly allowText = input(true);
   /** Dashed "add" look (menu grid). */

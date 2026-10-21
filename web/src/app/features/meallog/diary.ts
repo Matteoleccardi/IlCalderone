@@ -128,7 +128,7 @@ import { PlanConfirm } from './plan-confirm';
                     type="button"
                     class="link"
                     (click)="remove(e)"
-                    [attr.aria-label]="'common.delete' | t"
+                    [attr.aria-label]="'common.delete_named' | t: { name: e.title }"
                   >
                     ✕
                   </button>

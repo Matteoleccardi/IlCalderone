@@ -27,13 +27,12 @@ import { addDays } from '../meallog/dates';
   template: `
     <h1>{{ 'nav.shopping' | t }}</h1>
     @if (list(); as l) {
-      <div class="tabs" role="tablist">
+      <div class="tabs">
         @for (s of l.spaces; track s.id) {
           <button
             type="button"
-            role="tab"
             [class.active]="s.id === l.space.id"
-            [attr.aria-selected]="s.id === l.space.id"
+            [attr.aria-pressed]="s.id === l.space.id"
             (click)="open(s.id, l.week)"
           >
             {{ s.id === 'me' ? ('shop.personal' | t) : s.name }}
@@ -113,7 +112,7 @@ import { addDays } from '../meallog/dates';
               }
               @if (i.mixed) {
                 <span class="badge warn" [title]="'shop.mixed_title' | t"
-                  >⚠ {{ 'shop.mixed' | t }}</span
+                  ><span aria-hidden="true">⚠</span> {{ 'shop.mixed' | t }}</span
                 >
               }
               @for (f of i.from; track f) {
@@ -132,8 +131,9 @@ import { addDays } from '../meallog/dates';
                     class="link"
                     (click)="move([i.key])"
                     [title]="'shop.move_one' | t"
+                    [attr.aria-label]="('shop.to_home' | t) + ': ' + i.name"
                   >
-                    → {{ 'shop.to_home' | t }}
+                    <span aria-hidden="true">→</span> {{ 'shop.to_home' | t }}
                   </button>
                 }
                 @if (!i.extra) {
@@ -142,6 +142,7 @@ import { addDays } from '../meallog/dates';
                     class="link"
                     (click)="toPantry(i.name)"
                     [title]="'shop.pantry_add_title' | t"
+                    [attr.aria-label]="('shop.in_pantry' | t) + ': ' + i.name"
                   >
                     {{ 'shop.in_pantry' | t }}
                   </button>
@@ -150,7 +151,7 @@ import { addDays } from '../meallog/dates';
                     type="button"
                     class="icon"
                     (click)="removeExtra(i)"
-                    [attr.aria-label]="'common.remove' | t"
+                    [attr.aria-label]="'common.remove_named' | t: { name: i.name }"
                   >
                     ✕
                   </button>
@@ -186,7 +187,7 @@ import { addDays } from '../meallog/dates';
                   >{{ i.qty === null ? '' : (i.qty | qty) }} {{ i.unit | unit }}</span
                 >
                 <span class="badge">{{ i.household_name }}</span>
-                <button type="button" class="link" (click)="unmove([i.key])">
+                <button type="button" class="link" (click)="unmove([i.key])" [attr.aria-label]="('shop.bring_back' | t) + ': ' + i.name">
                   {{ 'shop.bring_back' | t }}
                 </button>
               </li>
@@ -210,7 +211,7 @@ import { addDays } from '../meallog/dates';
                 type="button"
                 class="link"
                 (click)="fromPantry(p)"
-                [attr.aria-label]="'common.remove' | t"
+                [attr.aria-label]="'common.remove_named' | t: { name: p }"
               >
                 ✕
               </button></span

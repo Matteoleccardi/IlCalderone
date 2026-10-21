@@ -1,4 +1,5 @@
-<a class="skip" href="#main">{{ 'app.skip' | t }}</a>
+<!-- <base href="/"> would turn a plain #main link into "go to the home page": focus <main> directly -->
+<a class="skip" href="#main" (click)="$event.preventDefault(); mainEl.focus()">{{ 'app.skip' | t }}</a>
 <header class="topbar">
   <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
     <app-brand />
@@ -19,7 +20,7 @@
   }
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1" #mainEl>
   <router-outlet />
 </main>
 
@@ -50,7 +51,7 @@
 
 <div class="toasts" aria-live="polite">
   @for (t of notify.toasts(); track t.id) {
-    <div class="toast" [class.error]="t.kind === 'error'" role="status">
+    <div class="toast" [class.error]="t.kind === 'error'" [attr.role]="t.kind === 'error' ? 'alert' : 'status'">
       <span>{{ t.text }}</span>
       <button type="button" class="link" (click)="notify.dismiss(t.id)" [attr.aria-label]="'app.close' | t">✕</button>
     </div>

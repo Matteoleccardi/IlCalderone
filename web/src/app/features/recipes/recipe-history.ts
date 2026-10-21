@@ -33,10 +33,11 @@ interface Line {
   template: `
     @if (recipe(); as r) {
       <p>
-        <a [routerLink]="['/ricette', r.id]">← {{ r.title }}</a>
+        <a [routerLink]="['/ricette', r.id]"><span aria-hidden="true">←</span> {{ r.title }}</a>
       </p>
       <h1>{{ 'history.title' | t }}</h1>
       <p class="muted">{{ 'history.intro' | t }}</p>
+      <div class="table-wrap" tabindex="0" role="region" [attr.aria-label]="'history.title' | t">
       <table class="table history">
         <thead>
           <tr>
@@ -68,6 +69,7 @@ interface Line {
           }
         </tbody>
       </table>
+      </div>
 
       @if (shown(); as s) {
         <section class="card version">

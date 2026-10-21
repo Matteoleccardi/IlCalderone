@@ -87,6 +87,7 @@ body { padding-bottom: var(--nav-h); }
 .bottom-nav a.active::after { content: ""; position: absolute; bottom: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .bottom-nav a.active svg { stroke-width: 2.3; transform: translateY(-3px); }
 .bottom-nav svg { display: block; }
+main:focus { outline: none; } /* the skip link moves focus here */
 main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 16px 3rem; }
 .foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem 1rem; color: var(--muted); font-size: .8rem; padding: 1rem; }
 .foot .lang { margin: 0; }
@@ -259,7 +260,9 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 .plan-row .dish { grid-column: 3; }
 .plan-row .badge, .plan-row .muted.small { grid-column: 2 / -1; grid-row: 3; justify-self: start; }
 .plan-row.done { opacity: .7; }
-.table { width: 100%; border-collapse: collapse; overflow-x: auto; display: block; }
+/* the table keeps its table semantics; the wrapper scrolls sideways (and is focusable for keyboard users) */
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
 .table th, .table td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line); }
 .checks { list-style: none; padding: 0; }
 .checks li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); column-gap: .25rem; padding: .45rem 0;
