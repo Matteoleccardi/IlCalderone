@@ -125,3 +125,25 @@ New translation keys (it/en/de/fr): `common.remove_named`, `common.move_up_named
 - **Test:** `/admin`: the table's computed display is `table`, the wrapper is a focusable named region, no page overflow at 390 px.
 
 **Commit checks:** `ng build` OK, `npm test` (i18n: 571 keys, no unused-key warnings; 21 Vitest tests) OK; checks for commits 1-2 re-run and still pass.
+
+---
+
+## Commit 4: focus, viewport, layout
+
+### A23: Focused fields hidden behind the sticky bar and bottom nav
+- **Fix:** `html { scroll-padding-bottom: calc(var(--nav-h, 0px) + 5.5rem) }` (nav height plus the sticky save bar).
+- **Files:** `web/src/styles.css`.
+- **Test:** recipe form at 390×844. Reaching the notes field with minimal scrolling (what Tab does) ends at y=699, above the sticky bar (718). With the rule removed the field ends at y=844, behind the bar and the nav. Note: a script's `focus()` centres the element, so `scrollIntoView({block: 'nearest'})` was used to reproduce keyboard behaviour; a real Tab press was not driven.
+
+### A25: Wheel overlay clipped its top on short screens
+- **Problem:** `justify-content: center` with `overflow-y: auto` makes the top of overflowing content unreachable (landscape phone, keyboard open). The timer dock also used `vh`.
+- **Fix:** the overlay is `flex-start` with `margin-top: auto` on its first child and `margin-bottom: auto` on its last: centred when it fits, scrollable from the top when it does not. Dock `top: 34vh` → `34dvh`.
+- **Files:** `web/src/styles.css`.
+- **Test:** 390×300 viewport: title at y=16 at scroll 0, Start/Cancel reachable at the end (bottom 284 of 300). With the old CSS injected the title sat at y=-137 (unreachable). The dock's computed `top` is 102 px (34% of 300).
+
+### A26: Bottom sheet scroll chaining
+- **Fix:** `dialog.sheet { overscroll-behavior: contain }`.
+- **Files:** `web/src/styles.css`.
+- **Test:** computed value is `contain` on the open add-to-menu dialog. Real scroll chaining on a phone was not tested.
+
+**Commit checks:** `ng build` OK, `npm test` OK, scripts for commits 1-3 unchanged.

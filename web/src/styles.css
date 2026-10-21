@@ -26,6 +26,8 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* a focused field scrolls into view above the fixed bottom navigation and the sticky save bar */
+html { scroll-padding-bottom: calc(var(--nav-h, 0px) + 5.5rem); }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); }
 h1, h2, h3 { font-family: var(--font-title); font-weight: 700; line-height: 1.2; margin: 0 0 .5em; letter-spacing: .005em; }
 h1 { font-weight: 900; }
@@ -359,7 +361,7 @@ app-recipe-card { display: block; }
 
 /* dialog: a bottom sheet on phones, a centred box on wider screens */
 dialog.sheet { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text);
-  padding: 1rem 1.25rem; width: min(30rem, calc(100vw - 2rem)); max-height: 90dvh; overflow-y: auto; box-shadow: var(--shadow); }
+  padding: 1rem 1.25rem; width: min(30rem, calc(100vw - 2rem)); max-height: 90dvh; overflow-y: auto; overscroll-behavior: contain; box-shadow: var(--shadow); }
 dialog.sheet::backdrop { background: var(--backdrop); }
 dialog.sheet h2 { margin: 0 0 .25rem; }
 dialog.sheet .actions { margin-top: 1rem; }
@@ -408,7 +410,7 @@ progress.batch { width: 100%; }
 /* kitchen timers: a thin tab on the right edge that slides out a narrow column */
 .timer-dock {
   --tab: 28px; --panel: 8.5rem;
-  position: fixed; right: 0; top: 34vh; z-index: 40; display: flex; align-items: flex-start;
+  position: fixed; right: 0; top: 34dvh; z-index: 40; display: flex; align-items: flex-start;
   transform: translateX(var(--panel)); transition: transform .2s ease; touch-action: pan-y;
 }
 .timer-dock.open { transform: none; }
@@ -445,9 +447,12 @@ button.timer-row.timer-add:hover { color: var(--accent); }
 /* new timer: full-screen wheels (shared/duration-wheel.ts); one row = 44px */
 .wheel-overlay {
   position: fixed; inset: 0; z-index: 60; background: var(--surface); color: var(--text);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); overflow-y: auto;
 }
+/* centred when it fits, scrollable from the top when it does not (justify-content: center would clip the top) */
+.wheel-overlay > :first-child { margin-top: auto; }
+.wheel-overlay > :last-child { margin-bottom: auto; }
 .wheel-overlay h2 { margin: 0; }
 .wheel-total { margin: 0; font-size: 2.6rem; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
 .wheels { position: relative; display: flex; gap: .75rem; }
