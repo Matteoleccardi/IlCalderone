@@ -1,16 +1,16 @@
-/* Frappé (Catppuccin palette 1.7.1, MIT licence). Mapped onto Il Calderone's colour tokens. */
+/* Frappé (Catppuccin palette 1.7.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #a5adce -> #aab2d1; danger #e78284 -> #eda0a2; accent #ef9f76 -> #efa179; accent-soft tint 22% -> 14%. */
 [data-theme="catppuccin-frappe"] {
   --bg: #292c3c;
   --surface: #303446;
   --surface-2: #414559;
   --text: #c6d0f5;
-  --muted: #a5adce;
+  --muted: #aab2d1;
   --line: #51576d;
-  --accent: #ef9f76;
+  --accent: #efa179;
   --accent-text: #000000;
-  --accent-soft: #5a4c51;
+  --accent-soft: #4b434d;
   --ok: #a6d189;
-  --danger: #e78284;
+  --danger: #eda0a2;
   --shadow: none;
   --on-danger: #000000;
   --backdrop: rgb(0 0 0 / 60%);

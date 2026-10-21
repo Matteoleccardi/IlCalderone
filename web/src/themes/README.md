@@ -41,9 +41,14 @@ Each theme is one CSS file, `<pack>/<variant>.css`. It sets Il Calderone's colou
 1. Add or change the palette in `tools/make_themes.py`, mapping it onto the tokens like the existing ones.
 2. Run `python tools/make_themes.py`. It writes the files and prints a contrast report.
    - **Readability rule:** every theme must reach WCAG AA contrast, 4.5:1, for text, secondary text, links,
-     success/error text and text on buttons, against the page and the cards.
+     success/error text and text on buttons, against every background it is drawn on: the page, the cards, the
+     buttons and chips (`--surface-2`) and, for text and links, the soft accent tint (`--accent-soft`). The pairs are
+     `PAIRS` in `tools/make_themes.py`; **Calderone goes through the same check**. Muted text on `--accent-soft` is not
+     enforced (it only appears on the selected row of the recipe history).
    - A palette colour that is too faint is darkened (light themes) or lightened (dark themes) just enough, keeping its
-     hue. The change is noted in the file's header comment.
+     hue. The generated tint `--accent-soft` is made fainter before the accent itself is moved. The change is noted in
+     the file's header comment.
+   - `python -m pytest -q tests/test_themes.py` re-checks every generated file (no server needed).
 3. Rebuild (`cd web && npm run build`) and look at it on a phone.
 
 ## The title image (logo), per theme and per week

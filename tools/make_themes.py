@@ -1,8 +1,9 @@
 """Write the colour themes, web/src/themes/<pack>/<variant>.css + index.css, from the official palettes below.
 
 Each palette is mapped onto Il Calderone's colour tokens. A colour is changed only when it is too faint to read
-(WCAG AA, 4.5:1 against the page and the cards): it is then darkened (light themes) or lightened (dark themes)
-just enough, which keeps its hue; the change is written in the file's header comment.
+(WCAG AA, 4.5:1 on every background it is drawn on, see PAIRS): it is then darkened (light themes) or lightened (dark
+themes) just enough, which keeps its hue; the change is written in the file's header comment.
+tests/test_themes.py re-checks the generated files.
 It also writes web/src/themes/themes.ts, the list the app shows (do not edit that file by hand).
 
 Usage: python tools/make_themes.py [THEMES_DIR]   (prints the contrast report)"""
@@ -123,35 +124,69 @@ theme('everforest', 'dark', 'Everforest Dark', 'dark', bg='#232a2e', surface='#2
       source='Everforest palette (medium)')
 
 
-def build(t):
-    """Token values for one theme; colours are only nudged when needed for readability (noted in the file)."""
+# Share of the accent mixed into the card colour to make --accent-soft (generated themes)
+SOFT = {'light': 0.16, 'dark': 0.22}
+MIN_SOFT = 6  # percent: the faintest tint worth showing
+
+# What the gate guarantees (also re-checked by tests/test_themes.py): text colour -> backgrounds it is drawn on.
+# Muted text on --accent-soft is not enforced: it only appears on the selected row of the recipe history.
+PAIRS = [('text', ('bg', 'surface', 'surface2', 'accent_soft')), ('muted', ('bg', 'surface', 'surface2')),
+         ('accent', ('bg', 'surface', 'surface2', 'accent_soft')), ('ok', ('bg', 'surface', 'surface2')),
+         ('danger', ('bg', 'surface', 'surface2')), ('accent_text', ('accent',)), ('on_danger', ('danger',))]
+
+
+def gate(t, soft=None):
+    """Nudge text, muted, accent, ok and danger until each reads at 4.5:1 on the backgrounds in PAIRS.
+    The accent also has to read on its own soft tint, which is mixed from it (unless `soft` is given): try ever
+    darker (light themes) or lighter (dark themes) accents until both hold. Returns the colours and what changed."""
     notes = []
-    dark = t['kind'] == 'dark'
+    kind = t['kind']
+    edge = '#ffffff' if kind == 'dark' else '#000000'
     bg, sf, s2 = t['bg'], t['surface'], t['surface2']
-    text = t['text']
-    edge = '#ffffff' if dark else '#000000'
-    if min(contrast(text, x) for x in (bg, sf, s2)) < 4.5:
-        new = push(text, (bg, sf, s2), 4.5, edge)
-        if new != text: notes.append(f'text {text} -> {new}'); text = new
-    def fix(name, color, target, against):
-        new = push(color, against, target, edge)
+    surfaces = (bg, sf, s2)
+
+    def fix(name, color, against):
+        new = push(color, against, 4.5, edge)
         if new != color: notes.append(f'{name} {color} -> {new}')
         return new
-    muted = fix('muted', t['muted'], 4.5, (bg, sf))
-    accent = fix('accent', t['accent'], 4.5, (bg, sf))  # links and accent text on page and cards
+
+    muted = fix('muted', t['muted'], surfaces)
+    ok = fix('ok', t['ok'], surfaces)
+    danger = fix('danger', t['danger'], surfaces)
+    # keep the accent as it is and make its soft tint fainter first; only when even a faint tint is not enough, move the accent
+    accent, share = edge, None
+    for i in range(51):
+        c = mix(t['accent'], edge, i / 50)
+        if not all(contrast(c, x) >= 4.5 for x in surfaces):
+            continue
+        shares = [None] if soft else [x / 100 for x in range(round(SOFT[kind] * 100), MIN_SOFT - 1, -2)]
+        hit = next((x for x in shares if contrast(c, soft or mix(sf, c, x)) >= 4.5), 'none')
+        if hit != 'none':
+            accent, share = c, hit
+            break
+    soft = soft or mix(sf, accent, share if share is not None else MIN_SOFT / 100)
+    if accent != t['accent']: notes.append(f"accent {t['accent']} -> {accent}")
+    if share is not None and share != SOFT[kind]: notes.append(f"accent-soft tint {SOFT[kind]:.0%} -> {share:.0%}")
+    text = fix('text', t['text'], surfaces + (soft,))
+    return dict(text=text, muted=muted, ok=ok, danger=danger, accent=accent, accent_soft=soft), notes
+
+
+def build(t):
+    """Token values for one theme; colours are only nudged when needed for readability (noted in the file)."""
+    dark = t['kind'] == 'dark'
+    bg, sf = t['bg'], t['surface']
+    g, notes = gate(t)
+    text, accent = g['text'], g['accent']
     # text on accent buttons: the theme's own dark/light colour that reads best
     cands = [bg, sf, text, '#ffffff', '#000000'] if not dark else [bg, sf, '#000000']
     acc_text = max(cands, key=lambda c: contrast(c, accent))
     if contrast(acc_text, accent) < 4.5:
         notes.append(f'accent-text contrast only {contrast(acc_text, accent):.2f}')
-    ok = fix('ok', t['ok'], 4.5, (bg, sf))
-    danger = fix('danger', t['danger'], 4.5, (bg, sf))
-    on_danger = max([bg, sf, '#ffffff', '#000000'], key=lambda c: contrast(c, danger))
-    soft = mix(sf, accent, 0.16 if not dark else 0.22)
+    on_danger = max([bg, sf, '#ffffff', '#000000'], key=lambda c: contrast(c, g['danger']))
     line = t['line']
     shadow = 'none' if dark else f'0 1px 2px rgb({" ".join(map(str, rgb(text)))} / 7%), 0 4px 16px rgb({" ".join(map(str, rgb(text)))} / 6%)'
-    tokens = dict(bg=bg, surface=sf, surface2=s2, text=text, muted=muted, line=line, accent=accent,
-                  accent_text=acc_text, accent_soft=soft, ok=ok, danger=danger, shadow=shadow)
+    tokens = dict(bg=bg, surface=sf, surface2=t['surface2'], text=text, muted=g['muted'], line=line, accent=accent,
+                  accent_text=acc_text, accent_soft=g['accent_soft'], ok=g['ok'], danger=g['danger'], shadow=shadow)
     return tokens, on_danger, notes
 
 
@@ -171,13 +206,14 @@ for kind in ('light', 'dark'):
     c = CALDERONE[kind]
     tid = f'calderone-{kind}'
     on_danger = '#ffffff' if kind == 'light' else '#1c1714'
-    tok = dict(c)
-    tok['surface2'] = tok.pop('surface2')
-    header = (f'/* Calderone {"(light)" if kind == "light" else "(dark)"}: the original Il Calderone look. */')
+    g, notes = gate(dict(c, kind=kind), soft=c['accent_soft'])
+    tok = dict(c, **g)
+    header = f'/* Calderone {"(light)" if kind == "light" else "(dark)"}: the original Il Calderone look'
+    header += '; nudged for readability (WCAG AA): ' + '; '.join(notes) + '. */' if notes else '. */'
     (OUT / 'calderone').mkdir(parents=True, exist_ok=True)
     (OUT / 'calderone' / f'{kind}.css').write_text(css(tid, kind, tok, on_danger, header))
     reg.append((tid, 'Calderone', 'Calderone', kind))
-    report.append((tid, tok, []))
+    report.append((tid, dict(tok, on_danger=on_danger), notes))
 
 for t in THEMES:
     tid = f"{t['pack']}-{t['variant']}"
@@ -189,7 +225,7 @@ for t in THEMES:
     pack_name = {'catppuccin': 'Catppuccin', 'rose-pine': 'Rosé Pine', 'gruvbox': 'Gruvbox', 'nord': 'Nord',
                  'solarized': 'Solarized', 'everforest': 'Everforest'}[t['pack']]
     reg.append((tid, pack_name, t['name'], t['kind']))
-    report.append((tid, tok, notes))
+    report.append((tid, dict(tok, on_danger=on_danger), notes))
 
 # index.css + registry
 (OUT / 'index.css').write_text('/* Every theme. Generated list: keep it in sync with themes.ts. */\n' + ''.join(
@@ -204,6 +240,5 @@ ts += ['];', '', "export const DEFAULT_LIGHT = 'calderone-light';", "export cons
 (OUT / 'themes.ts').write_text('\n'.join(ts))
 
 for tid, tok, notes in report:
-    worst = min(contrast(tok['text'], tok['bg']), contrast(tok['muted'], tok['surface']), contrast(tok['accent'], tok['surface']),
-                contrast(tok['accent_text'], tok['accent']))
+    worst = min(contrast(tok[fg], tok[bg]) for fg, bgs in PAIRS for bg in bgs)
     print(f'{tid:24} worst {worst:4.2f}  ' + ('; '.join(notes) if notes else 'as published'))

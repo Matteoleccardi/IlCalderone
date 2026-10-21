@@ -1,16 +1,16 @@
-/* Polar Night (Nord palette, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): danger #bf616a -> #d9a0a6. */
+/* Polar Night (Nord palette, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #aeb5c3 -> #b6bcc9; ok #a3be8c -> #acc498; danger #bf616a -> #dfb0b4; accent #88c0d0 -> #8fc4d3; accent-soft tint 22% -> 8%. */
 [data-theme="nord-dark"] {
   --bg: #2e3440;
   --surface: #3b4252;
   --surface-2: #434c5e;
   --text: #e5e9f0;
-  --muted: #aeb5c3;
+  --muted: #b6bcc9;
   --line: #4c566a;
-  --accent: #88c0d0;
+  --accent: #8fc4d3;
   --accent-text: #000000;
-  --accent-soft: #4c5e6e;
-  --ok: #a3be8c;
-  --danger: #d9a0a6;
+  --accent-soft: #424c5c;
+  --ok: #acc498;
+  --danger: #dfb0b4;
   --shadow: none;
   --on-danger: #000000;
   --backdrop: rgb(0 0 0 / 60%);

@@ -1,4 +1,4 @@
-/* Everforest Light (Everforest palette (medium), MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #829181 -> #606b5f; accent #f57d26 -> #a25219; ok #8da101 -> #606d01; danger #f85552 -> #b83f3d. */
+/* Everforest Light (Everforest palette (medium), MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #829181 -> #606b5f; ok #8da101 -> #606d01; danger #f85552 -> #b83f3d; accent #f57d26 -> #a25219; accent-soft tint 16% -> 10%. */
 [data-theme="everforest-light"] {
   --bg: #efebd4;
   --surface: #fdf6e3;
@@ -8,7 +8,7 @@
   --line: #e6e2cc;
   --accent: #a25219;
   --accent-text: #ffffff;
-  --accent-soft: #eedcc3;
+  --accent-soft: #f4e6cf;
   --ok: #606d01;
   --danger: #b83f3d;
   --shadow: 0 1px 2px rgb(92 106 114 / 7%), 0 4px 16px rgb(92 106 114 / 6%);

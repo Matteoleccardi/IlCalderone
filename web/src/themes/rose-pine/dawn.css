@@ -1,16 +1,16 @@
-/* Dawn (Rosé Pine palette 4.0.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #797593 -> #6f6c87; accent #d7827e -> #9b5e5b; danger #b4637a -> #a2596e. */
+/* Dawn (Rosé Pine palette 4.0.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #797593 -> #6a6781; danger #b4637a -> #975366; accent #d7827e -> #925856; accent-soft tint 16% -> 12%. */
 [data-theme="rose-pine-dawn"] {
   --bg: #faf4ed;
   --surface: #fffaf3;
   --surface-2: #f2e9e1;
   --text: #575279;
-  --muted: #6f6c87;
+  --muted: #6a6781;
   --line: #dfdad9;
-  --accent: #9b5e5b;
+  --accent: #925856;
   --accent-text: #ffffff;
-  --accent-soft: #efe1db;
+  --accent-soft: #f2e7e0;
   --ok: #286983;
-  --danger: #a2596e;
+  --danger: #975366;
   --shadow: 0 1px 2px rgb(87 82 121 / 7%), 0 4px 16px rgb(87 82 121 / 6%);
   --on-danger: #ffffff;
   --backdrop: rgb(0 0 0 / 45%);

@@ -1,15 +1,15 @@
-/* Calderone (light): the original Il Calderone look. */
+/* Calderone (light): the original Il Calderone look; nudged for readability (WCAG AA): muted #7a6a5e -> #78685c; ok #3f7d4e -> #3b7649; accent #b5532f -> #a74c2b. */
 [data-theme="calderone-light"] {
   --bg: #faf6f0;
   --surface: #ffffff;
   --surface-2: #f3ece2;
   --text: #2b211b;
-  --muted: #7a6a5e;
+  --muted: #78685c;
   --line: #e6dccf;
-  --accent: #b5532f;
+  --accent: #a74c2b;
   --accent-text: #ffffff;
   --accent-soft: #f6e3d8;
-  --ok: #3f7d4e;
+  --ok: #3b7649;
   --danger: #b3261e;
   --shadow: 0 1px 2px rgb(60 40 20 / 6%), 0 4px 16px rgb(60 40 20 / 6%);
   --on-danger: #ffffff;

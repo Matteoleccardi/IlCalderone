@@ -7,12 +7,12 @@
   --surface: #ffffff;
   --surface-2: #f3ece2;
   --text: #2b211b;
-  --muted: #7a6a5e;
+  --muted: #78685c;
   --line: #e6dccf;
-  --accent: #b5532f;
+  --accent: #a74c2b;
   --accent-text: #ffffff;
   --accent-soft: #f6e3d8;
-  --ok: #3f7d4e;
+  --ok: #3b7649;
   --danger: #b3261e;
   --on-danger: #ffffff;
   --backdrop: rgb(0 0 0 / 45%);
@@ -39,7 +39,7 @@ img { max-width: 100%; }
 code { background: var(--surface-2); padding: 0 .3em; border-radius: 4px; font-size: .9em; }
 .muted { color: var(--muted); }
 /* the JSON file an item lives in (shared/file-name.ts) */
-.file-name { color: var(--muted); font-size: .75rem; font-family: ui-monospace, monospace; opacity: .8;
+.file-name { color: var(--muted); font-size: .75rem; font-family: ui-monospace, monospace;
   margin: .75rem 0 0; overflow-wrap: anywhere; user-select: all; }
 /* 8-bit dish icons: keep the pixels crisp */
 .recipe-icon { image-rendering: pixelated; width: 48px; height: 48px; flex: none; }
@@ -193,7 +193,7 @@ fieldset legend { font-weight: 500; padding: 0 .25rem; }
   border-radius: var(--radius); opacity: var(--dish-fade, 0); }
 .dish-stage .hero-photo { opacity: calc(1 - var(--dish-fade, 0)); }
 .dish-play { position: absolute; right: .5rem; bottom: .5rem; min-height: 0; padding: .2rem .55rem; font-size: .8rem;
-  border-radius: 999px; background: var(--surface); color: var(--accent); border: 1px solid var(--line); opacity: .9; }
+  border-radius: 999px; background: var(--surface); color: var(--accent); border: 1px solid var(--line); }
 .dish-play:disabled { opacity: 0; }
 .recipe-body { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); margin-bottom: 1.5rem; }
 @media (min-width: 860px) { .recipe-body { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; } }
@@ -261,7 +261,7 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 .plan-row app-recipe-icon { grid-column: 2; display: flex; }
 .plan-row .dish { grid-column: 3; }
 .plan-row .badge, .plan-row .muted.small { grid-column: 2 / -1; grid-row: 3; justify-self: start; }
-.plan-row.done { opacity: .7; }
+.plan-row.done .dish { color: var(--muted); } /* done = muted text (not an opacity: that would lower the contrast) */
 /* the table keeps its table semantics; the wrapper scrolls sideways (and is focusable for keyboard users) */
 .table-wrap { overflow-x: auto; }
 .table { width: 100%; border-collapse: collapse; }
@@ -434,7 +434,7 @@ progress.batch { width: 100%; }
 .timer-time { flex-direction: column; gap: 0; line-height: 1.1; }
 .timer-time .big { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .timer-time .small { font-size: .68rem; color: var(--muted); font-weight: 400; }
-.timer-row.paused .big { opacity: .55; }
+.timer-row.paused .big { color: var(--muted); }
 .timer-row.done .timer-time { background: var(--accent); color: var(--accent-text); border-color: var(--accent); animation: timer-pulse 1s ease-in-out infinite; }
 .timer-row.done .timer-time .small { color: inherit; }
 .timer-note { margin: 0; font-size: .75rem; color: var(--muted); line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }

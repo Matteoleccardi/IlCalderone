@@ -1,16 +1,16 @@
-/* Everforest Dark (Everforest palette (medium), MIT licence). Mapped onto Il Calderone's colour tokens. */
+/* Everforest Dark (Everforest palette (medium), MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #9da9a0 -> #9faba2; danger #e67e80 -> #ea9092; accent-soft tint 22% -> 10%. */
 [data-theme="everforest-dark"] {
   --bg: #232a2e;
   --surface: #2d353b;
   --surface-2: #343f44;
   --text: #d3c6aa;
-  --muted: #9da9a0;
+  --muted: #9faba2;
   --line: #475258;
   --accent: #e69875;
   --accent-text: #000000;
-  --accent-soft: #564b48;
+  --accent-soft: #403f41;
   --ok: #a7c080;
-  --danger: #e67e80;
+  --danger: #ea9092;
   --shadow: none;
   --on-danger: #000000;
   --backdrop: rgb(0 0 0 / 60%);

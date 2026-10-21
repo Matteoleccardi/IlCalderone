@@ -195,3 +195,19 @@ New translation key (it/en/de/fr): `common.unsaved_confirm`. New files: `web/src
 **Side observation (not caused by this work, not fixed):** `ng serve` logs `NG01354: ngModel on a form control inside a child component cannot register with the NgForm in the parent component` on pages with form pickers; it appeared in the log before commit 1.
 
 **Commit checks:** `ng build` OK, `npm test` OK (i18n 572 keys, 28 Vitest tests), browser checks for commits 1-4 re-run and passing.
+
+---
+
+## Commit 6: contrast gate
+
+### A24: Contrast gate and opacity on text
+- **Problem:** the generator only checked muted/accent/ok/danger against the page and the cards. Text on buttons and chips (`--surface-2`) and the accent on its soft tint (`--accent-soft`) fell below 4.5:1 in most themes; **the Calderone themes were not checked at all** (they were written as-is). Three text rules also used `opacity`, which lowers contrast further.
+- **Measured before the fix:** 63 failing text/background pairs across the 17 themes (for example Calderone light: muted on surface-2 4.42, accent on surface-2 4.22, accent on accent-soft 3.98, ok on surface-2 4.21).
+- **Fix, `tools/make_themes.py`:** a shared `gate()` (used by every generated theme and by Calderone) nudges text, muted, ok, danger and accent until each reaches 4.5:1 on the backgrounds listed in `PAIRS`: text on bg/surface/surface-2/accent-soft; muted, ok, danger on bg/surface/surface-2; accent on bg/surface/surface-2/accent-soft; accent-text on accent; on-danger on danger. For the generated soft tint it first makes the tint fainter (down to 6 %), and moves the accent only if that is not enough, so accents keep their character (e.g. Nord dark accent `#88c0d0` → `#8fc4d3`, tint 22 % → 8 %). Every change is recorded in each CSS file's header and in the report (`python tools/make_themes.py` prints `worst` per theme: all ≥ 4.50).
+- **Visible change to the default theme (Calderone light):** muted `#7a6a5e` → `#78685c`, ok `#3f7d4e` → `#3b7649`, accent `#b5532f` → `#a74c2b` (a slightly deeper terracotta; the soft tint is unchanged). Other light themes move more where their accent was very light (e.g. Catppuccin Latte accent `#fe640b` → `#a84207`, Everforest light `#f57d26` → `#a25219`, Rosé Pine Dawn `#d7827e` → `#925856`), so **please look at the theme picker on your phone**. Dark themes changed little. The full list is in the headers of `web/src/themes/*/*.css`.
+- **Fix, `styles.css`:** the `:where(:root)` fallback palette is synced to the new Calderone light values (still zero specificity); `.file-name` loses `opacity: .8`; `.plan-row.done` uses muted text instead of `opacity: .7`; the paused timer time uses `--muted` instead of `opacity: .55`; `.dish-play` loses `opacity: .9`.
+- **Fix, tests:** new `tests/test_themes.py` parses every generated theme file and asserts all the pairs ≥ 4.5:1, plus that every theme listed in `themes.ts` has a file. `web/src/themes/README.md` documents the rule.
+- **Test:** `pytest tests/test_themes.py`: 18 passed. Sanity: against the old theme files 14 tests fail, so the test does catch the problem. In the browser (Calderone light): `.file-name` opacity 1 and 4.96:1, badges 4.62:1, accent chips 4.82:1, the paused timer 4.55:1; switching `data-theme` to `nord-dark` still applies.
+- **Files:** `tools/make_themes.py`, `web/src/themes/**` (13 regenerated files; the generator output is not edited by hand), `web/src/styles.css`, `web/src/themes/README.md`, `tests/test_themes.py`.
+
+**Commit checks:** `ng build` OK, `npm test` OK (28 Vitest tests), `pytest tests/test_themes.py` OK.

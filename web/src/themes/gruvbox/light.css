@@ -1,15 +1,15 @@
-/* Gruvbox Light (Gruvbox (morhetz), MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #7c6f64 -> #776b60; ok #79740e -> #746f0d. */
+/* Gruvbox Light (Gruvbox (morhetz), MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #7c6f64 -> #6b5f56; ok #79740e -> #66610c; accent #af3a03 -> #ac3903; accent-soft tint 16% -> 14%. */
 [data-theme="gruvbox-light"] {
   --bg: #fbf1c7;
   --surface: #f9f5d7;
   --surface-2: #ebdbb2;
   --text: #3c3836;
-  --muted: #776b60;
+  --muted: #6b5f56;
   --line: #d5c4a1;
-  --accent: #af3a03;
+  --accent: #ac3903;
   --accent-text: #ffffff;
-  --accent-soft: #edd7b5;
-  --ok: #746f0d;
+  --accent-soft: #eedbb9;
+  --ok: #66610c;
   --danger: #9d0006;
   --shadow: 0 1px 2px rgb(60 56 54 / 7%), 0 4px 16px rgb(60 56 54 / 6%);
   --on-danger: #ffffff;

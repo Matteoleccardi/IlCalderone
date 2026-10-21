@@ -1,16 +1,16 @@
-/* Moon (Rosé Pine palette 4.0.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #908caa -> #928eac. */
+/* Moon (Rosé Pine palette 4.0.1, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): muted #908caa -> #a4a1b9; danger #eb6f92 -> #ed809f; accent-soft tint 22% -> 18%. */
 [data-theme="rose-pine-moon"] {
   --bg: #232136;
   --surface: #2a273f;
   --surface-2: #393552;
   --text: #e0def4;
-  --muted: #928eac;
+  --muted: #a4a1b9;
   --line: #44415a;
   --accent: #ea9a97;
   --accent-text: #000000;
-  --accent-soft: #544052;
+  --accent-soft: #4d3c4f;
   --ok: #9ccfd8;
-  --danger: #eb6f92;
+  --danger: #ed809f;
   --shadow: none;
   --on-danger: #000000;
   --backdrop: rgb(0 0 0 / 60%);

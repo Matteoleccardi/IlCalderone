@@ -1,4 +1,4 @@
-/* Snow Storm (Nord palette, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): accent #5e81ac -> #4d6a8d; ok #a3be8c -> #5b6a4e; danger #bf616a -> #a05159. */
+/* Snow Storm (Nord palette, MIT licence). Mapped onto Il Calderone's colour tokens; nudged for readability (WCAG AA): ok #a3be8c -> #556349; danger #bf616a -> #954c53; accent #5e81ac -> #476283; accent-soft tint 16% -> 14%. */
 [data-theme="nord-light"] {
   --bg: #e5e9f0;
   --surface: #eceff4;
@@ -6,11 +6,11 @@
   --text: #2e3440;
   --muted: #4c566a;
   --line: #d8dee9;
-  --accent: #4d6a8d;
+  --accent: #476283;
   --accent-text: #ffffff;
-  --accent-soft: #d3dae4;
-  --ok: #5b6a4e;
-  --danger: #a05159;
+  --accent-soft: #d5dbe4;
+  --ok: #556349;
+  --danger: #954c53;
   --shadow: 0 1px 2px rgb(46 52 64 / 7%), 0 4px 16px rgb(46 52 64 / 6%);
   --on-danger: #ffffff;
   --backdrop: rgb(0 0 0 / 45%);
