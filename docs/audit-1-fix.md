@@ -147,3 +147,51 @@ New translation keys (it/en/de/fr): `common.remove_named`, `common.move_up_named
 - **Test:** computed value is `contain` on the open add-to-menu dialog. Real scroll chaining on a phone was not tested.
 
 **Commit checks:** `ng build` OK, `npm test` OK, scripts for commits 1-3 unchanged.
+
+---
+
+## Commit 5: forms and data loss
+
+New translation key (it/en/de/fr): `common.unsaved_confirm`. New files: `web/src/app/shared/suggest-input.ts`, specs `core/guards.spec.ts` and `shared/suggest-input.spec.ts` (7 new Vitest tests, 28 in total).
+
+### A17: Admin password prompt showed the password
+- **Problem:** `prompt()` is a plain text box, so a password typed for another account was visible.
+- **Fix:** a bottom-sheet `<dialog>` (same pattern as add-to-menu) with a `type="password"`, `autocomplete="new-password"`, `minlength="8"` field and Save/Cancel; backdrop tap closes it. The "initial password" field of the create-user form is now masked too.
+- **Files:** `admin.ts`.
+- **Test:** dialog opens, `window.prompt` is never called, the field is a password field, and submitting sends `{"password":"test-secret-1"}` to `POST /api/users/<id>/password` (that request was **blocked** by the harness, so no real account changed). Cancel closes it. The success path (server accepts, toast) was not exercised, so please try it once locally.
+
+### A18: Unsaved edits lost on navigation
+- **Problem:** with the bottom nav one tap away, leaving a half-written recipe or an edited menu discarded it silently.
+- **Fix:** `unsavedGuard` (`CanDeactivateFn`) in `core/guards.ts` asks "You have unsaved changes. Leave without saving?" (native `confirm()` for now; replacing it is B7). Wired on `ricette/nuova`, `ricette/:id/modifica` and `menu/:id`. `RecipeForm` marks itself edited on any `input`/`change` event and on taps of its editing buttons and suggestion options, and clears the mark after a successful save; `MenuEdit` reuses its existing `dirty` signal (cleared after delete). Both also warn on tab close/reload (`beforeunload`).
+- **Files:** `core/guards.ts`, `recipes.feature.ts`, `menus.feature.ts`, `recipe-form.ts/.html`, `menu-edit.ts`.
+- **Test:** pristine form leaves silently; after typing, the prompt appears in German, answering "stay" keeps the page and the text; stubbed "leave" navigates away; picking only a suggestion counts as an edit; menu editor: clean leaves silently, removing a dish prompts. Vitest covers `mayLeave`.
+- **Limits:** the dirty mark is event-based, not a value diff, so typing and then deleting the text still counts as edited, and the "write as text" switch also counts. The `beforeunload` prompt and the "saved, then leave without a prompt" path were not driven in the browser (the save request is blocked by the harness); please check both locally. The harness's CDP "accept" reply didn't reach `confirm()`, so "leave" was tested with `confirm` stubbed to true.
+
+### A19: Login and username fields
+- **Fix:** `autofocus` removed from the login username; `autocapitalize="none" autocorrect="off" spellcheck="false"` on the username inputs of login, setup and admin create-user.
+- **Files:** `login.ts`, `setup.ts`, `admin.ts`.
+- **Test:** attributes present and the field is not focused on load.
+
+### A20: Required markers and inline password mismatch
+- **Fix:** a `*` (`aria-hidden`, danger colour) on title and servings in the recipe form; the setup page shows "The two passwords are different" under the repeat field (`role="alert"`, `aria-invalid`, `aria-describedby`) as soon as both are filled and differ; the toast on submit stays. New CSS `.req` and `.field-error`.
+- **Files:** `recipe-form.html`, `setup.ts`, `styles.css`.
+- **Test:** markers present and fields `required`; on a faked first-run session the message appears, is wired to the field, and disappears when the passwords match. (The generic inline-error pattern for all forms stays in B8.)
+
+### A21: `<datalist>` replaced
+- **Fix:** new `app-suggest-input` (text field + listbox with the same markup, styles and keyboard model as the recipe picker): prefix matches first, then substring matches, accents and case ignored, 50 at most, nothing shown when the only match is exactly what is typed; ArrowUp/Down/Enter/Escape; Enter picks the suggestion instead of submitting the form. The unit field's list aligns to its right edge (`.picker-list.end`) so it never widens the page. `RecipePicker` is unchanged except that `fold()` is now exported and shared.
+- **Files:** `shared/suggest-input.ts`, `recipe-form.html/.ts`, `recipe-picker.ts`, `styles.css`.
+- **Test:** no `<datalist>` left; typing "agl"-style prefixes lists matches with `aria-expanded`; ArrowDown+Enter fills the first suggestion; the unit list stays inside the 390 px screen (`right` 353) with no page overflow. Vitest covers the matching function.
+
+### A22: Focus after adding or removing rows
+- **Fix:** after "add ingredient/step" the new row's first field is focused; after removing, focus goes to the neighbouring row's remove button, or to the add button when none are left (`afterNextRender`, via `data-row`/`data-step` hooks and `#add-row`/`#add-step`).
+- **Files:** `recipe-form.ts/.html`.
+- **Test:** all four cases asserted via `document.activeElement`.
+
+### A29: Pantry field cleared even when adding failed
+- **Fix:** `toPantry()` returns whether it worked; the form's `addPantry()` empties the field only then.
+- **Files:** `shopping-list.ts`.
+- **Test:** the request was blocked (as a failure): the typed "Basilikum" stayed in the field and an error toast appeared. The success path (field emptied) was not exercised.
+
+**Side observation (not caused by this work, not fixed):** `ng serve` logs `NG01354: ngModel on a form control inside a child component cannot register with the NgForm in the parent component` on pages with form pickers; it appeared in the log before commit 1.
+
+**Commit checks:** `ng build` OK, `npm test` OK (i18n 572 keys, 28 Vitest tests), browser checks for commits 1-4 re-run and passing.

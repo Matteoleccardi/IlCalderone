@@ -15,6 +15,7 @@ import { I18n, TPipe } from '../../core/i18n';
 import { MEALS, Meal, Menu, MenuItem, RecipeSummary, Visibility } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
+import { HasUnsaved } from '../../core/guards';
 import { FileName } from '../../shared/file-name';
 import { RecipeIcon } from '../../shared/recipe-icon';
 import { Pick, RecipePicker } from '../../shared/recipe-picker';
@@ -28,6 +29,7 @@ import { ScopePicker } from '../../shared/scope-picker';
   selector: 'app-menu-edit',
   imports: [FormsModule, RouterLink, FileName, RecipeIcon, RecipePicker, ScopePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { '(window:beforeunload)': 'warnUnload($event)' },
   template: `
     @if (menu(); as m) {
       <p>
@@ -225,7 +227,7 @@ import { ScopePicker } from '../../shared/scope-picker';
     }
   `,
 })
-export class MenuEdit {
+export class MenuEdit implements HasUnsaved {
   readonly id = input.required<string>();
   protected i18n = inject(I18n);
   protected households = inject(HouseholdsService);
@@ -319,6 +321,17 @@ export class MenuEdit {
     return it.recipe ? (it.title ?? this.i18n.t('common.unavailable_recipe')) : it.text;
   }
 
+  hasUnsaved(): boolean {
+    return this.dirty();
+  }
+
+  /** Closing the tab or reloading with unsaved edits asks first. */
+  protected warnUnload(e: BeforeUnloadEvent): void {
+    if (!this.dirty()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
   protected touch(): void {
     this.dirty.set(true);
   }
@@ -405,6 +418,7 @@ export class MenuEdit {
     if (!confirm(this.i18n.t('menus.confirm_delete', { name: this.name }))) return;
     try {
       await this.api.delete(`menus/${this.id()}`);
+      this.dirty.set(false); // deleted: nothing left to save
       this.router.navigateByUrl('/menu');
     } catch (e) {
       this.notify.error(e);

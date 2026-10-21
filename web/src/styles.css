@@ -348,6 +348,7 @@ ul.diff li.removed::before { content: "− "; }
 .picker-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 2px); margin: 0; padding: .25rem 0; list-style: none;
   max-height: 15rem; overflow-y: auto; overscroll-behavior: contain; background: var(--surface); border: 1px solid var(--line);
   border-radius: 8px; box-shadow: var(--shadow); min-width: 14rem; }
+.picker-list.end { left: auto; right: 0; } /* fields at the right edge: the list grows leftwards */
 .picker-list li { padding: .6rem .75rem; cursor: pointer; line-height: 1.25; }
 .picker-list li.active, .picker-list li:hover { background: var(--accent-soft); }
 .picker-list li.as-text { color: var(--muted); font-style: italic; border-top: 1px solid var(--line); }
@@ -502,6 +503,9 @@ button.theme-card.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--
 fieldset.facet { border: 0; padding: 0; margin: 0 0 .9rem; min-width: 0; }
 fieldset.facet legend { font-weight: 700; padding: 0; margin-bottom: .35rem; display: flex; gap: .4rem; align-items: baseline; }
 fieldset.facet .req { color: var(--danger); }
+/* required-field marker and a message next to its field */
+.req { color: var(--danger); }
+.field-error { color: var(--danger); margin: 0 0 .75rem; }
 .facet-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
 .facet-chips button.chip-btn { min-height: 2.25rem; }
 .facet-chips button.chip-btn:disabled { opacity: .4; }

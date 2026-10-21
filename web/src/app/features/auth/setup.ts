@@ -18,7 +18,7 @@ import { SessionService } from '../../core/session';
       <form (ngSubmit)="submit()">
         <label
           >{{ 'login.username' | t }}
-          <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="username"
+          <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
         /></label>
         <label
           >{{ 'account.display' | t }}
@@ -43,7 +43,12 @@ import { SessionService } from '../../core/session';
             [(ngModel)]="password2"
             required
             autocomplete="new-password"
+            [attr.aria-invalid]="mismatch() ? 'true' : null"
+            [attr.aria-describedby]="mismatch() ? 'p2-error' : null"
         /></label>
+        @if (mismatch()) {
+          <p id="p2-error" class="field-error small" role="alert">{{ 'setup.mismatch' | t }}</p>
+        }
         <button type="submit" class="primary" [disabled]="busy()">{{ 'setup.submit' | t }}</button>
       </form>
     </section>
@@ -63,6 +68,11 @@ export class Setup implements OnInit {
 
   async ngOnInit(): Promise<void> {
     if (!(await this.session.ensure()).needs_setup) this.router.navigateByUrl('/');
+  }
+
+  /** Both passwords are typed and differ (shown next to the field, not only as a toast on submit). */
+  protected mismatch(): boolean {
+    return !!this.password2 && this.password !== this.password2;
   }
 
   async submit(): Promise<void> {

@@ -16,7 +16,7 @@ import { SessionService } from '../../core/session';
       <form (ngSubmit)="submit()">
         <label
           >{{ 'login.username' | t }}
-          <input name="u" [(ngModel)]="username" autocomplete="username" required autofocus
+          <input name="u" [(ngModel)]="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required
         /></label>
         <label
           >{{ 'login.password' | t }}

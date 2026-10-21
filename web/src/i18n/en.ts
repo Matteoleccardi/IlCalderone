@@ -37,6 +37,7 @@ export const en: Dict = {
   'common.move_up_named': "Move {name} up",
   'common.move_down_named': "Move {name} down",
   'common.delete_named': "Delete {name}",
+  'common.unsaved_confirm': "You have unsaved changes. Leave without saving?",
   'common.save': 'Save',
   'common.saving': 'Saving…',
   'common.unavailable_recipe': 'Recipe not available',

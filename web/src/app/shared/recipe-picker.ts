@@ -14,7 +14,7 @@ import { RecipeSummary } from '../core/models';
 export type Pick = { recipe: RecipeSummary; text?: undefined } | { recipe?: undefined; text: string };
 
 /** Lower case without accents, for matching ("Pàsta" → "pasta"). */
-const fold = (s: string) =>
+export const fold = (s: string) =>
   s
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')

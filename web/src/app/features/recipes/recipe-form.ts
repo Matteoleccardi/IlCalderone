@@ -1,7 +1,10 @@
 import {
   Component,
+  ElementRef,
+  Injector,
   OnInit,
   WritableSignal,
+  afterNextRender,
   inject,
   input,
   signal,
@@ -23,8 +26,10 @@ import {
   stepsToText,
 } from '../../core/text-formats';
 import { Facets, FacetsService, blankFacets, facetValues, missingFacets, suggestDiet } from '../../core/facets';
+import { HasUnsaved } from '../../core/guards';
 import { FacetPicker } from '../../shared/facet-picker';
 import { ScopePicker } from '../../shared/scope-picker';
+import { SuggestInput } from '../../shared/suggest-input';
 
 /** An ingredient row while editing: the quantity stays text ("1/2", "q.b.") until saving. */
 interface Row {
@@ -38,11 +43,12 @@ interface Row {
 /** Create (/ricette/nuova) or edit (/ricette/:id/modifica) a recipe. */
 @Component({
   selector: 'app-recipe-form',
-  imports: [FacetPicker, FormsModule, RouterLink, ScopePicker, TPipe],
+  imports: [FacetPicker, FormsModule, RouterLink, ScopePicker, SuggestInput, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
+  host: { '(window:beforeunload)': 'warnUnload($event)' },
   templateUrl: './recipe-form.html',
 })
-export class RecipeForm implements OnInit {
+export class RecipeForm implements OnInit, HasUnsaved {
   readonly id = input<string>();
   protected loaded = signal(false);
   protected busy = signal(false);
@@ -93,6 +99,32 @@ export class RecipeForm implements OnInit {
   private router = inject(Router);
   private notify = inject(Notify);
   private i18n = inject(I18n);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
+
+  /** Something was typed or tapped since the page opened (and it was not saved yet). */
+  protected edited = false;
+
+  hasUnsaved(): boolean {
+    return this.edited;
+  }
+
+  /** Closing the tab or reloading with unsaved edits asks first. */
+  protected warnUnload(e: BeforeUnloadEvent): void {
+    if (!this.edited) return;
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
+  /** Taps on the editing buttons (add, remove, move, chips, suggestions) count as edits too; typing is caught by (input). */
+  protected clicked(e: Event): void {
+    if ((e.target as HTMLElement).closest('button[type="button"], [role="option"]')) this.edited = true;
+  }
+
+  /** Puts the focus on an element once the next render has created it. */
+  private focusAfterRender(selector: string): void {
+    afterNextRender(() => this.host.nativeElement.querySelector<HTMLElement>(selector)?.focus(), { injector: this.injector });
+  }
 
   async ngOnInit(): Promise<void> {
     this.facetsSvc.ensure().then(
@@ -153,10 +185,13 @@ export class RecipeForm implements OnInit {
 
   addRow(): void {
     this.rows.update((r) => [...r, this.emptyRow()]);
+    this.focusAfterRender(`[data-row="${this.rows().length - 1}"] input`);
   }
 
   removeRow(i: number): void {
     this.rows.update((r) => r.filter((_, k) => k !== i));
+    const n = this.rows().length;
+    this.focusAfterRender(n ? `[data-row="${Math.min(i, n - 1)}"] .tools button:last-child` : '#add-row');
   }
 
   move<T>(list: WritableSignal<T[]>, i: number, delta: number): void {
@@ -171,10 +206,13 @@ export class RecipeForm implements OnInit {
 
   addStep(): void {
     this.steps.update((s) => [...s, { title: '', text: '' }]);
+    this.focusAfterRender(`[data-step="${this.steps().length - 1}"] input`);
   }
 
   removeStep(i: number): void {
     this.steps.update((s) => s.filter((_, k) => k !== i));
+    const n = this.steps().length;
+    this.focusAfterRender(n ? `[data-step="${Math.min(i, n - 1)}"] .tools button:last-child` : '#add-step');
   }
 
   /** Switch between the row editor and the plain-text editor, converting the content. */
@@ -332,6 +370,7 @@ export class RecipeForm implements OnInit {
         r = await this.api.delete<Recipe>(`recipes/${r.id}/model`);
       }
       this.notify.ok(id ? 'form.saved' : 'form.created');
+      this.edited = false; // saved: leaving is fine
       this.router.navigate(['/ricette', r.id]);
     } catch (e) {
       this.notify.error(e);

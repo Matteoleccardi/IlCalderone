@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
@@ -53,12 +53,12 @@ import { SessionService } from '../../core/session';
       <form class="row" (ngSubmit)="create()">
         <label
           >{{ 'login.username' | t }}
-          <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="off"
+          <input name="u" [(ngModel)]="username" required minlength="3" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
         /></label>
         <label>{{ 'common.name' | t }} <input name="d" [(ngModel)]="display" /></label>
         <label
           >{{ 'admin.initial_password' | t }}
-          <input name="p" [(ngModel)]="password" required minlength="8" autocomplete="new-password"
+          <input name="p" type="password" [(ngModel)]="password" required minlength="8" autocomplete="new-password"
         /></label>
         <label class="check"
           ><input type="checkbox" name="a" [(ngModel)]="admin" />
@@ -80,6 +80,27 @@ import { SessionService } from '../../core/session';
         }
       </ul>
     </section>
+    <!-- new password for another account: a masked field instead of the browser's prompt() -->
+    <dialog #pwDlg class="sheet" aria-labelledby="pw-title" (close)="newPassword = ''" (click)="pwBackdrop($event)">
+      <form (ngSubmit)="submitPassword()">
+        <h2 id="pw-title">{{ 'admin.new_password' | t }}</h2>
+        <label
+          >{{ 'admin.prompt_password' | t: { name: pwUser()?.username ?? '' } }}
+          <input
+            name="pw"
+            type="password"
+            [(ngModel)]="newPassword"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          />
+        </label>
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="pwBusy()">{{ 'common.save' | t }}</button>
+          <button type="button" (click)="pwDlg.close()">{{ 'common.cancel' | t }}</button>
+        </div>
+      </form>
+    </dialog>
   `,
 })
 export class Admin implements OnInit {
@@ -93,6 +114,10 @@ export class Admin implements OnInit {
   protected display = '';
   protected password = '';
   protected admin = false;
+  protected pwUser = signal<User | null>(null);
+  protected pwBusy = signal(false);
+  protected newPassword = '';
+  private pwDlg = viewChild.required<ElementRef<HTMLDialogElement>>('pwDlg');
 
   async ngOnInit(): Promise<void> {
     this.reload();
@@ -120,15 +145,30 @@ export class Admin implements OnInit {
     }
   }
 
-  async resetPassword(u: User): Promise<void> {
-    const pw = prompt(this.i18n.t('admin.prompt_password', { name: u.username }));
-    if (!pw) return;
+  resetPassword(u: User): void {
+    this.newPassword = '';
+    this.pwUser.set(u);
+    this.pwDlg().nativeElement.showModal();
+  }
+
+  async submitPassword(): Promise<void> {
+    const u = this.pwUser();
+    if (!u || this.newPassword.length < 8) return;
+    this.pwBusy.set(true);
     try {
-      await this.api.post(`users/${u.id}/password`, { password: pw });
+      await this.api.post(`users/${u.id}/password`, { password: this.newPassword });
       this.notify.ok('admin.password_updated');
+      this.pwDlg().nativeElement.close();
     } catch (e) {
       this.notify.error(e);
+    } finally {
+      this.pwBusy.set(false);
     }
+  }
+
+  /** Tapping outside the sheet closes it. */
+  protected pwBackdrop(e: MouseEvent): void {
+    if (e.target === this.pwDlg().nativeElement) this.pwDlg().nativeElement.close();
   }
 
   async remove(u: User): Promise<void> {

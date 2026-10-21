@@ -37,6 +37,7 @@ export const fr: Dict = {
   'common.move_up_named': "Monter {name}",
   'common.move_down_named': "Descendre {name}",
   'common.delete_named': "Supprimer {name}",
+  'common.unsaved_confirm': "Vous avez des modifications non enregistrées. Quitter sans enregistrer ?",
   'common.save': 'Enregistrer',
   'common.saving': 'Enregistrement…',
   'common.unavailable_recipe': 'Recette non disponible',

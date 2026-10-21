@@ -1,10 +1,10 @@
 @if (loaded()) {
   <h1>{{ (id() ? 'form.edit_title' : 'recipes.new') | t }}</h1>
-  <form class="recipe-form" (ngSubmit)="save()">
+  <form class="recipe-form" (ngSubmit)="save()" (input)="edited = true" (change)="edited = true" (click)="clicked($event)">
     <section class="card">
-      <label>{{ 'form.title' | t }} <input name="title" [(ngModel)]="title" required maxlength="200" /></label>
+      <label>{{ 'form.title' | t }} <span class="req" aria-hidden="true">*</span> <input name="title" [(ngModel)]="title" required maxlength="200" /></label>
       <div class="row">
-        <label>{{ 'form.people' | t }} <input name="servings" type="number" min="1" max="100" [(ngModel)]="servings" required /></label>
+        <label>{{ 'form.people' | t }} <span class="req" aria-hidden="true">*</span> <input name="servings" type="number" min="1" max="100" [(ngModel)]="servings" required /></label>
         <label>{{ 'form.time' | t }} <input name="time" type="number" min="1" [(ngModel)]="time" /></label>
       </div>
       <label>{{ 'form.tags' | t }} <span class="muted small">{{ 'form.tags_hint' | t }}</span>
@@ -49,14 +49,12 @@
       } @else {
         <h3>{{ 'recipe.ingredients' | t }}</h3>
         <p class="muted small">{{ 'form.qty_hint' | t: { n: servings } }}</p>
-        <datalist id="ingredients">@for (i of vocab().ingredients; track i) { <option [value]="i"></option> }</datalist>
-        <datalist id="units">@for (u of vocab().units; track u) { <option [value]="u"></option> }</datalist>
         <div class="ing-rows">
           @for (row of rows(); track $index; let i = $index) {
-            <div class="ing-row">
-              <input [name]="'n' + i" [(ngModel)]="row.name" [placeholder]="'form.ingredient' | t" list="ingredients" [attr.aria-label]="'form.ingredient' | t" />
+            <div class="ing-row" [attr.data-row]="i">
+              <app-suggest-input [(value)]="row.name" [options]="vocab().ingredients" [placeholder]="'form.ingredient' | t" />
               <input [name]="'q' + i" [(ngModel)]="row.qty" [placeholder]="'form.qty' | t" class="qty" [attr.aria-label]="'form.qty_label' | t" />
-              <input [name]="'u' + i" [(ngModel)]="row.unit" [placeholder]="'form.unit' | t" class="unit" list="units" [attr.aria-label]="'form.unit' | t" />
+              <app-suggest-input class="unit" align="end" [(value)]="row.unit" [options]="vocab().units" [placeholder]="'form.unit' | t" />
               <input [name]="'x' + i" [(ngModel)]="row.note" [placeholder]="'form.note' | t" class="note" [attr.aria-label]="'form.note' | t" />
               <label class="check" [title]="'recipe.optional' | t"><input type="checkbox" [name]="'o' + i" [(ngModel)]="row.optional" /> {{ 'form.optional_short' | t }}</label>
               <span class="tools">
@@ -67,11 +65,11 @@
             </div>
           }
         </div>
-        <button type="button" (click)="addRow()">+ {{ 'form.ingredient' | t }}</button>
+        <button type="button" id="add-row" (click)="addRow()">+ {{ 'form.ingredient' | t }}</button>
 
         <h3>{{ 'recipe.steps' | t }}</h3>
         @for (s of steps(); track $index; let i = $index) {
-          <div class="step-edit">
+          <div class="step-edit" [attr.data-step]="i">
             <div class="row">
               <strong class="step-n">{{ i + 1 }}</strong>
               <input [name]="'st' + i" [(ngModel)]="s.title" [placeholder]="'form.step_title' | t" [attr.aria-label]="'form.step_title' | t" />
@@ -84,7 +82,7 @@
             <textarea [name]="'sx' + i" [(ngModel)]="s.text" rows="3" [attr.aria-label]="'form.step_text' | t"></textarea>
           </div>
         }
-        <button type="button" (click)="addStep()">+ {{ 'form.step' | t }}</button>
+        <button type="button" id="add-step" (click)="addStep()">+ {{ 'form.step' | t }}</button>
       }
     </section>
 

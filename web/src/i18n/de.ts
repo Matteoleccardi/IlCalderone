@@ -37,6 +37,7 @@ export const de: Dict = {
   'common.move_up_named': "{name} nach oben",
   'common.move_down_named': "{name} nach unten",
   'common.delete_named': "{name} löschen",
+  'common.unsaved_confirm': "Du hast ungespeicherte Änderungen. Ohne Speichern verlassen?",
   'common.save': 'Speichern',
   'common.saving': 'Wird gespeichert…',
   'common.unavailable_recipe': 'Rezept nicht verfügbar',

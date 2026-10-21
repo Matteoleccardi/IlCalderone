@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import { CanActivateFn, CanDeactivateFn, CanMatchFn, Router } from '@angular/router';
+import { I18n } from './i18n';
 import { SessionService } from './session';
 
 /** Everything needs a login (the site may be public on the internet). First run → /setup. */
@@ -21,4 +22,19 @@ export const adminGuard: CanActivateFn = async () => {
 export const moduleEnabled = (module: string): CanMatchFn => async () => {
   const s = await inject(SessionService).ensure();
   return s.modules.includes(module);
+};
+
+/** A page whose edits would be lost by leaving it (the recipe form, the menu editor). */
+export interface HasUnsaved {
+  hasUnsaved(): boolean;
+}
+
+/** Leaving is fine when nothing is unsaved, or when the user agrees to lose it. */
+export function mayLeave(page: HasUnsaved, ask: () => boolean): boolean {
+  return !page.hasUnsaved() || ask();
+}
+
+export const unsavedGuard: CanDeactivateFn<HasUnsaved> = (page) => {
+  const i18n = inject(I18n);
+  return mayLeave(page, () => confirm(i18n.t('common.unsaved_confirm')));
 };

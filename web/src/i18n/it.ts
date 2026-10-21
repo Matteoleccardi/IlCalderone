@@ -41,6 +41,7 @@ export const it = {
   'common.move_up_named': "Sposta su {name}",
   'common.move_down_named': "Sposta giù {name}",
   'common.delete_named': "Elimina {name}",
+  'common.unsaved_confirm': "Hai modifiche non salvate. Uscire senza salvare?",
   'common.save': 'Salva',
   'common.saving': 'Salvataggio…',
   'common.unavailable_recipe': 'Ricetta non disponibile',

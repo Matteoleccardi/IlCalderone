@@ -220,7 +220,7 @@ import { addDays } from '../meallog/dates';
             <span class="muted small">—</span>
           }
         </div>
-        <form class="row" (ngSubmit)="toPantry(pName); pName = ''">
+        <form class="row" (ngSubmit)="addPantry()">
           <label>{{ 'shop.pantry_add' | t }} <input name="pn" [(ngModel)]="pName" /></label>
           <button type="submit">{{ 'common.add' | t }}</button>
         </form>
@@ -313,14 +313,22 @@ export class ShoppingListPage implements OnInit {
     this.run('shopping/unmove', { keys });
   }
 
-  async toPantry(name: string): Promise<void> {
-    if (!name.trim()) return;
+  /** True when the item went into the pantry. */
+  async toPantry(name: string): Promise<boolean> {
+    if (!name.trim()) return false;
     try {
       await this.api.post('pantry', { space: this.where.space, name });
       await this.open(this.where.space, this.where.week);
+      return true;
     } catch (e) {
       this.notify.error(e);
+      return false;
     }
+  }
+
+  /** The "add to pantry" form: the field is emptied only when the item was added. */
+  protected async addPantry(): Promise<void> {
+    if (await this.toPantry(this.pName)) this.pName = '';
   }
 
   async fromPantry(name: string): Promise<void> {
