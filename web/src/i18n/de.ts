@@ -486,6 +486,7 @@ export const de: Dict = {
   'shop.from': 'von {name}',
   'shop.for': 'für:',
   'shop.in_pantry': 'Hab ich immer',
+  'shop.row_menu': "Mehr zu {name}",
   'shop.pantry_add_title': 'Zum Vorrat hinzufügen: Es erscheint nicht mehr auf der Liste',
   'shop.empty': 'Die Liste ist diese Woche leer.',
   'shop.go_menus': 'Zu den Speiseplänen',

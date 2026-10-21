@@ -2,9 +2,11 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   input,
   signal,
+  viewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -108,56 +110,35 @@ import { addDays } from '../meallog/dates';
               <span class="amount"
                 >{{ i.qty === null ? '' : (i.qty | qty) }} {{ i.unit | unit }}</span
               >
-              @if (i.optional) {
-                <span class="badge">{{ 'recipe.optional' | t }}</span>
+              <button
+                type="button"
+                class="icon row-menu"
+                (click)="openMenu(i)"
+                [attr.aria-label]="'shop.row_menu' | t: { name: i.name }"
+              >
+                <span aria-hidden="true">⋯</span>
+              </button>
+              @if (i.optional || i.mixed || i.from.length || i.note || i.sources.length) {
+                <span class="row-meta">
+                  @if (i.optional) {
+                    <span class="badge">{{ 'recipe.optional' | t }}</span>
+                  }
+                  @if (i.mixed) {
+                    <span class="badge warn" [title]="'shop.mixed_title' | t"
+                      ><span aria-hidden="true">⚠</span> {{ 'shop.mixed' | t }}</span
+                    >
+                  }
+                  @for (f of i.from; track f) {
+                    <span class="badge">{{ 'shop.from' | t: { name: f } }}</span>
+                  }
+                  @if (i.note) {
+                    <span>{{ i.note }}</span>
+                  }
+                  @if (i.sources.length) {
+                    <span>{{ 'shop.for' | t }} {{ sources(i) }}</span>
+                  }
+                </span>
               }
-              @if (i.mixed) {
-                <span class="badge warn" [title]="'shop.mixed_title' | t"
-                  ><span aria-hidden="true">⚠</span> {{ 'shop.mixed' | t }}</span
-                >
-              }
-              @for (f of i.from; track f) {
-                <span class="badge">{{ 'shop.from' | t: { name: f } }}</span>
-              }
-              @if (i.note) {
-                <span class="muted small">— {{ i.note }}</span>
-              }
-              @if (i.sources.length) {
-                <span class="muted small sources">{{ 'shop.for' | t }} {{ sources(i) }}</span>
-              }
-              <span class="tools">
-                @if (l.space.id === 'me' && homes().length) {
-                  <button
-                    type="button"
-                    class="link"
-                    (click)="move([i.key])"
-                    [title]="'shop.move_one' | t"
-                    [attr.aria-label]="('shop.to_home' | t) + ': ' + i.name"
-                  >
-                    <span aria-hidden="true">→</span> {{ 'shop.to_home' | t }}
-                  </button>
-                }
-                @if (!i.extra) {
-                  <button
-                    type="button"
-                    class="link"
-                    (click)="toPantry(i.name)"
-                    [title]="'shop.pantry_add_title' | t"
-                    [attr.aria-label]="('shop.in_pantry' | t) + ': ' + i.name"
-                  >
-                    {{ 'shop.in_pantry' | t }}
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="icon"
-                    (click)="removeExtra(i)"
-                    [attr.aria-label]="'common.remove_named' | t: { name: i.name }"
-                  >
-                    ✕
-                  </button>
-                }
-              </span>
             </li>
           }
         </ul>
@@ -226,6 +207,20 @@ import { addDays } from '../meallog/dates';
           <button type="submit">{{ 'common.add' | t }}</button>
         </form>
       </details>
+      <dialog class="sheet" #rowSheet aria-labelledby="row-menu-title" (click)="$event.target === rowSheet && closeMenu()">
+        @if (menuItem(); as m) {
+          <h2 id="row-menu-title">{{ m.name }}</h2>
+          @if (l.space.id === 'me' && homes().length) {
+            <button type="button" class="sheet-btn" (click)="toHome(m)">{{ 'shop.to_home' | t }}</button>
+          }
+          @if (!m.extra) {
+            <button type="button" class="sheet-btn" (click)="toPantryFromSheet(m)">{{ 'shop.in_pantry' | t }}</button>
+          } @else {
+            <button type="button" class="sheet-btn danger" (click)="removeFromSheet(m)">{{ 'common.remove' | t }}</button>
+          }
+          <button type="button" class="link" (click)="closeMenu()">{{ 'app.close' | t }}</button>
+        }
+      </dialog>
     } @else {
       <p class="muted">{{ 'common.loading' | t }}</p>
     }
@@ -249,6 +244,9 @@ export class ShoppingListPage {
   protected xQty = '';
   protected xUnit = '';
   protected pName = '';
+  /** The item whose "…" sheet is open (move to the household, always at home, remove). */
+  protected menuItem = signal<ShoppingItem | null>(null);
+  private rowSheet = viewChild<ElementRef<HTMLDialogElement>>('rowSheet');
 
   /** Households the personal list can be moved to. */
   protected homes = computed(() => (this.list()?.spaces ?? []).filter((s) => s.id !== 'me'));
@@ -292,6 +290,30 @@ export class ShoppingListPage {
         void this.router.navigate(['/spesa'], { replaceUrl: true });
       }
     }
+  }
+
+  protected openMenu(i: ShoppingItem): void {
+    this.menuItem.set(i);
+    this.rowSheet()?.nativeElement.showModal();
+  }
+
+  protected closeMenu(): void {
+    this.rowSheet()?.nativeElement.close();
+  }
+
+  protected async toHome(i: ShoppingItem): Promise<void> {
+    this.closeMenu();
+    await this.move([i.key]);
+  }
+
+  protected async toPantryFromSheet(i: ShoppingItem): Promise<void> {
+    this.closeMenu();
+    await this.toPantry(i.name);
+  }
+
+  protected removeFromSheet(i: ShoppingItem): void {
+    this.closeMenu();
+    this.removeExtra(i);
   }
 
   protected sources(i: ShoppingItem): string {

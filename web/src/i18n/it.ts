@@ -502,6 +502,7 @@ export const it = {
   'shop.from': 'da {name}',
   'shop.for': 'per:',
   'shop.in_pantry': 'Ce l’ho sempre',
+  'shop.row_menu': "Altro su {name}",
   'shop.pantry_add_title': 'Aggiungi alla dispensa: non comparirà più nella lista',
   'shop.empty': 'Lista vuota per questa settimana.',
   'shop.go_menus': 'Vai ai menu',

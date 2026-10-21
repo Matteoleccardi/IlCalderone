@@ -289,7 +289,7 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 /* menus: plan of the coming days and the week editor */
 .plan { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
 .plan-day { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: .6rem .8rem; }
-.plan-day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.plan-day.today { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
 .plan-day h3 { font-size: var(--t-sm); }
 .plan-day h3::first-letter { text-transform: uppercase; }
 .plan-meal { margin-bottom: .4rem; }
@@ -301,32 +301,42 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 .menu-grid > div { background: var(--surface); padding: .5rem; }
 .menu-grid .head { font-weight: 600; font-size: var(--t-sm); color: var(--muted); text-transform: capitalize; }
 .menu-grid .day-name { font-weight: 600; text-transform: capitalize; }
-.menu-grid .today { background: var(--accent-soft); }
+.menu-grid .today { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); }
+/* today is a word and a bar, never colour alone */
+.today-badge { display: inline-block; font-size: var(--t-xs); font-weight: 700; padding: 0 8px; margin-left: 8px; border-radius: var(--r-1);
+  background: var(--accent); color: var(--accent-text); vertical-align: middle; font-family: var(--font); text-transform: none; }
 .menu-grid .cell { display: flex; flex-direction: column; gap: .3rem; }
 .menu-grid .cell-label { display: none; }
 .dish { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
 .dish > a, .dish > span:first-child { flex: 1 1 8rem; }
 .dish input.servings { width: 4.2rem; margin: 0; padding: .2rem .35rem; }
-.cell input.add, .picker input.add { margin: 0; padding: .3rem .5rem; font-size: var(--t-sm); border-style: dashed; }
+.cell input.add, .picker input.add { margin: 0; padding: .3rem .5rem; font-size: var(--t-sm); border-style: solid; background: transparent; }
 @media (max-width: 700px) {
   .menu-grid { grid-template-columns: minmax(0, 1fr); }
-  .menu-grid .head, .menu-grid .day-name { display: none; }
+  .menu-grid .head { display: none; }
+  .menu-grid .day-name { font-size: var(--t-md); background: var(--surface-2); padding-block: .6rem; }
   .menu-grid .cell-label { display: block; font-size: var(--t-sm); color: var(--muted); text-transform: capitalize; }
+  .menu-grid .cell-label .dn { display: none; }
 }
 
 /* shopping list */
-.week-nav { justify-content: flex-start; }
-.week-nav h2 { font-size: 1.1rem; }
-ul.shop li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; padding: .45rem 0; border-bottom: 1px solid var(--line); }
+.page-head.week-nav { display: grid; grid-template-columns: var(--hit) minmax(0, 1fr) var(--hit); gap: 8px; align-items: center; justify-content: stretch; }
+.week-nav h2 { font-size: var(--t-md); text-align: center; margin: 0; }
+.week-nav button.link { grid-column: 1 / -1; justify-self: center; }
+/* a row: tick + name, amount, "…" (the extra actions are in a sheet); one muted line below for sources and notes */
+ul.shop li { display: grid; grid-template-columns: minmax(0, 1fr) auto var(--hit); align-items: center; column-gap: 8px; padding: 4px 0;
+  border-bottom: 1px solid var(--line); min-height: 3.5rem; }
 /* long (German) ingredient names wrap inside the row instead of widening the page */
-ul.shop label.check { white-space: normal; overflow-wrap: anywhere; min-width: 0; flex: 1 1 12rem; align-items: center; gap: .75rem; min-height: 2.75rem; }
+ul.shop label.check { white-space: normal; overflow-wrap: anywhere; min-width: 0; align-items: center; gap: .75rem; min-height: 3.5rem; }
 ul.shop label.check input { width: 1.5rem; height: 1.5rem; margin: 0; flex: none; accent-color: var(--accent); }
-ul.shop .name { font-weight: 500; }
+ul.shop .name { font-weight: 600; }
 /* quantity and unit stay together */
-ul.shop .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
-ul.shop .sources { flex-basis: 100%; padding-left: 1.6rem; order: 1; }
-ul.shop .tools { margin-left: auto; }
+ul.shop .amount { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; font-family: var(--font-figure); }
+ul.shop .row-meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0 8px; align-items: center; padding: 0 0 6px 2.25rem; font-size: var(--t-xs);
+  color: var(--muted); overflow-wrap: anywhere; }
 ul.shop li.done .name, ul.shop li.done .amount { text-decoration: line-through; color: var(--muted); }
+button.row-menu { font-size: var(--t-lg); border-color: transparent; }
+.sheet-btn { width: 100%; justify-content: flex-start; min-height: 3.5rem; margin-bottom: 8px; }
 .add-extra { margin: 1rem 0 1.5rem; }
 .add-extra .qty, .add-extra .unit { max-width: 7rem; }
 .add-extra > label:has(.qty), .add-extra > label:has(.unit) { flex: 0 1 7rem; }
@@ -392,7 +402,7 @@ fieldset.choice.days button { min-width: 0; padding: .35rem .1rem; }
 
 @media print {
   body { padding-bottom: 0; }
-  .topbar, .bottom-nav, dialog.more, .foot, .actions, .toasts, .graph, .tabs, .add-extra, .card-actions, app-add-to-menu, ul.shop .tools, details, app-collection-panel, app-meallog-panel { display: none !important; }
+  .topbar, .bottom-nav, dialog.more, .foot, .actions, .toasts, .graph, .tabs, .add-extra, .card-actions, app-add-to-menu, ul.shop .row-menu, details, app-collection-panel, app-meallog-panel { display: none !important; }
   .card { box-shadow: none; border: 0; padding: 0; }
 }
 

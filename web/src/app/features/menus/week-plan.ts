@@ -13,7 +13,10 @@ import { PlanDay } from '../../core/models';
     <div class="plan">
       @for (d of days(); track d.date) {
         <div class="plan-day" [class.today]="d.date === today()">
-          <h3>{{ i18n.date(d.date, { weekday: 'long', day: 'numeric', month: 'short' }) }}</h3>
+          <h3>
+            {{ i18n.date(d.date, { weekday: 'long', day: 'numeric', month: 'short' }) }}
+            @if (d.date === today()) { <span class="today-badge">{{ 'diary.today' | t }}</span> }
+          </h3>
           @for (m of d.meals; track m.meal) {
             <div class="plan-meal">
               <span class="meal">{{ 'meal.' + m.meal | t }}</span>

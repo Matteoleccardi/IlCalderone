@@ -144,12 +144,14 @@ import { ScopePicker } from '../../shared/scope-picker';
           <div class="head">{{ 'meal.' + x | t }}</div>
         }
         @for (dn of dayNames; track $index; let d = $index) {
-          <div class="day-name" [class.today]="week() === m.today.week && d + 1 === m.today.day">
+          @let isToday = week() === m.today.week && d + 1 === m.today.day;
+          <div class="day-name" [class.today]="isToday">
             {{ dn }}
+            @if (isToday) { <span class="today-badge">{{ 'diary.today' | t }}</span> }
           </div>
           @for (x of meals(); track x) {
-            <div class="cell" [class.today]="week() === m.today.week && d + 1 === m.today.day">
-              <span class="cell-label">{{ dn }} · {{ 'meal.' + x | t }}</span>
+            <div class="cell" [class.today]="isToday">
+              <span class="cell-label"><span class="dn">{{ dn }} · </span>{{ 'meal.' + x | t }}</span>
               @for (it of cell(d + 1, x); track $index) {
                 <div class="dish">
                   @if (it.recipe) {
