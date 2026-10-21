@@ -208,6 +208,8 @@ table.ing tr.optional td { color: var(--muted); }
 /* the recipe itself (ingredients, steps, notes) is set in the reading serif, a little larger */
 table.ing, .steps li p, .steps p.notes { font-family: var(--font-read); font-size: 1.0625rem; line-height: 1.6; }
 table.ing .small { font-family: var(--font); }
+/* long compound words (German) break instead of overflowing the card */
+table.ing td:first-child, .steps li p, .steps p.notes { overflow-wrap: anywhere; hyphens: auto; }
 .steps li strong { font-size: 1.02rem; }
 .steps li::marker { font-weight: 700; color: var(--accent); }
 
@@ -304,8 +306,11 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 .week-nav { justify-content: flex-start; }
 .week-nav h2 { font-size: 1.1rem; }
 ul.shop li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; padding: .45rem 0; border-bottom: 1px solid var(--line); }
+/* long (German) ingredient names wrap inside the row instead of widening the page */
+ul.shop label.check { white-space: normal; overflow-wrap: anywhere; min-width: 0; flex: 1 1 12rem; }
 ul.shop .name { font-weight: 500; }
-ul.shop .amount { font-variant-numeric: tabular-nums; }
+/* quantity and unit stay together */
+ul.shop .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
 ul.shop .sources { flex-basis: 100%; padding-left: 1.6rem; order: 1; }
 ul.shop .tools { margin-left: auto; }
 ul.shop li.done .name, ul.shop li.done .amount { text-decoration: line-through; color: var(--muted); }
@@ -422,8 +427,8 @@ progress.batch { width: 100%; }
 .timer-row.paused .big { opacity: .55; }
 .timer-row.done .timer-time { background: var(--accent); color: var(--accent-text); border-color: var(--accent); animation: timer-pulse 1s ease-in-out infinite; }
 .timer-row.done .timer-time .small { color: inherit; }
-.timer-note { margin: 0; font-size: .68rem; color: var(--muted); line-height: 1.25; }
-.timer-note button.link { padding: 0; font-size: inherit; text-align: left; }
+.timer-note { margin: 0; font-size: .75rem; color: var(--muted); line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }
+.timer-note button.link { padding: 0; font-size: inherit; text-align: left; overflow-wrap: anywhere; hyphens: auto; }
 @media (prefers-reduced-motion: reduce) { .timer-dock { transition: none; } .timer-dock.ringing .timer-tab, .timer-row.done .timer-time { animation: none; } }
 button.timer-row.timer-add { display: flex; justify-content: center; height: 2.3rem; font-size: 1.2rem; color: var(--muted);
   border-style: dashed; background: transparent; }
