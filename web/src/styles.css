@@ -174,7 +174,7 @@ fieldset legend { font-weight: 500; padding: 0 .25rem; }
   .recipe-card .meta { font-size: .7rem; gap: .1rem .4rem; margin: 0; }
   .recipe-card .meta > :not(:first-child) { display: none; }
   .recipe-card-wrap .card-actions { top: .25rem; right: .25rem; }
-  .recipe-card-wrap .card-actions button.icon { padding: .15rem .3rem; font-size: .7rem; min-height: 0; }
+  .recipe-card-wrap .card-actions button.icon { min-width: 2.75rem; min-height: 2.75rem; padding: 0; justify-content: center; font-size: .85rem; }
 }
 
 /* recipe page */
@@ -219,9 +219,10 @@ table.ing td:first-child, .steps li p, .steps p.notes { overflow-wrap: anywhere;
 .ing-row input { margin: 0 !important; }
 .tools { display: inline-flex; gap: .2rem; }
 @media (max-width: 700px) {
-  .ing-row { grid-template-columns: 1fr 1fr 1fr; padding-bottom: .5rem; border-bottom: 1px dashed var(--line); }
-  .ing-row > input:first-child { grid-column: 1 / -1; }
+  .ing-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-bottom: .5rem; border-bottom: 1px dashed var(--line); }
+  .ing-row > :first-child { grid-column: 1 / -1; }
   .ing-row .note { grid-column: 1 / -1; }
+  .ing-row .tools { justify-self: end; }
 }
 .step-edit { margin-bottom: 1rem; }
 .step-edit .row { align-items: center; flex-wrap: nowrap; }
@@ -307,7 +308,8 @@ label.check.plan-row { display: grid; grid-template-columns: auto 28px minmax(0,
 .week-nav h2 { font-size: 1.1rem; }
 ul.shop li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem; padding: .45rem 0; border-bottom: 1px solid var(--line); }
 /* long (German) ingredient names wrap inside the row instead of widening the page */
-ul.shop label.check { white-space: normal; overflow-wrap: anywhere; min-width: 0; flex: 1 1 12rem; }
+ul.shop label.check { white-space: normal; overflow-wrap: anywhere; min-width: 0; flex: 1 1 12rem; align-items: center; gap: .75rem; min-height: 2.75rem; }
+ul.shop label.check input { width: 1.5rem; height: 1.5rem; margin: 0; flex: none; accent-color: var(--accent); }
 ul.shop .name { font-weight: 500; }
 /* quantity and unit stay together */
 ul.shop .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -402,7 +404,7 @@ progress.batch { width: 100%; }
 
 /* kitchen timers: a thin tab on the right edge that slides out a narrow column */
 .timer-dock {
-  --tab: 22px; --panel: 6.4rem;
+  --tab: 28px; --panel: 8.5rem;
   position: fixed; right: 0; top: 34vh; z-index: 40; display: flex; align-items: flex-start;
   transform: translateX(var(--panel)); transition: transform .2s ease; touch-action: pan-y;
 }
@@ -410,8 +412,10 @@ progress.batch { width: 100%; }
 .timer-tab {
   width: var(--tab); min-height: 56px; padding: .35rem 0; flex-direction: column; justify-content: center; gap: .25rem;
   border-radius: 10px 0 0 10px; border-right: 0; background: var(--accent); color: var(--accent-text); border-color: var(--accent);
-  box-shadow: var(--shadow); font-size: 1rem;
+  box-shadow: var(--shadow); font-size: 1rem; position: relative;
 }
+/* the visible tab is 28px wide; the tappable area reaches 44px (16px further into the page) */
+.timer-tab::before { content: ""; position: absolute; top: 0; bottom: 0; left: -16px; right: 0; }
 .timer-tab-left { writing-mode: vertical-rl; font-variant-numeric: tabular-nums; font-size: .72rem; letter-spacing: .02em; }
 .timer-dock.ringing .timer-tab { animation: timer-pulse 1s ease-in-out infinite; }
 @keyframes timer-pulse { 50% { filter: brightness(1.35); transform: scale(1.08); } }
@@ -419,7 +423,7 @@ progress.batch { width: 100%; }
   width: var(--panel); background: var(--surface); border: 1px solid var(--line); border-right: 0;
   border-radius: 0 0 0 10px; box-shadow: var(--shadow); padding: .3rem; display: flex; flex-direction: column; gap: .3rem;
 }
-.timer-row { display: grid; grid-template-columns: minmax(0, 1fr) 1.6rem; gap: .2rem; align-items: stretch; margin: 0; }
+.timer-row { display: grid; grid-template-columns: minmax(0, 1fr) 2.75rem; gap: .2rem; align-items: stretch; margin: 0; }
 .timer-row button { padding: .2rem; justify-content: center; }
 .timer-time { flex-direction: column; gap: 0; line-height: 1.1; }
 .timer-time .big { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -430,7 +434,7 @@ progress.batch { width: 100%; }
 .timer-note { margin: 0; font-size: .75rem; color: var(--muted); line-height: 1.25; overflow-wrap: anywhere; hyphens: auto; }
 .timer-note button.link { padding: 0; font-size: inherit; text-align: left; overflow-wrap: anywhere; hyphens: auto; }
 @media (prefers-reduced-motion: reduce) { .timer-dock { transition: none; } .timer-dock.ringing .timer-tab, .timer-row.done .timer-time { animation: none; } }
-button.timer-row.timer-add { display: flex; justify-content: center; height: 2.3rem; font-size: 1.2rem; color: var(--muted);
+button.timer-row.timer-add { display: flex; justify-content: center; height: 2.75rem; font-size: 1.2rem; color: var(--muted);
   border-style: dashed; background: transparent; }
 button.timer-row.timer-add:hover { color: var(--accent); }
 @media print { .timer-dock, .wheel-overlay { display: none !important; } }
@@ -504,3 +508,21 @@ button.filter-toggle.on { border-color: var(--accent); color: var(--accent); }
 button.filter-toggle .count { background: var(--accent); color: var(--accent-text); border-radius: 999px; font-size: .75rem;
   padding: 0 .45rem; min-width: 1.3rem; text-align: center; }
 section.filters > button.chip-btn { margin-bottom: .9rem; }
+
+/* touch screens: controls are at least 44px (2.75rem) high and wide where they are tapped, and a fast double tap
+   does not zoom the page (pinch zoom stays allowed). Lives at the end so it wins over the per-component sizes above. */
+a, button, input, select, textarea, label, summary { touch-action: manipulation; }
+@media (pointer: coarse) {
+  button, .button, input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select { min-height: 2.75rem; }
+  button.icon, button.logout, .stepper button, .dish-play { min-width: 2.75rem; min-height: 2.75rem; justify-content: center; }
+  button.link { min-height: 2.75rem; padding-inline: .5rem; }
+  .who a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: .6rem; }
+  .facet-chip { min-height: 2.75rem; padding-inline: .8rem; }
+  button.chip-btn, .facet-chips button.chip-btn, .segmented button { min-height: 2.75rem; }
+  label.check { min-height: 2.75rem; }
+  label.check input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--accent); }
+  details summary { padding-block: .65rem; }
+  .picker-list li { min-height: 2.75rem; display: flex; align-items: center; }
+  .tags .tag { display: inline-block; padding-block: .6rem; }
+  .timer-note button.link { min-height: 2.75rem; }
+}
