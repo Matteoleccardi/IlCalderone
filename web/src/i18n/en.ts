@@ -442,6 +442,7 @@ export const en: Dict = {
   'menus.grid_hint': "Tap the box and pick a recipe from the list (alphabetical, filtered as you type), or type free text and press Enter. Empty servings use the recipe’s own.",
   'picker.as_text': "Add as text: \"{text}\"",
   'addmenu.button': "Add to menu",
+  'addmenu.short': 'Menu',
   'addmenu.title': "Add to menu",
   'addmenu.no_menus': "You have no menu to add it to yet.",
   'addmenu.some_hidden': "{n} household menu is not listed: not everyone in that household can see this recipe.|{n} household menus are not listed: not everyone in those households can see this recipe.",

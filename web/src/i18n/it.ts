@@ -457,6 +457,7 @@ export const it = {
   'menus.grid_hint': "Tocca la casella e scegli una ricetta dall’elenco (in ordine alfabetico, filtrato mentre scrivi), oppure scrivi un testo libero e premi Invio. Le porzioni vuote usano quelle della ricetta.",
   'picker.as_text': "Aggiungi come testo: «{text}»",
   'addmenu.button': "Aggiungi al menu",
+  'addmenu.short': 'Menu',
   'addmenu.title': "Aggiungi al menu",
   'addmenu.no_menus': "Non hai ancora un menu in cui aggiungerla.",
   'addmenu.some_hidden': "{n} menu di famiglia non compare: non tutta la famiglia può vedere questa ricetta.|{n} menu di famiglia non compaiono: non tutta la famiglia può vedere questa ricetta.",

@@ -442,6 +442,7 @@ export const de: Dict = {
   'menus.grid_hint': "Tippe auf das Feld und wähle ein Rezept aus der Liste (alphabetisch, beim Tippen gefiltert) oder schreibe freien Text und drücke Enter. Leere Portionen übernehmen die des Rezepts.",
   'picker.as_text': "Als Text hinzufügen: „{text}“",
   'addmenu.button': "Zum Speiseplan",
+  'addmenu.short': 'Plan',
   'addmenu.title': "Zum Speiseplan hinzufügen",
   'addmenu.no_menus': "Du hast noch keinen Speiseplan, in den du es aufnehmen kannst.",
   'addmenu.some_hidden': "{n} Haushalts-Speiseplan fehlt: Nicht alle im Haushalt können dieses Rezept sehen.|{n} Haushalts-Speisepläne fehlen: Nicht alle in diesen Haushalten können dieses Rezept sehen.",

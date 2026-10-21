@@ -29,12 +29,11 @@ const LAST_MENU = 'calderone.lastMenu';
   template: `
     <button
       type="button"
-      [class]="compact() ? 'icon add-to-menu' : 'add-to-menu'"
+      [class]="compact() ? 'add-to-menu compact' : 'add-to-menu'"
       (click)="openDialog()"
-      [title]="'addmenu.button' | t"
-      [attr.aria-label]="'addmenu.button' | t"
+      [attr.aria-label]="('addmenu.button' | t) + (compact() ? ': ' + recipe().title : '')"
     >
-      📅 @if (!compact()) { {{ 'addmenu.button' | t }} } @else { + }
+      @if (!compact()) { {{ 'addmenu.button' | t }} } @else { <span aria-hidden="true">+</span> {{ 'addmenu.short' | t }} }
     </button>
 
     <dialog #dlg class="sheet" [attr.aria-labelledby]="uid + '-title'" (close)="opened.set(false)" (click)="backdrop($event)">

@@ -442,6 +442,7 @@ export const fr: Dict = {
   'menus.grid_hint': "Touchez la case et choisissez une recette dans la liste (alphabétique, filtrée pendant la saisie), ou tapez un texte libre puis Entrée. Les portions vides reprennent celles de la recette.",
   'picker.as_text': "Ajouter comme texte : « {text} »",
   'addmenu.button': "Ajouter au menu",
+  'addmenu.short': 'Menu',
   'addmenu.title': "Ajouter au menu",
   'addmenu.no_menus': "Vous n’avez pas encore de menu où l’ajouter.",
   'addmenu.some_hidden': "{n} menu du foyer n’apparaît pas : tout le foyer ne peut pas voir cette recette.|{n} menus de foyer n’apparaissent pas : tous leurs membres ne peuvent pas voir cette recette.",
