@@ -588,3 +588,7 @@ body.cooking main { padding-top: 0; padding-bottom: calc(5.5rem + var(--bottom-h
 .cook-bar button { min-height: 3.5rem; flex: 1; justify-content: center; font-size: var(--t-md); }
 .cook-bar button.primary { flex: 2; }
 @media (min-width: 760px) { .cook { max-width: 720px; margin: 0 auto; } }
+
+/* confirmation sheet (shared/confirm-sheet.ts): the destructive button is the only filled danger in the app */
+dialog.confirm .confirm-text { font-size: var(--t-md); font-weight: 600; margin: 0 0 .5rem; overflow-wrap: anywhere; }
+button.danger-fill { background: var(--danger); border-color: var(--danger); color: var(--on-danger); font-weight: 700; }

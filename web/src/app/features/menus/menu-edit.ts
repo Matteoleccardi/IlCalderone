@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { HouseholdsService } from '../../core/households';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { MEALS, Meal, Menu, MenuItem, RecipeSummary, Visibility } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -234,6 +235,7 @@ export class MenuEdit implements HasUnsaved {
   /** ?week=N: the open week, kept in the address so reload and Back keep it (changed with replaceUrl). */
   readonly weekParam = input<string | undefined>(undefined, { alias: 'week' });
   protected i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   protected households = inject(HouseholdsService);
   protected api = inject(Api);
   private notify = inject(Notify);
@@ -437,7 +439,7 @@ export class MenuEdit implements HasUnsaved {
   }
 
   async removeMenu(): Promise<void> {
-    if (!confirm(this.i18n.t('menus.confirm_delete', { name: this.name }))) return;
+    if (!(await this.confirmer.ask(this.i18n.t('menus.confirm_delete', { name: this.name }), 'common.delete'))) return;
     try {
       await this.api.delete(`menus/${this.id()}`);
       this.dirty.set(false); // deleted: nothing left to save

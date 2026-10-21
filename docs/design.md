@@ -4,6 +4,8 @@ Direction **"La dispensa"** (the pantry shelf). This file is the style manifest:
 
 Phone first: design and check every screen at 390 px wide, then let it grow.
 
+Build status and the gaps between this manifest and the code: `redesign.md`.
+
 ## 1. Idea
 
 The app is a pantry shelf. Each dish stands on it as a specimen: its hand-drawn 8-bit icon (and, on the recipe page, its voxel model). Everything else is quiet, flat and made of the same unit as the icons: the **art-pixel** (4 px). Colour lives in the dishes and in data (the one primary action, status, today), not in chrome.

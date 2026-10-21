@@ -9,6 +9,7 @@ import { Notify } from './core/notify';
 import { SessionService } from './core/session';
 import { TimersService } from './core/timers';
 import { Brand } from './shared/brand';
+import { ConfirmSheet } from './shared/confirm-sheet';
 import { NavIcon } from './shared/nav-icon';
 import { TimerDock } from './shared/timer-dock';
 import { ThemeService } from './core/theme';
@@ -19,7 +20,7 @@ const MORE_ORDER = ['/raccolte', '/diario', '/famiglie', '/admin'];
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Brand, NavIcon, TimerDock, TPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Brand, ConfirmSheet, NavIcon, TimerDock, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './app.html',
 })

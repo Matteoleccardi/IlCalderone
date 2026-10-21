@@ -12,6 +12,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { ShoppingItem, ShoppingList } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -235,6 +236,7 @@ export class ShoppingListPage {
   readonly week = input<string>('');
 
   protected i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   private api = inject(Api);
   private notify = inject(Notify);
   private router = inject(Router);
@@ -348,7 +350,7 @@ export class ShoppingListPage {
   async move(keys: string[], all = false): Promise<void> {
     const home = this.homes().find((h) => h.id === this.target) ?? this.homes()[0];
     if (!home) return;
-    if (all && !confirm(this.i18n.t('shop.confirm_move_all', { name: home.name }))) return;
+    if (all && !(await this.confirmer.ask(this.i18n.t('shop.confirm_move_all', { name: home.name }), 'shop.move_all'))) return;
     await this.run('shopping/move', { household: home.id, keys, all });
     this.notify.ok('shop.moved', { name: home.name });
   }

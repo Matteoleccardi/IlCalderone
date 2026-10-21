@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { FacetChips } from '../../shared/facet-chips';
 import { Ingredient, Recipe, Revision } from '../../core/models';
@@ -123,6 +124,7 @@ interface Line {
 export class RecipeHistory {
   readonly id = input.required<string>();
   protected i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   private api = inject(Api);
   private notify = inject(Notify);
   private router = inject(Router);
@@ -193,7 +195,7 @@ export class RecipeHistory {
   }
 
   async restore(rev: number): Promise<void> {
-    if (!confirm(this.i18n.t('history.confirm_restore', { n: rev }))) return;
+    if (!(await this.confirmer.ask(this.i18n.t('history.confirm_restore', { n: rev }), 'history.restore'))) return;
     try {
       await this.api.post<Recipe>(`recipes/${this.id()}/history/${rev}/restore`);
       this.notify.ok('history.restored', { n: rev });

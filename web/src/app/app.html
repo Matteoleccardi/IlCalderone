@@ -55,6 +55,8 @@
   </dialog>
 }
 
+<app-confirm-sheet />
+
 <div class="toasts" aria-live="polite">
   @for (t of notify.toasts(); track t.id) {
     <div class="toast" [class.error]="t.kind === 'error'" [attr.role]="t.kind === 'error' ? 'alert' : 'status'">

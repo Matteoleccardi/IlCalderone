@@ -22,6 +22,8 @@ export const en: Dict = {
   'common.add': 'Add',
   'common.by': 'by {name}',
   'common.cancel': 'Cancel',
+  'common.confirm': "Confirm",
+  'common.discard': "Discard changes",
   'common.choose': 'choose…',
   'common.create': 'Create',
   'common.delete': 'Delete',

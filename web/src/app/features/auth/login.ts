@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Api } from '../../core/api';
@@ -17,6 +17,7 @@ import { SessionService } from '../../core/session';
         <label
           >{{ 'login.username' | t }}
           <input name="u" [(ngModel)]="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required
+            [attr.aria-invalid]="error() ? 'true' : null" [attr.aria-describedby]="error() ? 'login-error' : null"
         /></label>
         <label
           >{{ 'login.password' | t }}
@@ -26,7 +27,12 @@ import { SessionService } from '../../core/session';
             [(ngModel)]="password"
             autocomplete="current-password"
             required
+            [attr.aria-invalid]="error() ? 'true' : null"
+            [attr.aria-describedby]="error() ? 'login-error' : null"
         /></label>
+        @if (error(); as msg) {
+          <p id="login-error" class="field-error" role="alert"><span aria-hidden="true">⚠</span> {{ msg }}</p>
+        }
         <button type="submit" class="primary" [disabled]="busy()">{{ 'login.submit' | t }}</button>
       </form>
       <p class="muted small">{{ 'login.no_account' | t }}</p>
@@ -38,6 +44,9 @@ export class Login implements OnInit {
   protected username = '';
   protected password = '';
   protected busy = signal(false);
+  /** The reason the last attempt failed, shown under the fields (not as a toast) and linked to them. */
+  protected error = signal('');
+  private host = inject(ElementRef<HTMLElement>);
   private session = inject(SessionService);
   private router = inject(Router);
   private notify = inject(Notify);
@@ -52,6 +61,7 @@ export class Login implements OnInit {
 
   async submit(): Promise<void> {
     this.busy.set(true);
+    this.error.set('');
     try {
       await this.session.login(this.username, this.password);
       const lang = this.session.user()?.lang;
@@ -64,7 +74,8 @@ export class Login implements OnInit {
       if (!lang) this.api.put('me', { lang: this.i18n.lang }).catch(() => {});
       this.router.navigateByUrl(this.safeNext());
     } catch (e) {
-      this.notify.error(e);
+      this.error.set(this.notify.message(e));
+      queueMicrotask(() => this.host.nativeElement.querySelector('input[name=p]')?.focus());
     } finally {
       this.busy.set(false);
     }

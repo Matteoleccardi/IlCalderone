@@ -26,6 +26,8 @@ export const it = {
   'common.add': 'Aggiungi',
   'common.by': 'di {name}',
   'common.cancel': 'Annulla',
+  'common.confirm': "Conferma",
+  'common.discard': "Scarta le modifiche",
   'common.choose': 'scegli…',
   'common.create': 'Crea',
   'common.delete': 'Elimina',

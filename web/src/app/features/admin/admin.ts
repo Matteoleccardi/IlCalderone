@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { Check, User } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -106,6 +107,7 @@ import { SessionService } from '../../core/session';
 export class Admin implements OnInit {
   protected session = inject(SessionService);
   protected i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   private api = inject(Api);
   private notify = inject(Notify);
   protected users = signal<User[]>([]);
@@ -172,7 +174,7 @@ export class Admin implements OnInit {
   }
 
   async remove(u: User): Promise<void> {
-    if (!confirm(this.i18n.t('admin.confirm_delete', { name: u.username }))) return;
+    if (!(await this.confirmer.ask(this.i18n.t('admin.confirm_delete', { name: u.username }), 'common.delete'))) return;
     try {
       await this.api.delete(`users/${u.id}`);
       await this.reload();

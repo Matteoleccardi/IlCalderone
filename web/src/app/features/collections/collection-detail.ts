@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { Collection, Visibility } from '../../core/models';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { Notify } from '../../core/notify';
 import { AppTitle } from '../../core/title';
@@ -89,6 +90,7 @@ export class CollectionDetail {
   private router = inject(Router);
   private title = inject(AppTitle);
   private i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   protected c = signal<Collection | null>(null);
   protected name = '';
   protected description = '';
@@ -144,7 +146,7 @@ export class CollectionDetail {
   }
 
   async remove(): Promise<void> {
-    if (!confirm(this.i18n.t('collections.confirm_delete'))) return;
+    if (!(await this.confirmer.ask(this.i18n.t('collections.confirm_delete'), 'common.delete'))) return;
     try {
       await this.api.delete(`collections/${this.id()}`);
       this.router.navigateByUrl('/raccolte');

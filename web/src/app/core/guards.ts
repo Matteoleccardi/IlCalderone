@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, CanDeactivateFn, CanMatchFn, Router } from '@angular/router';
+import { ConfirmService } from './confirm';
 import { I18n } from './i18n';
 import { SessionService } from './session';
 
@@ -30,11 +31,12 @@ export interface HasUnsaved {
 }
 
 /** Leaving is fine when nothing is unsaved, or when the user agrees to lose it. */
-export function mayLeave(page: HasUnsaved, ask: () => boolean): boolean {
+export function mayLeave(page: HasUnsaved, ask: () => boolean | Promise<boolean>): boolean | Promise<boolean> {
   return !page.hasUnsaved() || ask();
 }
 
 export const unsavedGuard: CanDeactivateFn<HasUnsaved> = (page) => {
   const i18n = inject(I18n);
-  return mayLeave(page, () => confirm(i18n.t('common.unsaved_confirm')));
+  const confirmer = inject(ConfirmService);
+  return mayLeave(page, () => confirmer.ask(i18n.t('common.unsaved_confirm'), 'common.discard'));
 };

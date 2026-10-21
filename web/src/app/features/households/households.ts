@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api';
 import { HouseholdsService } from '../../core/households';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { Household } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -71,6 +72,7 @@ export class Households implements OnInit {
   private notify = inject(Notify);
   private session = inject(SessionService);
   private i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
   protected name = '';
   protected me = () => this.session.user()?.id;
 
@@ -103,14 +105,10 @@ export class Households implements OnInit {
   }
 
   async removeMember(h: Household, uid: string, self: boolean): Promise<void> {
-    if (
-      !confirm(
-        self
-          ? this.i18n.t('households.confirm_leave', { name: h.name })
-          : this.i18n.t('households.confirm_remove'),
-      )
-    )
-      return;
+    const text = self
+      ? this.i18n.t('households.confirm_leave', { name: h.name })
+      : this.i18n.t('households.confirm_remove');
+    if (!(await this.confirmer.ask(text, 'common.confirm'))) return;
     try {
       await this.api.delete(`households/${h.id}/members/${uid}`);
       await this.hh.refresh();

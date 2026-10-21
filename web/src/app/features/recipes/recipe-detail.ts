@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { FEATURES } from '../../core/features';
 import { HouseholdsService } from '../../core/households';
+import { ConfirmService } from '../../core/confirm';
 import { I18n, TPipe } from '../../core/i18n';
 import { Recipe, RecipeSummary } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -48,6 +49,7 @@ export class RecipeDetail {
   private title = inject(AppTitle);
   private features = inject(FEATURES);
   private i18n = inject(I18n);
+  private confirmer = inject(ConfirmService);
 
   /** Recipe-page panels contributed by the enabled features (collections, diary…). */
   protected panels = computed(() =>
@@ -121,7 +123,7 @@ export class RecipeDetail {
 
   async remove(): Promise<void> {
     const r = this.recipe();
-    if (!r || !confirm(this.i18n.t('recipe.confirm_delete', { title: r.title }))) return;
+    if (!r || !(await this.confirmer.ask(this.i18n.t('recipe.confirm_delete', { title: r.title }), 'common.delete'))) return;
     try {
       await this.api.delete(`recipes/${r.id}`);
       this.notify.ok('recipe.deleted');
