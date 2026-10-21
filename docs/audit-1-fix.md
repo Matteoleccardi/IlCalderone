@@ -4,7 +4,42 @@ Branch `audit-one`. Source of the findings: `docs/audit-1.md` (triage bucket A).
 
 ## Summary changelog
 
-_(filled in at the end)_
+Branch `audit-one` (from `main` at `f4c06b7`), 7 commits, nothing pushed or merged. **29 of the 30 A items are fixed; A27 was dropped** (see below).
+
+| # | Commit | Items |
+|---|---|---|
+| 1 | `ce13d41` overflow and text | A1 A3 A4 A5 |
+| 2 | `9936e0c` touch targets | A2 A6 A7 A8 A9 A28 |
+| 3 | `d89d154` labels and ARIA | A10 A11 A12 A13 A14 A15 A16 |
+| 4 | `f46f0a4` focus, viewport, layout | A23 A25 A26 |
+| 5 | `b777283` forms and data loss | A17 A18 A19 A20 A21 A22 A29 |
+| 6 | `662d8bd` contrast gate | A24 |
+| 7 | HEAD of the branch: URL state | A30 |
+
+**Verification:** `npm test` (translation check + 28 Vitest tests), `ng build`, `pytest tests` (41 passed, including the new theme test), and seven headless-Chrome check scripts at 390 px in German and French (all passing), plus a final pass over 8 pages in de and fr with no horizontal scroll. Everything that writes was blocked during testing (see "How items were tested"), so nothing in your data was changed.
+
+**New files:** `web/src/app/shared/suggest-input.ts` (+ spec), `web/src/app/core/guards.spec.ts`, `tests/test_themes.py`, `docs/audit-1-fix.md`.
+**New translation keys (it/en/de/fr):** `common.remove_named`, `common.move_up_named`, `common.move_down_named`, `common.delete_named`, `common.unsaved_confirm`, `facet.remove_named`, `menus.add_dish_to`, `menus.servings_of`, `timer.ringing`. Removed: `common.move_up`, `common.move_down`.
+**Other changes outside `web/src/app`:** `tools/make_themes.py` and the 13 regenerated theme CSS files (`web/src/themes/`), `web/src/themes/README.md`, `web/src/styles.css`.
+
+### Things to know before you test
+- **Touch-only sizing:** the 44 px rules live in `@media (pointer: coarse)`. A desktop browser will not show them; use device emulation or your phone (over NetBird, as in `CLAUDE.md`).
+- **Default theme colours moved slightly** (Calderone light: muted, ok, accent a touch deeper) and some light themes moved more (Catppuccin Latte, Everforest light, Rosé Pine Dawn). Look at *Account → Appearance* (details under A24).
+- **Visible layout changes:** the card "+" button on the 3-up phone grid is now a 44 px circle (covers more of the dish picture), shopping rows are taller (44 px tap target), the timer panel is wider (8.5 rem), and the ingredient editor row is a 2-column layout on phones.
+- **Still native:** leaving with unsaved edits uses the browser's `confirm()` (replacing it with the sheet dialog is B7).
+- **Found while testing:** the skip link used to navigate to the home page (fixed under A15). A pre-existing `NG01354` warning from `ng serve` (ngModel inside a child component of a form) is *not* fixed.
+
+### Please try these locally (not testable against your live data)
+1. Admin → "New password" for a throwaway account: dialog, masked field, success toast (A17).
+2. Edit a recipe, change a field, save: no leave-prompt after saving; edit again and close the tab: browser asks (A18, `beforeunload`).
+3. Shopping: add a pantry item (field empties on success), and the household tab (`?space=<id>`) if you have a household (A29, A30).
+4. On the phone: tap targets, double-tap on the servings stepper does not zoom (A9), Tab key / on-screen keyboard scrolling in the recipe form (A23), VoiceOver or TalkBack on the recipe form and the timer (A10-A14).
+
+### Dropped item
+**A27 (German copy "Einkaufswoche" / "diese"): no change.** `shop.this_week` means "Shopping week" in all four languages (Italian "Settimana della spesa", English "Shopping week", French "Semaine des courses"), and `menus.this_week` "diese" is correct German ("diese [Woche]", like "questa", "this one", "celle-ci"). It was a false positive of the audit.
+
+### Still open (B items and observations)
+The B bucket of `docs/audit-1.md` is untouched, as planned. While testing I noticed: the step-title field in the recipe editor is narrow on phones now that three 44 px buttons sit beside it (its placeholder is truncated); the open timer panel covers a third of the screen width. Both belong with the redesign.
 
 ## How items were tested
 
@@ -211,3 +246,16 @@ New translation key (it/en/de/fr): `common.unsaved_confirm`. New files: `web/src
 - **Files:** `tools/make_themes.py`, `web/src/themes/**` (13 regenerated files; the generator output is not edited by hand), `web/src/styles.css`, `web/src/themes/README.md`, `tests/test_themes.py`.
 
 **Commit checks:** `ng build` OK, `npm test` OK (28 Vitest tests), `pytest tests/test_themes.py` OK.
+
+---
+
+## Commit 7: URL state
+
+### A30: Shopping week/space and menu week were not in the address
+- **Problem:** reload or Back lost the shopping week and space, and the menu editor's week tab.
+- **Fix, shopping:** `space` and `week` are router-bound query inputs (`?space=<household id>`, `?week=<any day of the week>`; defaults are left out of the URL). `open()` now navigates (so Back steps between weeks) and an `effect` loads from the address. The pantry actions reload through a private `load()`. An unknown space gives the error toast and a replace-navigation back to the personal list. The server already treats an invalid `week` as the current shopping week.
+- **Fix, menu editor:** `?week=N` (set with `replaceUrl`, so Back does not walk through every tab); invalid values (`0`, `9`, `abc`) are ignored and the usual current-week logic applies; the address wins when valid, also after saving.
+- **Files:** `shopping-list.ts`, `menu-edit.ts`.
+- **Test:** shopping: ← twice produced `?week=2026-10-12` then `?week=2026-10-05`; Back returned to the 12 Oct week; reload kept it; "Einkaufswoche" cleared the parameter and showed the current week; `?space=bogus` gave the error toast, a clean `/spesa` and a loaded list; `?week=garbage` showed the current week. Menu editor (faked 2-week menu): the current week is open at first; clicking week 2 gives `?week=2` without a new history entry; reload keeps week 2; invalid weeks fall back to the current one. A *valid* household space could not be tested (your data has none), so please try one locally.
+
+**Commit checks:** `ng build` OK, `npm test` OK (28 tests), `pytest tests` 41 passed, all seven browser check scripts passing.

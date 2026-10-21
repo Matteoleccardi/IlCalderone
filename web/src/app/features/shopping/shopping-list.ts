@@ -1,13 +1,14 @@
 import {
   Component,
-  OnInit,
   computed,
+  effect,
   inject,
+  input,
   signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
 import { I18n, TPipe } from '../../core/i18n';
 import { ShoppingItem, ShoppingList } from '../../core/models';
@@ -230,10 +231,18 @@ import { addDays } from '../meallog/dates';
     }
   `,
 })
-export class ShoppingListPage implements OnInit {
+export class ShoppingListPage {
+  /**
+   * What is shown lives in the address, so reload and Back keep it: ?space=<household id> (absent = personal list)
+   * and ?week=<any day of the week> (absent = the current shopping week). Bound by the router.
+   */
+  readonly space = input<string>('');
+  readonly week = input<string>('');
+
   protected i18n = inject(I18n);
   private api = inject(Api);
   private notify = inject(Notify);
+  private router = inject(Router);
   protected list = signal<ShoppingList | null>(null);
   protected target = '';
   protected xName = '';
@@ -249,8 +258,10 @@ export class ShoppingListPage implements OnInit {
   );
   protected todo = computed(() => (this.list()?.items ?? []).filter((i) => !i.checked));
 
-  ngOnInit(): void {
-    this.open('me', '');
+  constructor() {
+    effect(() => {
+      void this.load(this.space() || 'me', this.week() || '');
+    });
   }
 
   protected sunday(monday: string): string {
@@ -262,13 +273,24 @@ export class ShoppingListPage implements OnInit {
     return { space: l.space.id, week: l.week };
   }
 
-  async open(space: string, week: string): Promise<void> {
+  /** Shows another space or week: changes the address (default values are left out); the effect above loads it. */
+  open(space: string, week: string): void {
+    void this.router.navigate(['/spesa'], {
+      queryParams: { space: space === 'me' ? null : space, week: week || null },
+    });
+  }
+
+  private async load(space: string, week: string): Promise<void> {
     try {
       const l = await this.api.get<ShoppingList>('shopping', { space, week });
       this.list.set(l);
       if (!this.homes().some((h) => h.id === this.target)) this.target = this.homes()[0]?.id ?? '';
     } catch (e) {
       this.notify.error(e);
+      // an address that points at a space you cannot see: go back to the personal list instead of staying empty
+      if (space !== 'me') {
+        void this.router.navigate(['/spesa'], { replaceUrl: true });
+      }
     }
   }
 
@@ -318,7 +340,7 @@ export class ShoppingListPage implements OnInit {
     if (!name.trim()) return false;
     try {
       await this.api.post('pantry', { space: this.where.space, name });
-      await this.open(this.where.space, this.where.week);
+      await this.load(this.where.space, this.where.week);
       return true;
     } catch (e) {
       this.notify.error(e);
@@ -334,7 +356,7 @@ export class ShoppingListPage implements OnInit {
   async fromPantry(name: string): Promise<void> {
     try {
       await this.api.post('pantry/remove', { space: this.where.space, name });
-      await this.open(this.where.space, this.where.week);
+      await this.load(this.where.space, this.where.week);
     } catch (e) {
       this.notify.error(e);
     }

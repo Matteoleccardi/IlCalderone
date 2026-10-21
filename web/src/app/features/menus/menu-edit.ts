@@ -128,7 +128,7 @@ import { ScopePicker } from '../../shared/scope-picker';
             type="button"
             [class.active]="w === week()"
             [attr.aria-pressed]="w === week()"
-            (click)="week.set(w)"
+            (click)="showWeek(w)"
           >
             {{ 'menus.week_n' | t: { n: w } }}
             @if (w === m.today.week && m.active && m.in_season) {
@@ -229,6 +229,8 @@ import { ScopePicker } from '../../shared/scope-picker';
 })
 export class MenuEdit implements HasUnsaved {
   readonly id = input.required<string>();
+  /** ?week=N: the open week, kept in the address so reload and Back keep it (changed with replaceUrl). */
+  readonly weekParam = input<string | undefined>(undefined, { alias: 'week' });
   protected i18n = inject(I18n);
   protected households = inject(HouseholdsService);
   protected api = inject(Api);
@@ -274,6 +276,11 @@ export class MenuEdit implements HasUnsaved {
     effect(() => {
       this.load(this.id());
     });
+    // the address names a week (reload, Back, a shared link): open it
+    effect(() => {
+      const w = this.paramWeek(this.weeks());
+      if (w !== null) this.week.set(w);
+    });
     this.households.ensure();
     this.api.get<RecipeSummary[]>('recipes').then(
       (r) => this.recipes.set(r),
@@ -303,11 +310,24 @@ export class MenuEdit implements HasUnsaved {
     this.household.set(m.household);
     this.seasonFrom = m.season ? Number(m.season.from.slice(0, 2)) : 0;
     this.seasonTo = m.season ? Number(m.season.to.slice(0, 2)) : 12;
+    const fromAddress = this.paramWeek(m.weeks);
     this.week.update((w) =>
-      w > m.weeks ? 1 : m.active && m.in_season && !this.dirty() ? m.today.week : w,
+      fromAddress ?? (w > m.weeks ? 1 : m.active && m.in_season && !this.dirty() ? m.today.week : w),
     );
     this.dirty.set(false);
     this.title.set(m.name);
+  }
+
+  /** The week named by the address, when it is a real week of this menu. */
+  private paramWeek(max: number): number | null {
+    const n = Number(this.weekParam());
+    return Number.isInteger(n) && n >= 1 && n <= max ? n : null;
+  }
+
+  /** A week tab: open it and write it into the address (replacing the entry, so Back doesn't step through tabs). */
+  protected showWeek(w: number): void {
+    this.week.set(w);
+    void this.router.navigate(['/menu', this.id()], { queryParams: { week: w }, replaceUrl: true });
   }
 
   protected cell(day: number, meal: Meal): MenuItem[] {
