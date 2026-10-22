@@ -29,7 +29,7 @@ Branch `redesign` (from `audit-one`, nothing pushed). The style manifest is `des
 10. **Recipe page and cooking mode**: details visible without a click; in the cooking mode the whole step is the tap target.
 11. **Menu**: "In programma (settimana N)" computed from each active menu's start and length (`menu-week.ts`); "New menu" and "Import/Export" side by side from 900 px.
 
-Round 2 was checked with unit tests and a build; the browser pass (5 tabs at 390 px, header alignment, assist band timing, left side, menu week) was done for items 8 and the first timer check only, see the last section.
+Round 2 was checked in a 390 px headless browser (and 1280 px for the menu): five tabs and header alignment, logout sheet, timer tab (enlarge, 1.5 s return, second-miss reach, left side, 5 slots, 9/11 min presets), recipe details visible, cooking-mode tap on text and on the step, side-by-side menu cards. Not seen with real data: the week number in the menu heading (the test account has no active menu; the calculation is unit-tested) and real finger touches on the edge band.
 
 ## Still open
 
