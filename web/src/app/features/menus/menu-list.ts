@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
@@ -8,6 +8,7 @@ import { Notify } from '../../core/notify';
 import { ScopePicker } from '../../shared/scope-picker';
 import { addDays, today } from '../meallog/dates';
 import { MenuImport } from './menu-import';
+import { menuWeek } from './menu-week';
 import { WeekPlan } from './week-plan';
 
 /** The plan of the coming days over all your menus, the list of menus, and "new menu". */
@@ -19,7 +20,7 @@ import { WeekPlan } from './week-plan';
     <h1>{{ 'nav.menus' | t }}</h1>
     <section>
       <div class="page-head">
-        <h2>{{ 'menus.plan' | t }}</h2>
+        <h2>{{ weekLabel() }}</h2>
         <div class="actions">
           <button type="button" (click)="shift(-7)" [attr.aria-label]="'common.previous' | t">
             ←
@@ -74,6 +75,7 @@ import { WeekPlan } from './week-plan';
       }
     </section>
 
+    <div class="side-by-side">
     <section class="card narrow">
       <h2>{{ 'menus.new' | t }}</h2>
       <form (ngSubmit)="create()">
@@ -119,6 +121,7 @@ import { WeekPlan } from './week-plan';
     </section>
 
     <app-menu-import (imported)="loadMenus()" />
+    </div>
   `,
 })
 export class MenuList implements OnInit {
@@ -137,6 +140,18 @@ export class MenuList implements OnInit {
   protected meals: Meal[] = ['cena'];
   protected visibility = signal<Visibility>('private');
   protected household = signal<string | null>(null);
+
+  /** "Planned (week 2)": the week of the first day shown, in each active menu (usually one). */
+  protected weekLabel = computed(() => {
+    const weeks = [
+      ...new Set(
+        this.menus()
+          .filter((m) => m.active && m.in_season)
+          .map((m) => menuWeek(m.start, m.weeks, this.from())),
+      ),
+    ].sort((a, b) => a - b);
+    return weeks.length ? this.i18n.t('menus.plan_week', { n: weeks.join(' · ') }) : this.i18n.t('menus.plan');
+  });
 
   protected hasAny = () => this.plan().some((d) => d.meals.length);
 
