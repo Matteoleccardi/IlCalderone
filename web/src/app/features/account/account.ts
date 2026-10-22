@@ -1,15 +1,20 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { ConfirmService } from '../../core/confirm';
+import { HouseholdsService } from '../../core/households';
+import { NavService } from '../../core/nav';
 import { I18n, LANGS, Lang, TPipe } from '../../core/i18n';
 import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
 import { User } from '../../core/models';
+import { NavIcon } from '../../shared/nav-icon';
 import { ThemePicker } from '../../shared/theme-picker';
 
 @Component({
   selector: 'app-account',
-  imports: [FormsModule, ThemePicker, TPipe],
+  imports: [FormsModule, RouterLink, NavIcon, ThemePicker, TPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h1>{{ 'account.title' | t }}</h1>
@@ -25,6 +30,16 @@ import { ThemePicker } from '../../shared/theme-picker';
         {{ 'account.username_is' | t }} <strong>{{ session.user()?.username }}</strong>
       </p>
     </section>
+    @if (pages().length) {
+      <section class="card narrow">
+        <h2>{{ 'account.pages' | t }}</h2>
+        <ul class="page-links">
+          @for (n of pages(); track n.path) {
+            <li><a [routerLink]="n.path"><app-nav-icon [name]="n.path" /> {{ n.label | t }}</a></li>
+          }
+        </ul>
+      </section>
+    }
     <section class="card narrow">
       <h2>{{ 'app.language' | t }}</h2>
       <label
@@ -66,6 +81,11 @@ import { ThemePicker } from '../../shared/theme-picker';
         <button type="submit" [disabled]="busy()">{{ 'account.change_password' | t }}</button>
       </form>
     </section>
+    <section class="card narrow">
+      <h2>{{ 'app.logout' | t }}</h2>
+      <p class="muted">{{ 'account.logout_hint' | t }}</p>
+      <button type="button" class="danger" (click)="logout()">{{ 'app.logout' | t }}</button>
+    </section>
   `,
 })
 export class Account {
@@ -78,6 +98,21 @@ export class Account {
   protected old = '';
   protected pw = '';
   protected busy = signal(false);
+  private nav = inject(NavService);
+  private confirm = inject(ConfirmService);
+  private households = inject(HouseholdsService);
+  private router = inject(Router);
+
+  /** Pages that are not in the bottom bar: Families, Admin (only for admins, see NavService). */
+  protected pages = computed(() => this.nav.items().filter((n) => n.path === '/famiglie' || n.path === '/admin'));
+
+  /** Asks first: logging out by a stray tap would be annoying in the middle of cooking. */
+  async logout(): Promise<void> {
+    if (!(await this.confirm.ask(this.i18n.t('account.logout_confirm'), 'app.logout'))) return;
+    await this.session.logout();
+    this.households.reset();
+    this.router.navigateByUrl('/login');
+  }
 
   async saveName(): Promise<void> {
     try {

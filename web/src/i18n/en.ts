@@ -8,7 +8,6 @@ export const en: Dict = {
   'app.logout': 'Log out',
   'app.language': 'Language',
   'app.close': 'Close',
-  'nav.more': 'More',
   'nav.recipes': 'Recipes',
   'nav.menus': 'Menus',
   'nav.shopping': 'Shopping',
@@ -83,6 +82,9 @@ export const en: Dict = {
   'setup.done': 'Account created',
 
   'account.title': 'My account',
+  'account.pages': 'Pages',
+  'account.logout_hint': 'Sign out on this device; you will need to sign in again.',
+  'account.logout_confirm': 'Sign out?',
   'account.display': 'Display name',
   'account.name': 'Name',
   'account.username_is': 'Username for logging in:',

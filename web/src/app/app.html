@@ -1,9 +1,15 @@
 <!-- <base href="/"> would turn a plain #main link into "go to the home page": focus <main> directly -->
 <a class="skip" href="#main" (click)="$event.preventDefault(); mainEl.focus()">{{ 'app.skip' | t }}</a>
 <header class="topbar">
-  <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
-    <app-brand />
-  </a>
+  <div class="topbar-in">
+    <a routerLink="/" class="brand" [attr.aria-label]="'app.home_label' | t">
+      <app-brand />
+    </a>
+    @if (session.user()) {
+      <a routerLink="/account" class="account-btn" routerLinkActive="active" ariaCurrentWhenActive="page"
+        [attr.aria-label]="'account.title' | t"><app-nav-icon name="/account" /></a>
+    }
+  </div>
 </header>
 
 <main id="main" tabindex="-1" #mainEl>
@@ -27,32 +33,8 @@
         <span class="tab-label">{{ n.label | t }}</span>
       </a>
     }
-    <button type="button" class="tab" [class.active]="moreActive()" [attr.aria-current]="moreActive() ? 'page' : null"
-      aria-haspopup="dialog" (click)="openMore()">
-      <app-nav-icon name="more" />
-      <span class="tab-label">{{ 'nav.more' | t }}</span>
-    </button>
   </nav>
 
-  <dialog class="sheet more" #more aria-labelledby="more-h" (click)="$event.target === more && closeMore()">
-    <h2 id="more-h">{{ session.user()?.display }}</h2>
-    <ul class="more-list">
-      @for (n of moreItems(); track n.path) {
-        <li><a [routerLink]="n.path" (click)="closeMore()"><app-nav-icon [name]="n.path" /> {{ n.label | t }}</a></li>
-      }
-      <li><button type="button" class="more-btn" (click)="newTimer()"><app-nav-icon name="timer" /> {{ 'timer.new' | t }}</button></li>
-      <li><a routerLink="/account" (click)="closeMore()"><app-nav-icon name="/account" /> {{ 'account.title' | t }}</a></li>
-    </ul>
-    <label class="lang">{{ 'app.language' | t }}
-      <select [value]="i18n.lang" (change)="setLang($any($event.target).value)">
-        @for (l of langs; track l.code) { <option [value]="l.code" [selected]="l.code === i18n.lang">{{ l.name }}</option> }
-      </select>
-    </label>
-    <div class="actions">
-      <button type="button" (click)="logout()">{{ 'app.logout' | t }}</button>
-      <button type="button" class="link" (click)="closeMore()">{{ 'app.close' | t }}</button>
-    </div>
-  </dialog>
 }
 
 <app-confirm-sheet />

@@ -8,7 +8,6 @@ export const fr: Dict = {
   'app.logout': 'Se déconnecter',
   'app.language': 'Langue',
   'app.close': 'Fermer',
-  'nav.more': 'Plus',
   'nav.recipes': 'Recettes',
   'nav.menus': 'Menus',
   'nav.shopping': 'Courses',
@@ -83,6 +82,9 @@ export const fr: Dict = {
   'setup.done': 'Compte créé',
 
   'account.title': 'Mon compte',
+  'account.pages': 'Pages',
+  'account.logout_hint': 'Se déconnecter de cet appareil : il faudra se reconnecter.',
+  'account.logout_confirm': 'Se déconnecter ?',
   'account.display': 'Nom affiché',
   'account.name': 'Nom',
   'account.username_is': "Nom d'utilisateur pour la connexion :",

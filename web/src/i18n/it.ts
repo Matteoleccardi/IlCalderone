@@ -11,7 +11,6 @@ export const it = {
   'app.logout': 'Esci',
   'app.language': 'Lingua',
   'app.close': 'Chiudi',
-  'nav.more': 'Altro',
   'nav.recipes': 'Ricette',
   'nav.menus': 'Menu',
   'nav.shopping': 'Spesa',
@@ -89,6 +88,9 @@ export const it = {
 
   // account
   'account.title': 'Il mio account',
+  'account.pages': 'Pagine',
+  'account.logout_hint': 'Esci da questo dispositivo: dovrai accedere di nuovo.',
+  'account.logout_confirm': 'Vuoi uscire?',
   'account.display': 'Nome visualizzato',
   'account.name': 'Nome',
   'account.username_is': "Nome utente per l'accesso:",

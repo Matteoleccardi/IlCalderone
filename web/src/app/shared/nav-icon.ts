@@ -28,12 +28,6 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
           <!-- star -->
           <path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.6l6-.9z" />
         }
-        @case ('more') {
-          <!-- three dots -->
-          <circle cx="5" cy="12" r="1.6" fill="currentColor" />
-          <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-          <circle cx="19" cy="12" r="1.6" fill="currentColor" />
-        }
         @case ('timer') {
           <!-- stopwatch -->
           <circle cx="12" cy="13.5" r="7.5" />
