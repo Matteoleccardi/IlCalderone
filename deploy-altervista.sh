@@ -183,6 +183,22 @@ if [[ "$REMOTE_VERSION" != "(unknown)" && "${REMOTE_VERSION%.*}" != "${REL_VERSI
   warn "minor/major version change: read the release notes in case a data format changed (migrations in api/bin/ cannot run on Altervista; do that step by hand)"
 fi
 
+# can this FTP login write into the site folder and api/? A temporary empty file is sent and removed again. Better to learn it
+# here than half way through the upload.
+if has api; then
+  wt="$(mktemp -d)/.calderone-write-test"; : > "$wt"
+  say "Checking that this login can write to the server"
+  for d in . api; do
+    if lf "put -O $d $(printf '"%s"' "$wt")" >/dev/null 2>&1; then
+      lf "rm -f -- $(printf '"%s"' "$d/.calderone-write-test")" >/dev/null 2>&1 || warn "sent a test file to $d/ but could not remove it: delete $d/.calderone-write-test by hand"
+      echo "    OK: can write to ${d/#./the site folder}"
+    else
+      die "this FTP login cannot write to ${d/#./the site folder} on the server. In FileZilla, right-click the folder -> File permissions -> 755 (apply to the folder; for api/ also tick 'recurse into subdirectories' with 'apply to all'), or check the FTP user. Nothing was changed."
+    fi
+  done
+  rm -rf "$(dirname "$wt")"
+fi
+
 # ---------------------------------------------------------------- the plan
 # never sent, never deleted: the server's data and local settings
 KEEP=(-x '^data/' -x '^data$' -x '(^|/)[^/]*\.local\.php$')

@@ -171,6 +171,7 @@ SFTP, no rsync).
 - The order keeps the site usable: all program files first, then `index.html`, `sw.js` and `manifest.webmanifest`,
   then the outdated `chunk-*.js`, `main-*.js`, `styles-*.css` files and files that are gone from `api/`, `logos/` and
   `media/` are removed. Read the dry run first: it lists what would be deleted.
+- Before sending anything it checks that your FTP login can write to the site folder and `api/` (a temporary empty file is sent and removed) and stops with the fix if it cannot.
 - Afterwards it opens `<site>/api/session` to check the new version is live, and `<site>/data/users.json`, which must
   NOT be readable (a 200 there is reported as DANGER).
 - Options: `--host`, `--user`, `--remote-dir` (with `--base-href` for a sub-folder), `--url`, `--no-build`,
