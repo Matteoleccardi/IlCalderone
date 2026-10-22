@@ -22,6 +22,15 @@ Branch `redesign` (from `audit-one`, nothing pushed). The style manifest is `des
 - Primary button: saffron in Dispensa; other themes use their accent as `--primary`.
 - No undo toast: deletes are permanent on the server, so they ask in the sheet.
 
+## Round 2 (feedback after trying it)
+
+8. **Header, tabs, account**: logo left and a round account button right, in the page column; five tabs (Rezepte, Menü, Einkauf, Sammlungen, Tagebuch), the "More" sheet is gone; Haushalte/Verwaltung, language, timer side and **logout (with a confirmation sheet)** are on the account page. Radii softer: `--r-1` 8 px, `--r-2` 12 px.
+9. **Timers**: the edge tab with 5 slots is back (the strip above the tabs was dropped); left/right side per device in Account; 24 px edge band that enlarges the tab for 1.5 s (second miss: bigger tappable area); presets 9 and 11 min.
+10. **Recipe page and cooking mode**: details visible without a click; in the cooking mode the whole step is the tap target.
+11. **Menu**: "In programma (settimana N)" computed from each active menu's start and length (`menu-week.ts`); "New menu" and "Import/Export" side by side from 900 px.
+
+Round 2 was checked with unit tests and a build; the browser pass (5 tabs at 390 px, header alignment, assist band timing, left side, menu week) was done for items 8 and the first timer check only, see the last section.
+
 ## Still open
 
 - Inline field errors only on the login form; recipe form, setup, admin and shopping extras still use toasts (B8).
@@ -33,4 +42,4 @@ Branch `redesign` (from `audit-one`, nothing pushed). The style manifest is `des
 
 ## Try locally
 
-`cd web && npm run build` (already done once; `php -S 127.0.0.1:8080 -t public public/api/router-dev.php`). Check: Account → Appearance (Dispensa light/dark, Calderone still there), a recipe → "Kochen" (tick ingredients, tap steps, start a timer, leave and come back), More sheet, shopping "…", leaving the recipe form with unsaved text.
+`cd web && npm run build` (`php -S 127.0.0.1:8080 -t public public/api/router-dev.php`). Check: Account → Appearance (Dispensa light/dark, Calderone still there), a recipe → "Kochen" (tick ingredients, tap steps, start a timer, leave and come back), account page (timer side, Families, logout), shopping "…", leaving the recipe form with unsaved text.

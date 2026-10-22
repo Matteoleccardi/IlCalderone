@@ -94,17 +94,18 @@ Weights: 400 body, 600 UI emphasis, 800 titles (Bricolage). Titles may wrap to t
 ## 5. Space, shape, motion
 
 - **Unit:** the art-pixel, `--px: 4px`. Spacing steps: 4, 8, 12, 16, 24, 32, 48 (`--s-1`…`--s-7`). Page margin 16 px; gap between tiles 12 px; section gap 24 px.
-- **Radius:** `--r-1: 4px` (inputs, chips), `--r-2: 8px` (tiles, sheets). Buttons and chips may use a **stepped corner** (a 4 px notch drawn with a `clip-path` polygon or a two-step border) as the pixel signature; never a full pill except the timer chip and the servings stepper.
+- **Radius:** `--r-1: 8px` (buttons, fields, small chips), `--r-2: 12px` (tiles, sheets, dialogs, the timer panel). Soft on purpose (round 2 feedback: 4/8 felt too sharp); both stay multiples of the art-pixel. Full pills only for the timer chips, the servings stepper and the round account button. A card inside a card uses an inner radius no larger than the outer one. Marks (the 4 px active-tab bar, the current-step bar) stay square.
 - **Borders:** 1 px `--line` for dividers, 2 px `--line-strong` for controls and the focus ring `outline: 3px solid var(--accent); outline-offset: 2px` (also on tinted fields; check contrast).
 - **Targets:** minimum 44×44 px (`--hit: 2.75rem`), 56 px for shopping rows and cooking-mode controls, 8 px between neighbours.
 - **Motion:** 150 ms ease-out for state changes only (sheet slide, chip toggle); respect `prefers-reduced-motion` (no transform animation, no pulse). Timer ringing pulses via background step, not scale.
-- **Z-index:** content 0, sticky header 10, timer strip 30, bottom tab bar 40, sheet/dialog 60, toast 70.
+- **Z-index:** content 0, sticky header 10, bottom tab bar 40, timer tab 40, sheet/dialog 60, toast 70.
 - **Safe areas:** `viewport-fit=cover`; the tab bar, sheets and the timer strip add `env(safe-area-inset-bottom)`.
 - **Hover** styles only inside `@media (hover: hover)`.
 
 ## 6. Components
 
-- **Tab bar (bottom).** Four labelled destinations: Rezepte, Menü, Einkauf, Mehr. Label always visible (14 px), icon above (line icon from `shared/nav-icon.ts`, 24 px), selected = `--accent` text and a 4 px bar on top of the item, `aria-current="page"`. "Mehr" opens a bottom sheet with Kollektionen, Tagebuch, Haushalte, Admin, Account, language, logout. Height kept in `--nav-h`; anything fixed above it uses `bottom: calc(var(--nav-h) + env(safe-area-inset-bottom))`.
+- **Tab bar (bottom).** Five labelled destinations: Rezepte, Menü, Einkauf, Sammlungen, Tagebuch (each only if its module is on). Label always visible (12 px / 600, set to fit the longest German word in ~72 px), icon above (line icon from `shared/nav-icon.ts`, 24 px), selected = `--accent` text and a 4 px bar on top of the item, `aria-current="page"`. There is no "More" sheet (tried, dropped: it hid Sammlungen and Tagebuch behind a second tap). Haushalte and Verwaltung (admins only) are links on the account page; so are language, timer side and logout (with a confirmation sheet).
+- **Header.** Logo left, round 44 px account button right, both inside the same 1100 px column as the page so they line up with the content on wide screens. Height kept in `--nav-h`; anything fixed above it uses `bottom: calc(var(--nav-h) + env(safe-area-inset-bottom))`.
 - **Top bar.** Brand (weekly logo, left) and nothing else on a phone; page title is an `<h1>` in the page, not a bar. Max 56 px.
 - **Recipe card.** `--surface` tile, dish icon 160 px (integer scale, `pixelated`), full title 16 px / 600 below, one 14 px meta line (time · diet). The "add to menu" action is a 44 px button in a row under the title, never over the picture. Two columns at 390 px, three from 640 px.
 - **Buttons.** Primary: `--primary` fill, `--primary-text`, 44 px high, one per screen. Secondary: 2 px `--line-strong` outline, `--text`. Tertiary/link: `--accent` text, underline, 44 px hit area. Destructive: `--danger` outline, filled `--danger`/`--on-danger` only inside the confirm sheet.
@@ -114,7 +115,7 @@ Weights: 400 body, 600 UI emphasis, 800 titles (Bricolage). Titles may wrap to t
 - **Sheet (bottom dialog).** `<dialog class="sheet">`, slides from the bottom, `--surface`, top corners `--r-2`, grabber 32×4 px, `overscroll-behavior: contain`, safe-area padding, close on backdrop and Escape. Replaces every native `confirm()`/`prompt()`.
 - **Confirm + undo.** Destructive actions ask once in a sheet (title names the object, the destructive button says what it does: "Rezept löschen"). Where reversible, skip the sheet and show an **undo toast** for 8 s instead.
 - **Toast.** Above the timer strip and tab bar; 14 px; `role="status"`, errors `role="alert"`; never the only error channel.
-- **Timer strip.** Replaces the right-edge tab. A bar above the tab bar showing running timers as 44 px chips (bold tabular digits, pause label + label for paused, word "Fertig" when ringing, pulse by background step). Tap = pause/resume, trailing "+" opens the duration wheel. Hidden when no timer runs. Ringing sets `role="alert"`.
+- **Timer tab.** A 28×64 px tab on the left or right screen edge (Account → Timer, per device, default right) that slides out a 9.5 rem column of 5 timer rows (44 px; tap = pause/resume, ✕ remove, dashed "+" rows open the duration wheel, bold tabular digits, word "Fertig" when ringing). The closed tab shows the soonest remaining time. Ringing = the tab and the row flash between `--accent`/`--primary` by background step (no glow). Swipe towards the middle of the screen opens, towards the edge closes. **Edge band:** a touch in the 24 px strip along that edge (no overlay element; a passive document listener, so the page under it still gets its tap) makes the tab grow to 56×112 px for 1.5 s, then it shrinks back with a .25 s ease; if the next touch in the band misses the tab too, its tappable area stretches to 44 px. Reduced motion: no transition. Wheel presets: 1, 3, 5, 9, 10, 11, 15, 20, 30, 45, 60 min. Ringing sets `role="alert"`. (A strip above the tab bar was tried in round 1 and dropped.)
 - **Shopping row.** 56 px minimum, two lines: name + amount (amount `white-space: nowrap`, tabular), second line 12 px source. Check target is the whole row. "Always at home" and "move to household" live in the row's "…" sheet, not as extra lines.
 - **Menu day row.** Day name + date, dish icon 96 px, dish title, servings. **Today** = the word "Heute"/"Oggi" in a badge plus a 4 px leading bar (never colour alone).
 - **Empty / loading / error.** Empty: the dish icon of the section at 128 px, one sentence, one action. Loading: static skeleton tiles in `--surface-2` (no shimmer). Error: sentence + "Retry", inline.
@@ -125,9 +126,9 @@ Weights: 400 body, 600 UI emphasis, 800 titles (Bricolage). Titles may wrap to t
 Each screen at 390 px, in order of vertical position.
 
 1. **Recipe list.** Search field (sticky, 44 px) · "Filter" row · two-column cards · "+" new recipe as a secondary button at the end of the list (no floating button). 
-2. **Recipe page.** Voxel dish on a flat `--surface` field (4:3, picture crossfade stays) · title (30 px) · one meta line · two buttons: **Cucina** (primary) and **Aggiungi** (secondary) · "Dettagli" disclosure (facets, tags, visibility, edit, variant, download, history, delete in a "…" sheet) · ingredients (two columns: name / qty+unit; servings stepper in the heading row) · steps as a real `<ol>`, Literata 17/26 · notes · source line (12 px).
+2. **Recipe page.** Voxel dish on a flat `--surface` field (4:3, picture crossfade stays) · title (30 px) · one meta line · two buttons: **Cucina** (primary) and **Aggiungi** (secondary) · details always visible below the buttons (visibility, facets, tags, edit, variant, download, history, delete; no disclosure) · ingredients (two columns: name / qty+unit; servings stepper in the heading row) · steps as a real `<ol>`, Literata 17/26 · notes · source line (12 px).
 3. **Cooking mode ("Cucina").** See section 8.
-4. **Menu.** Week switcher (segmented, 44 px) · seven day rows · today marked with word and bar · empty slot = row with "+" (44 px) instead of a dashed box.
+4. **Menu.** Heading "In programma (settimana N)" (week of the first day shown, per active menu) · "New menu" and "Import/Export" side by side from 900 px (`.side-by-side`, stacked below) · week switcher (segmented, 44 px) · seven day rows · today marked with word and bar · empty slot = row with "+" (44 px) instead of a dashed box.
 5. **Shopping list.** Space switcher · week · rows by section · done rows move to a collapsed "Erledigt (n)" group with count · extras field at the bottom.
 6. **Editor.** One column. Controls stack: row = name (full width) / qty + unit / note / tools. Step title full width. Sticky save bar above the tab bar. Leaving with unsaved changes asks in a sheet.
 
@@ -145,9 +146,9 @@ Layout, top to bottom (390 px):
    - **current**: Literata 20 px / 30, 4 px `--primary` bar on the left, title in 600, full text, an inline **Timer mm:ss** button (44 px) per duration found in the text;
    - **previous** and **next**: normal 16 px, full text, `--text` colour;
    - **others**: 16 px, `--muted` (never opacity), collapsed to the first two lines with "mehr";
-   - tapping any step makes it current; the current step is kept in `sessionStorage`.
+   - tapping anywhere on a step (not just its title; the timer buttons excepted) makes it current; the current step is kept in `sessionStorage`.
 4. **Primary bar** (fixed, above the timer strip and the tab bar): "Weiter" (primary, full width, 56 px) and a "Zurück" text button. Last step: "Fertig".
-5. **Timer strip** (shared, section 6) above the tab bar with the running timers.
+5. **Timer tab** (shared, section 6) on the screen edge with the running timers.
 
 Hidden in cooking mode: voxel dish, facets, tags, visibility, the action buttons, notes (reachable via "Notizen" at the end), file name, variants.
 
@@ -201,7 +202,7 @@ Rules: the screen stays awake (Screen Wake Lock, feature-detected, released on l
 | B8 | Inline field errors | §6 fields |
 | B9 | `viewport-fit=cover`, manifest, safe areas | §5 safe areas, §9 theme-color |
 
-Observations from the audit also solved here: the timer dock covering a third of the screen (timer strip, §6), the narrow step-title field in the editor (stacked controls, §7), the "+" on top of the dish picture (§6 card), tall shopping rows (§6 shopping row), seven unlabelled nav icons (§6 tab bar, four labelled tabs with "Mehr").
+Observations from the audit also solved here: the timer dock covering a third of the screen (timer tab, §6), the narrow step-title field in the editor (stacked controls, §7), the "+" on top of the dish picture (§6 card), tall shopping rows (§6 shopping row), seven unlabelled nav icons (§6 tab bar, five labelled tabs, no "More").
 
 ## 13. Reusing this style elsewhere
 

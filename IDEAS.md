@@ -42,5 +42,6 @@ All three directions build on the same identity: the hand-drawn 8-bit dish icons
 - Screen Wake Lock while the cooking mode is open (adopted in the plan; iOS support varies).
 - Timer detection in step text ("10 Minuten") as an inline button (adopted for the cooking mode).
 - Per-step ingredient matching (show only the quantities a step uses). Fragile without data changes: would need an `ingredients` list per step in the recipe schema.
+- Timer strip above the tab bar: tried in round 1, dropped (the edge tab with its 5 slots was preferred). A "More" sheet in the tab bar: tried, dropped (hid Sammlungen and Tagebuch).
 - Swipe on shopping rows (tick, "always at home") instead of a row menu.
 - Photos of real dishes are deliberately not part of the identity; drawn icons and voxels stay the picture language.
