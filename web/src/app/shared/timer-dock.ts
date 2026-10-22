@@ -6,8 +6,8 @@ import { DurationWheel } from './duration-wheel';
 import { Assist, AssistState, inBand } from './timer-assist';
 
 /**
- * Kitchen timers on every page: a thin tab on the left or right screen edge (Account → Timer); tap it or swipe it
- * towards the middle to slide out a narrow column of up to 5 timers. A touch in the 24px band along that edge makes
+ * Kitchen timers on every page: a thin tab low on the left or right screen edge (Account → Timer); tap it or swipe it
+ * towards the middle to slide out a narrow column of up to 5 timers. A touch in the 48px band along that edge makes
  * the tab bigger for 1.5 s (a second miss makes its tappable area bigger still), see shared/timer-assist.ts.
  * A new timer's length is chosen on wheels (shared/duration-wheel.ts).
  */

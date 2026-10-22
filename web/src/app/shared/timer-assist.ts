@@ -1,5 +1,5 @@
 /** The invisible band along the screen edge that helps a thumb find the timer tab (docs/design.md, "Timer tab"). */
-export const BAND_PX = 24;
+export const BAND_PX = 48;
 /** How long the tab stays big after the last touch in the band. */
 export const HOLD_MS = 1500;
 

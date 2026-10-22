@@ -25,7 +25,7 @@ Branch `redesign` (from `audit-one`, nothing pushed). The style manifest is `des
 ## Round 2 (feedback after trying it)
 
 8. **Header, tabs, account**: logo left and a round account button right, in the page column; five tabs (Rezepte, Menü, Einkauf, Sammlungen, Tagebuch), the "More" sheet is gone; Haushalte/Verwaltung, language, timer side and **logout (with a confirmation sheet)** are on the account page. Radii softer: `--r-1` 8 px, `--r-2` 12 px.
-9. **Timers**: the edge tab with 5 slots is back (the strip above the tabs was dropped); left/right side per device in Account; 24 px edge band that enlarges the tab for 1.5 s (second miss: bigger tappable area); presets 9 and 11 min.
+9. **Timers**: the edge tab with 5 slots is back, low on the screen (above the tab bar, panel growing upward) (the strip above the tabs was dropped); left/right side per device in Account; 48 px edge band that makes the tab 1.5 times wider (not taller) for 1.5 s (second miss: bigger tappable area); presets 9 and 11 min.
 10. **Recipe page and cooking mode**: details visible without a click; in the cooking mode the whole step is the tap target.
 11. **Menu**: "In programma (settimana N)" computed from each active menu's start and length (`menu-week.ts`); "New menu" and "Import/Export" side by side from 900 px.
 
