@@ -33,7 +33,7 @@ import { RecipeCard } from './recipe-card';
           (input)="typed()"
         />
         <button type="submit" class="search-go" [attr.aria-label]="'recipes.search' | t">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 21 21" /></svg>
         </button>
       </div>

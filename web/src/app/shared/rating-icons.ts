@@ -14,7 +14,7 @@ const TRIANGLE = 'M12 3.6 21.4 20H2.6z';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @for (f of fills(); track $index) {
-      <span class="ri" [style.width.px]="size()" [style.height.px]="size()" aria-hidden="true">
+      <span class="ri" [style.width.px]="size()" [style.height.px]="size()" [style.margin-inline.px]="pad()" aria-hidden="true">
         <svg viewBox="0 0 24 24" [attr.width]="size()" [attr.height]="size()"><path [attr.d]="path()" class="ri-line" /></svg>
         @if (f > 0) {
           <svg viewBox="0 0 24 24" [attr.width]="size()" [attr.height]="size()" class="ri-fill-wrap" [style.clip-path]="'inset(0 ' + (1 - f) * 100 + '% 0 0)'">
@@ -33,6 +33,8 @@ export class RatingIcons {
   readonly size = input(24);
   /** One icon, fully filled, as a label for an average ("★ 4.5"). */
   readonly single = input(false);
+  /** Space on each side of an icon (px), so a row of them has even, easier cells to tap. */
+  readonly pad = input(0);
   protected path = computed(() => (this.kind() === 'taste' ? STAR : TRIANGLE));
   /** The fill of each of the five icons: 0, 0.5 or 1. */
   protected fills = computed(() => {

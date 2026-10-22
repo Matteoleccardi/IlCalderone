@@ -40,7 +40,7 @@ const NONE: Rating = { taste: null, ease: null };
             <div class="rate-input" role="slider" tabindex="0" [attr.aria-labelledby]="'rl-' + c.key"
               aria-valuemin="0" aria-valuemax="5" [attr.aria-valuenow]="mine()[c.key] ?? 0" [attr.aria-valuetext]="valueText(c.key)"
               (click)="tap($event, c.key)" (keydown)="key($event, c.key)">
-              <app-rating-icons [kind]="c.key" [value]="mine()[c.key]" tone="mine" [size]="40" />
+              <app-rating-icons [kind]="c.key" [value]="mine()[c.key]" tone="mine" [size]="24" [pad]="6" />
             </div>
             <span class="rate-value" aria-hidden="true">{{ mine()[c.key] === null ? '–' : num(mine()[c.key]!) }}</span>
           </div>
