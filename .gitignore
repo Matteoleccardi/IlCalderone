@@ -9,6 +9,9 @@ public/*.js
 public/*.css
 public/*.html
 public/*.svg
+public/*.png
+public/*.webmanifest
+public/sw.js
 public/*.ico
 public/media/
 public/logos/
