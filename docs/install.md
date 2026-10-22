@@ -152,6 +152,34 @@ protected by `.htaccess`, is the right choice.
 - On Altervista's free plan the site usually can't call itself, so expect "impossibile verificare" (cannot check) on
   the privacy line. **The manual test of `/data/users.json` is the one that counts.**
 
+### 2.4b Upgrading with the script
+After the first install, `./deploy-altervista.sh` upgrades the site from your computer and replaces **only the program**.
+`data/` and `api/config.local.php` (and any other `*.local.php` in `api/`) are never uploaded, overwritten or deleted,
+so accounts, sessions, recipes, photos and your settings stay as they are.
+
+It needs `lftp` and `curl` (`sudo dnf install lftp`, or `sudo apt install lftp`). Altervista offers plain FTP only (no
+SFTP, no rsync).
+```bash
+./deploy-altervista.sh              # builds, then only SHOWS what would change (dry run)
+./deploy-altervista.sh --apply      # does it
+```
+- It asks for the FTP host (`ftp.<name>.altervista.org`), user and password every time. Nothing is stored; the
+  password is never put on a command line. It tries an encrypted (explicit TLS) connection first; if the server
+  refuses, it asks you to type `plain` before sending anything unencrypted.
+- With `--apply` it first saves `api/config.local.php` and `data/` (without sessions and photos; `--backup-media` adds
+  the photos) to `backups/altervista-<date>/` (git-ignored, owner-only), and stops if that fails.
+- The order keeps the site usable: all program files first, then `index.html`, `sw.js` and `manifest.webmanifest`,
+  then the outdated `chunk-*.js`, `main-*.js`, `styles-*.css` files and files that are gone from `api/`, `logos/` and
+  `media/` are removed. Read the dry run first: it lists what would be deleted.
+- Afterwards it opens `<site>/api/session` to check the new version is live, and `<site>/data/users.json`, which must
+  NOT be readable (a 200 there is reported as DANGER).
+- Options: `--host`, `--user`, `--remote-dir` (with `--base-href` for a sub-folder), `--url`, `--no-build`,
+  `--no-backup`, `--insecure-tls`, `--yes` (skips the "type upload" question; the password is still asked).
+- Limits: Altervista has no shell, so migration scripts in `api/bin/` can't run there. When the minor version changes, the
+  script reminds you to read the release notes. If you edited `.htaccess` by hand on the server, the upload replaces it.
+- The first install (empty server folder) still works with the script, which then also creates the empty `data/`.
+  Create the admin account in the browser afterwards.
+
 ### 2.5 Bringing recipes and menus from a local installation
 Use the app's own import, not FTP. It sets the owners and checks every file:
 1. **On the local site, export:**

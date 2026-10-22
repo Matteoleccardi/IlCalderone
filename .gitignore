@@ -38,3 +38,6 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .DS_Store
+
+# server backups made by deploy-altervista.sh (accounts, settings): never commit
+backups/

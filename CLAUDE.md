@@ -13,6 +13,7 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
 
 - Release for a server: `./deploy.sh [--altervista] [--base-href /sub/] [--data-dir PATH] [--with-data]` (`--altervista` = `AddHandler av-php84 .php` in `.htaccess`: Altervista picks PHP by that line, and uploading our `.htaccess` replaces theirs; keep `.htaccess` files ASCII-only) → `release/IlCalderone-<version>/`
   (+ zip, with `docs/install.md` as INSTALL.md); it builds into `web/dist` and never touches `public/`. Keep `docs/install.md` in sync with it.
+- Upgrade an Altervista site from here: `./deploy-altervista.sh` (dry run; `--apply` to send; needs `lftp`; asks for the FTP password, stores nothing). It never touches the server's `data/` or `*.local.php`; the script is tested against a local folder (`--test-target DIR`, internal). Keep it in sync with `deploy.sh` and `docs/install.md` §2.4b.
 - Build the front end: `cd web && npm run build`. This is `ng build` plus `scripts/publish.mjs`, which copies `web/dist/web/browser` into
   `public/`. **Never point `ng build` output at `public/`**: the builder empties its output folder (api/ + data/).
 - Dev: `cd web && npm run api` (PHP on :8080) and `npm start` (Angular on :4200, proxying /api).
