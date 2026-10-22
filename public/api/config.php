@@ -10,7 +10,7 @@ $config = [
     'data_dir' => __DIR__ . '/../data',
 
     // Feature modules, in any order (dependencies are resolved). "core" is always on.
-    'modules' => ['recipes', 'collections', 'meallog', 'menus', 'shopping'],
+    'modules' => ['recipes', 'collections', 'meallog', 'menus', 'shopping', 'ratings'],
 
     // Max photo upload size in bytes (the browser already shrinks photos to ~1600 px JPEG).
     'max_upload' => 8 * 1024 * 1024,

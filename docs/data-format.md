@@ -110,6 +110,14 @@ Exchange files carry it as `model_data` (`data:application/octet-stream;base64,â
 - **Import is idempotent**: a recipe whose `id` already exists is skipped. Parents are linked after all files are imported,
   so the order doesn't matter.
 
+## Ratings (`calderone-ratings/1`)
+
+`data/ratings/<recipeId>.json`: `{format, recipe, votes: {<userId>: {taste?, ease?, updated}}}`. Two opinions per user and recipe, **taste**
+(how good it is) and **ease** (how simple it is to make), each 0.5 to 5 in steps of 0.5; either can be missing. The file exists only
+while somebody has voted (removed with the recipe and with the user). Anyone who can see a recipe may rate it. A household's rating is
+the average over its members who voted on that criterion (`{avg, n}`; members who did not vote do not count); the API never returns
+who voted what. Schema: `schema/ratings.schema.json`. Not part of the recipe exchange files.
+
 ## Meal log entry
 
 ```json

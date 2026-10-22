@@ -583,6 +583,7 @@ export const fr: Dict = {
   'err.import_format': '« {title} » : format non pris en charge',
   'err.import_exists': '« {title} » existe déjà, ignorée',
   'err.import_failed': '« {title} » : {reason}',
+  'err.rating_invalid': "Une note va de 0,5 à 5 par pas de 0,5",
   'err.collection_not_found': 'Collection introuvable',
   'err.collection_edit_denied': 'Vous ne pouvez pas modifier cette collection',
   'err.collection_name_required': 'Donnez un nom à la collection',

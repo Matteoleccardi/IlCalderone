@@ -68,6 +68,8 @@ final class Messages
         'import_menus_empty' => 'No menus to import',
         'import_menu_exists' => 'Menu "{title}" already exists, skipped',
         'import_menu_recipe_text' => '"{menu}": recipe "{title}" not found, kept as a text dish',
+        // ratings
+        'rating_invalid' => 'A rating is between 0.5 and 5 in steps of 0.5',
         // collections
         'collection_not_found' => 'Collection not found',
         'collection_edit_denied' => 'You cannot edit this collection',

@@ -583,6 +583,7 @@ export const de: Dict = {
   'err.import_format': '„{title}“: Format nicht unterstützt',
   'err.import_exists': '„{title}“ ist schon vorhanden, übersprungen',
   'err.import_failed': '„{title}“: {reason}',
+  'err.rating_invalid': "Eine Bewertung liegt zwischen 0,5 und 5 in Schritten von 0,5",
   'err.collection_not_found': 'Sammlung nicht gefunden',
   'err.collection_edit_denied': 'Du kannst diese Sammlung nicht bearbeiten',
   'err.collection_name_required': 'Gib der Sammlung einen Namen',

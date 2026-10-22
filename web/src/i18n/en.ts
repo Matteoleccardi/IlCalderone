@@ -583,6 +583,7 @@ export const en: Dict = {
   'err.import_format': '"{title}": unsupported format',
   'err.import_exists': '"{title}" already exists, skipped',
   'err.import_failed': '"{title}": {reason}',
+  'err.rating_invalid': "A rating is between 0.5 and 5 in steps of 0.5",
   'err.collection_not_found': 'Collection not found',
   'err.collection_edit_denied': 'You cannot edit this collection',
   'err.collection_name_required': 'Give the collection a name',

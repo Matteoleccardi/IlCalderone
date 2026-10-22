@@ -601,6 +601,7 @@ export const it = {
   'err.import_format': '«{title}»: formato non supportato',
   'err.import_exists': '«{title}» già presente, saltata',
   'err.import_failed': '«{title}»: {reason}',
+  'err.rating_invalid': "Una valutazione va da 0,5 a 5 a passi di 0,5",
   'err.collection_not_found': 'Raccolta non trovata',
   'err.collection_edit_denied': 'Non puoi modificare questa raccolta',
   'err.collection_name_required': 'Dai un nome alla raccolta',

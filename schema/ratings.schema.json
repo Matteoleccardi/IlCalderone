@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data/ratings/<recipeId>.json (calderone-ratings/1)",
+  "description": "The opinions of the users on one recipe: taste (how good it is) and ease (how simple it is to make), each 0.5 to 5 in steps of 0.5. A file exists only while somebody has voted. Households see the average of their members who voted on each criterion; votes are never shown per person.",
+  "type": "object",
+  "required": ["format", "recipe", "votes"],
+  "properties": {
+    "format": { "const": "calderone-ratings/1" },
+    "recipe": { "type": "string" },
+    "votes": {
+      "type": "object",
+      "description": "by user id",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["updated"],
+        "minProperties": 2,
+        "properties": {
+          "taste": { "type": "number", "minimum": 0.5, "maximum": 5, "multipleOf": 0.5 },
+          "ease": { "type": "number", "minimum": 0.5, "maximum": 5, "multipleOf": 0.5 },
+          "updated": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
