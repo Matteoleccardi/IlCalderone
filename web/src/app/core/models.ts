@@ -301,3 +301,32 @@ export interface ShoppingList {
   moved: ShoppingItem[];
   pantry: string[];
 }
+
+// ---------- ratings ----------
+
+/** Two opinions on a recipe, 0.5 to 5 in steps of 0.5; null = no opinion. */
+export interface Rating {
+  taste: number | null;
+  ease: number | null;
+}
+export type RatingKey = keyof Rating;
+export interface RatingAvg {
+  avg: number;
+  n: number;
+}
+export interface HouseholdRating {
+  id: string;
+  name: string;
+  members: number;
+  taste: RatingAvg | null;
+  ease: RatingAvg | null;
+}
+export interface RecipeRating {
+  mine: Rating;
+  households: HouseholdRating[];
+}
+/** Per recipe, for the list: my opinions and the average of me and my household peers who voted. */
+export interface RatingRow {
+  mine: Rating;
+  family: { taste: RatingAvg | null; ease: RatingAvg | null };
+}

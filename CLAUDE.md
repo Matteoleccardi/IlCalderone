@@ -133,6 +133,7 @@ The v0.1 Python/FastAPI prototype lives in `legacy/` and is frozen.
   dropped on save. Course and diet are required when saving from the editor (`facets_required`), not on import
   (`import_facets_missing` warning). Diet suggestion from ingredients: `suggestDiet` (core/facets.ts) = `suggest_diet`
   (tools/calderone_io.py), keep both lists in sync. "Quick" (≤ 20 min) is derived, never stored.
+- **Ratings** (`modules/ratings`, `features/ratings`, `core/ratings.ts`): `data/ratings/<recipeId>.json` holds `votes{userId:{taste?,ease?}}` (0.5 steps). `GET/PUT /recipes/{id}/rating` (mine + one average per household of mine, counting only members who voted on that criterion; never who voted what), `GET /ratings/summary` (per recipe: mine + the average of me and my household peers, for card badges and list sort/filter, done client-side). Anyone who can see a recipe may rate. UI hook: `Feature.recipeMeta` (full widget on the recipe page, compact badge on cards). A server whose `api/config.local.php` sets `modules` must add `'ratings'`.
 - Menu exchange: `Menus::toExchange`/`import` (`schema/menu-exchange.schema.json`); items carry `title` so they match by title elsewhere.
 
 ## Agents (`.claude/agents/`)

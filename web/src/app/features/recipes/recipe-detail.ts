@@ -57,6 +57,9 @@ export class RecipeDetail {
       .filter((f) => !f.module || this.session.has(f.module))
       .flatMap((f) => f.recipePanels ?? []),
   );
+  protected metas = computed(() =>
+    this.features.filter((f) => !f.module || this.session.has(f.module)).flatMap((f) => f.recipeMeta ?? []),
+  );
   protected actions = computed(() =>
     this.features
       .filter((f) => !f.module || this.session.has(f.module))

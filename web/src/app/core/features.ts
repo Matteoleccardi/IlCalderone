@@ -16,6 +16,8 @@ export interface Feature {
   recipePanels?: Type<RecipePanelComponent>[];
   /** Small buttons shown on every recipe card and in the recipe page's actions ("Add to menu"…). */
   recipeActions?: Type<RecipeActionComponent>[];
+  /** Small facts under a recipe's title (ratings…): the full widget on the recipe page, a one-line badge (compact) on cards. */
+  recipeMeta?: Type<RecipeActionComponent>[];
 }
 
 export interface NavItem {

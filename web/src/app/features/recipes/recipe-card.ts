@@ -32,6 +32,9 @@ import { VisibilityBadge } from '../../shared/visibility-badge';
           @if (recipe().parents.length) { <span>{{ 'kind.variant' | t }}</span> }
           <app-visibility [value]="recipe().visibility" />
         </span>
+        @for (m of metas(); track $index) {
+          <ng-container *ngComponentOutlet="m; inputs: { recipe: recipe(), compact: true }" />
+        }
       </div>
     </a>
     @if (actions().length) {
@@ -54,6 +57,9 @@ export class RecipeCard {
   });
   private features = inject(FEATURES);
   private session = inject(SessionService);
+  protected metas = computed(() =>
+    this.features.filter((f) => !f.module || this.session.has(f.module)).flatMap((f) => f.recipeMeta ?? []),
+  );
   /** Buttons contributed by the enabled features (e.g. "Add to menu"). */
   protected actions = computed(() =>
     this.features

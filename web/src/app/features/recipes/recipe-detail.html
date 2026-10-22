@@ -13,6 +13,9 @@
           @if (diet(); as d) { <span>{{ d | t }}</span> }
           <app-visibility [value]="r.visibility" />
         </p>
+        @for (m of metas(); track $index) {
+          <ng-container *ngComponentOutlet="m; inputs: { recipe: r, compact: false }" />
+        }
         <div class="actions main-actions">
           <button type="button" class="primary" (click)="cook(true)" [disabled]="!r.steps.length">{{ 'recipe.cook' | t }}</button>
           @for (a of actions(); track $index) {

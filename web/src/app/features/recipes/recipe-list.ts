@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, signal, ChangeDetectionStra
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { RatingsService } from '../../core/ratings';
 import { I18n, TPipe } from '../../core/i18n';
 import { RecipeSummary } from '../../core/models';
 import { Notify } from '../../core/notify';
@@ -49,6 +50,13 @@ import { RecipeCard } from './recipe-card';
         (click)="showFilters.set(!showFilters())">
         <span aria-hidden="true">⚙</span> {{ 'facet.filters' | t }}@if (active().length) { <span class="count">{{ active().length }}</span> }
       </button>
+      @if (ratings.enabled()) {
+        <select class="sort" name="ord" [attr.aria-label]="'recipes.sort' | t" [ngModel]="ord() || 'title'" (ngModelChange)="setOrd($event)">
+          <option value="title">{{ 'recipes.sort_title' | t }}</option>
+          <option value="taste">★ {{ 'recipes.sort_taste' | t }}</option>
+          <option value="ease">▲ {{ 'recipes.sort_ease' | t }}</option>
+        </select>
+      }
     </form>
     @if (active().length) {
       <p class="facet-list active-filters">
@@ -65,15 +73,29 @@ import { RecipeCard } from './recipe-card';
         <button type="button" class="chip-btn" [class.on]="quick() === '1'" [attr.aria-pressed]="quick() === '1'" (click)="toggleQuick()">
           <span aria-hidden="true">⚡</span> {{ 'facet.quick_long' | t: { n: quickMinutes } }}
         </button>
+        @if (ratings.enabled()) {
+          <div class="rate-filters">
+            <label>{{ 'recipes.min_taste' | t }}
+              <select name="mt" [ngModel]="mt()" (ngModelChange)="setMin('mt', $event)">
+                @for (o of mins; track o) { <option [value]="o">{{ o ? '★ ≥ ' + o : ('rating.any' | t) }}</option> }
+              </select>
+            </label>
+            <label>{{ 'recipes.min_ease' | t }}
+              <select name="me" [ngModel]="me()" (ngModelChange)="setMin('me', $event)">
+                @for (o of mins; track o) { <option [value]="o">{{ o ? '▲ ≥ ' + o : ('rating.any' | t) }}</option> }
+              </select>
+            </label>
+          </div>
+        }
         <app-facet-picker [defs]="d" mode="filter" [value]="filters()" (valueChange)="setFilters($event)" />
       </section>
     }
     @if (loading()) {
       <p class="muted">{{ 'common.loading' | t }}</p>
     } @else if (recipes().length) {
-      <p class="muted small">{{ 'recipes.count' | t: { n: recipes().length } }}</p>
+      <p class="muted small">{{ 'recipes.count' | t: { n: shown().length } }}</p>
       <div class="grid">
-        @for (r of recipes(); track r.id) {
+        @for (r of shown(); track r.id) {
           <app-recipe-card [recipe]="r" />
         }
       </div>
@@ -95,6 +117,12 @@ export class RecipeList {
   readonly season = input<string>('');
   readonly cuisine = input<string>('');
   readonly quick = input<string>('');
+  // ratings: ?ord=taste|ease (best first), ?mt=4 and ?me=3.5 (minimum taste / ease)
+  readonly ord = input<string>('');
+  readonly mt = input<string>('');
+  readonly me = input<string>('');
+  protected mins = ['', '3', '3.5', '4', '4.5'];
+  protected ratings = inject(RatingsService);
   protected quickMinutes = QUICK_MINUTES;
   private facetsSvc = inject(FacetsService);
   protected defs = this.facetsSvc.defs;
@@ -111,9 +139,23 @@ export class RecipeList {
   protected active = computed(() => [
     ...FACET_ORDER.flatMap((name) => (this.filters()[name] as string[]).map((value) => ({ name, value }))),
     ...(this.quick() === '1' ? [{ name: 'quick', value: '1' }] : []),
+    ...(this.mt() ? [{ name: 'mt', value: this.mt() }] : []),
+    ...(this.me() ? [{ name: 'me', value: this.me() }] : []),
   ]);
   protected text = '';
   protected recipes = signal<RecipeSummary[]>([]);
+  /** The list after the rating filters and the order (title order comes from the server). */
+  protected shown = computed(() => {
+    let list = this.recipes();
+    const min = (key: 'taste' | 'ease', v: string) => {
+      if (v) list = list.filter((r) => (this.ratings.score(r.id, key) ?? 0) >= Number(v));
+    };
+    min('taste', this.mt());
+    min('ease', this.me());
+    const by = this.ord() === 'taste' || this.ord() === 'ease' ? this.ord() as 'taste' | 'ease' : null;
+    if (!by) return list;
+    return [...list].sort((a, b) => (this.ratings.score(b.id, by) ?? -1) - (this.ratings.score(a.id, by) ?? -1));
+  });
   protected loading = signal(true);
   private api = inject(Api);
   private i18n = inject(I18n);
@@ -123,6 +165,8 @@ export class RecipeList {
 
   /** The text of an active-filter chip. */
   protected chipText(a: { name: string; value: string }): string {
+    if (a.name === 'mt') return '★ ≥ ' + a.value;
+    if (a.name === 'me') return '▲ ≥ ' + a.value;
     return a.name === 'quick' ? '⚡ ' + this.i18n.t('facet.quick') : this.i18n.t('facet.' + a.name + '.' + a.value);
   }
 
@@ -133,6 +177,7 @@ export class RecipeList {
 
   constructor() {
     this.facetsSvc.ensure().catch(() => {});
+    this.ratings.ensure();
     effect(() => {
       const q = this.q() ?? '';
       const mine = this.mine() === '1';
@@ -181,13 +226,14 @@ export class RecipeList {
 
   protected drop(name: string, value: string): void {
     if (name === 'quick') return this.toggleQuick();
+    if (name === 'mt' || name === 'me') return this.setMin(name, '');
     const f = { ...this.filters() };
     f[name] = (f[name] as string[]).filter((v) => v !== value);
     this.setFilters(f);
   }
 
   protected clearFilters(): void {
-    const queryParams: Record<string, null> = { quick: null };
+    const queryParams: Record<string, null> = { quick: null, mt: null, me: null };
     for (const k of FACET_ORDER) queryParams[k] = null;
     this.router.navigate([], { queryParams, queryParamsHandling: 'merge', replaceUrl: true });
   }
@@ -198,6 +244,14 @@ export class RecipeList {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  protected setOrd(v: string): void {
+    this.router.navigate([], { queryParams: { ord: v === 'title' ? null : v }, queryParamsHandling: 'merge', replaceUrl: true });
+  }
+
+  protected setMin(name: 'mt' | 'me', v: string): void {
+    this.router.navigate([], { queryParams: { [name]: v || null }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
   toggleMine(on: boolean): void {

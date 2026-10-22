@@ -158,7 +158,7 @@ button:disabled { color: var(--muted); border-color: var(--line); cursor: defaul
 button.primary:disabled { background: var(--surface-2); border-color: var(--line); }
 .search { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
 .search-field { position: relative; flex: 1 1 100%; }
-.search input[name="q"] { margin: 0 !important; padding-right: calc(var(--hit) + 4px); }
+.search input[name="q"] { margin: 0 !important; padding-right: calc(var(--hit) + 4px) !important; }
 .search input[name="q"]::-webkit-search-cancel-button { display: none; }
 /* the magnifier sits inside the field, at its right end (one control less than a separate button) */
 .search-go { position: absolute; top: 0; right: 0; bottom: 0; width: var(--hit); min-height: 0; padding: 0; justify-content: center; border: 0; background: none; color: var(--accent); border-radius: 0 var(--r-1) var(--r-1) 0; }
@@ -636,3 +636,35 @@ body.cooking main { padding-top: 0; padding-bottom: calc(5.5rem + var(--bottom-h
 /* confirmation sheet (shared/confirm-sheet.ts): the destructive button is the only filled danger in the app */
 dialog.confirm .confirm-text { font-size: var(--t-md); font-weight: 600; margin: 0 0 .5rem; overflow-wrap: anywhere; }
 button.danger-fill { background: var(--danger); border-color: var(--danger); color: var(--on-danger); font-weight: 700; }
+
+/* ratings (features/ratings): stars = taste, triangles = ease. Own votes in colour, a household's average in grey and smaller */
+.ri-row { display: inline-flex; vertical-align: middle; }
+.ri { display: inline-block; position: relative; flex: none; }
+.ri svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ri-line { fill: none; stroke: var(--line-strong); stroke-width: 1.6; stroke-linejoin: round; }
+.ri-fill { stroke: var(--text); stroke-width: 1.6; stroke-linejoin: round; }
+.ri-taste.ri-mine .ri-fill { fill: var(--primary); }
+.ri-ease.ri-mine .ri-fill { fill: var(--accent); }
+.ri-family .ri-fill, .ri-family .ri-line { fill: var(--muted); stroke: var(--muted); }
+.ri-family .ri-line { fill: none; }
+.rating { margin: 1rem 0; }
+.rating h2 { font-size: var(--t-md); margin: 0 0 .25rem; }
+.rate-row { display: grid; grid-template-columns: 5.5rem auto 2.5rem; align-items: center; gap: 8px; min-height: var(--hit); }
+.rate-label { font-weight: 600; font-size: var(--t-sm); }
+.rate-input { display: inline-flex; border-radius: var(--r-1); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.rate-input .ri-row { pointer-events: none; }
+.rate-value, .rate-num, .fam-item { font-family: var(--font-figure); font-variant-numeric: tabular-nums; font-weight: 700; }
+.rate-value { font-size: var(--t-md); }
+.fam-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--t-sm); color: var(--muted); padding: 2px 0; }
+.fam-name { font-weight: 600; }
+.fam-item { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-sm); }
+.fam-n { font-weight: 400; font-size: var(--t-xs); }
+.rate-badge { display: inline-flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 2px; }
+.rate-badge-item { display: inline-flex; align-items: center; gap: 3px; }
+.rate-num { font-size: var(--t-xs); }
+.ri-family.rate-badge-item { color: var(--muted); }
+.search select.sort { width: 7.5rem; flex: none; margin: 0; min-height: var(--hit); padding-inline: .6rem; }
+.rate-filters { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: .5rem; }
+.rate-filters label { margin: 0; }
+.rate-filters select { width: auto; }
+.sort-pick { margin-left: auto; }

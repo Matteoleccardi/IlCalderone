@@ -180,6 +180,8 @@ SFTP, no rsync).
 - The first install (empty server folder) still works with the script, which then also creates the empty `data/`.
   Create the admin account in the browser afterwards.
 
+> **Version 0.3.x and ratings:** if your server's `api/config.local.php` sets its own `modules` list, add `'ratings'` to it, or the star ratings stay hidden. Without a `modules` line nothing is needed.
+
 ### 2.5 Bringing recipes and menus from a local installation
 Use the app's own import, not FTP. It sets the owners and checks every file:
 1. **On the local site, export:**
