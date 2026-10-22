@@ -166,6 +166,7 @@ fi
 cp -R "$PUB/api" "$OUT/api"
 rm -f "$OUT/api/router-dev.php"                  # only for "php -S" on a PC
 rm -f "$OUT/api/config.local.php"                # never ship your local settings
+{ git -C "$ROOT" rev-parse --short=7 HEAD 2>/dev/null || true; } > "$OUT/api/BUILD"   # the commit code shown next to the version
 cp "$PUB/data/.htaccess" "$PUB/data/index.php" "$OUT/data/"
 
 if [[ -n "$DATA_DIR" ]]; then

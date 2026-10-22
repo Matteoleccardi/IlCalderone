@@ -17,7 +17,7 @@
 </main>
 
 <footer class="foot">
-  <span>Il Calderone {{ session.state()?.version }}</span>
+  <span>Il Calderone v{{ session.state()?.version }}@if (session.state()?.build) {-{{ session.state()?.build }}}</span>
 </footer>
 
 @if (session.user()) {

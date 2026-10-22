@@ -15,6 +15,8 @@ export interface User {
 
 export interface Session {
   version: string;
+  /** Short commit code of the running code ('' if unknown). */
+  build?: string;
   needs_setup: boolean;
   user: User | null;
   modules: string[];

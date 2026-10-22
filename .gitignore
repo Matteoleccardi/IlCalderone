@@ -44,3 +44,4 @@ __pycache__/
 
 # server backups made by deploy-altervista.sh (accounts, settings): never commit
 backups/
+public/api/BUILD

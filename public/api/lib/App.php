@@ -12,6 +12,30 @@ final class App
 {
     public const VERSION = '0.3.0';
 
+    /**
+     * Short commit code of this code, shown next to the version (v0.3.0-abc1234): read live from the git checkout when
+     * there is one (development), else from api/BUILD, which deploy.sh writes into every release. '' when unknown.
+     */
+    public static function build(): string
+    {
+        $git = dirname(__DIR__, 3) . '/.git';
+        $head = is_file($git . '/HEAD') ? trim((string) @file_get_contents($git . '/HEAD')) : '';
+        if (str_starts_with($head, 'ref: ')) {
+            $ref = substr($head, 5);
+            $hash = is_file("$git/$ref") ? trim((string) @file_get_contents("$git/$ref")) : '';
+            if ($hash === '' && is_file($git . '/packed-refs')) {
+                foreach (file($git . '/packed-refs', FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+                    if (str_ends_with($line, ' ' . $ref)) { $hash = strtok($line, ' '); break; }
+                }
+            }
+            $head = $hash;
+        }
+        if (!preg_match('/^[0-9a-f]{7,40}$/', $head)) {
+            $head = is_file(__DIR__ . '/../BUILD') ? trim((string) @file_get_contents(__DIR__ . '/../BUILD')) : '';
+        }
+        return preg_match('/^[0-9a-f]{7,40}$/', $head) ? substr($head, 0, 7) : '';
+    }
+
     private array $routes = [];
     private array $listeners = [];
     /** @var array<string,array> */
