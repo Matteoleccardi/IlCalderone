@@ -70,8 +70,10 @@ const KEY = 'calderone.cook.';
             [class.near]="$index !== current() && distance($index) === 1"
             [class.far]="distance($index) > 1"
             [attr.aria-current]="$index === current() ? 'step' : null"
+            (click)="pick($event, $index)"
           >
-            <button type="button" class="step-pick" (click)="goto($index)"
+            <!-- the whole step is the tap target (the click bubbles up to the li); this button is its one keyboard stop -->
+            <button type="button" class="step-pick"
               [attr.aria-label]="('cook.step_n' | t: { n: $index + 1, total: steps().length }) + (s.title ? ': ' + s.title : '')">
               <span class="step-n">{{ $index + 1 }}</span>
               @if (s.title) { <strong>{{ s.title }}</strong> }
@@ -167,6 +169,12 @@ export class RecipeCook {
         behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       }),
     );
+  }
+
+  /** A tap anywhere on a step makes it the current one, except on its timer buttons. */
+  protected pick(ev: Event, i: number): void {
+    if ((ev.target as Element).closest('.cook-timer')) return;
+    this.goto(i);
   }
 
   protected tick(i: number): void {

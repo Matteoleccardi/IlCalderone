@@ -128,7 +128,6 @@ export const fr: Dict = {
   'recipe.title': 'Recette',
   'recipe.minutes': '{n} min',
   'recipe.cook': "Cuisiner",
-  'recipe.details': "Détails",
   'cook.ingredients': "Ingrédients ({n})",
   'cook.next': "Suivant",
   'cook.prev': "Retour",
@@ -427,6 +426,7 @@ export const fr: Dict = {
 
   'menus.one': 'Menu',
   'menus.plan': 'Au programme',
+  'menus.plan_week': "Au programme (semaine {n})",
   'menus.from_today': "À partir d'aujourd'hui",
   'menus.nothing_planned': 'Rien de prévu : créez un menu ci-dessous.',
   'menus.list': 'Les menus',

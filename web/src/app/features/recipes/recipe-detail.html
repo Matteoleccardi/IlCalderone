@@ -19,8 +19,7 @@
             <ng-container *ngComponentOutlet="a; inputs: { recipe: r, compact: false }" />
           }
         </div>
-        <details class="recipe-details">
-          <summary>{{ 'recipe.details' | t }}</summary>
+        <div class="recipe-details">
           @if (r.visibility === 'household') { <p class="meta"><span>{{ households.name(r.household) }}</span></p> }
           @if (r.rev > 1 && r.updated_by !== r.owner) {
             <p class="meta">{{ 'recipe.edited_by' | t: { name: r.updated_by_name ?? ('common.deleted_user' | t) } }}</p>
@@ -44,7 +43,7 @@
               <button type="button" class="danger" (click)="remove()">{{ 'common.delete' | t }}</button>
             }
           </div>
-        </details>
+        </div>
       </div>
     </header>
 

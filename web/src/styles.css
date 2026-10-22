@@ -114,6 +114,12 @@ label.inline { display: inline-flex; align-items: center; gap: .5rem; margin: 0;
 label.inline select { width: auto; margin: 0; }
 section { margin-bottom: 1.5rem; }
 .narrow { max-width: 520px; }
+/* two related cards next to each other on wide screens, stacked on phones and tablets */
+.side-by-side { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 24px; align-items: start; }
+@media (min-width: 900px) {
+  .side-by-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .side-by-side > section.narrow { max-width: none; margin-inline: 0; }
+}
 section.narrow.card { margin-inline: auto; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.25rem; box-shadow: var(--shadow); }
 .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-bottom: .75rem; }
@@ -577,8 +583,7 @@ a, button, input, select, textarea, label, summary { touch-action: manipulation;
 .recipe-head h1 { margin-bottom: .25rem; }
 .main-actions { margin: .75rem 0; }
 .main-actions .primary { min-height: 3rem; padding-inline: 1.5rem; font-size: var(--t-md); }
-details.recipe-details { margin-bottom: .5rem; }
-details.recipe-details summary { min-height: var(--hit); display: flex; align-items: center; color: var(--accent); }
+.recipe-details { margin-bottom: .5rem; }
 .dish-stage { border: 1px solid var(--line); border-radius: var(--r-2); }
 
 /* cooking mode (features/recipes/recipe-cook.ts): ingredients, steps, timers; the logo and footer step aside */
@@ -604,7 +609,7 @@ body.cooking main { padding-top: 0; padding-bottom: calc(5.5rem + var(--bottom-h
 .ing-tick { position: relative; }
 .ing-tick[aria-pressed="true"]::after { right: 8px; top: 4px; color: var(--accent); font-weight: 700; }
 .cook-steps { list-style: none; margin: 0; padding: 0; font-family: var(--font-read); }
-.cook-steps li { padding: 12px 12px 12px 16px; border-left: 4px solid transparent; margin-bottom: 4px; scroll-margin-block: 8rem; }
+.cook-steps li { cursor: pointer; -webkit-tap-highlight-color: transparent; padding: 12px 12px 12px 16px; border-left: 4px solid transparent; margin-bottom: 4px; scroll-margin-block: 8rem; }
 .cook-steps p { margin: 4px 0 0; font-size: var(--t-md); line-height: 1.55; overflow-wrap: anywhere; hyphens: auto; }
 .step-pick { display: flex; align-items: baseline; gap: 8px; width: 100%; min-height: var(--hit); border: 0; padding: 0; text-align: left; font-family: var(--font);
   font-weight: 700; }

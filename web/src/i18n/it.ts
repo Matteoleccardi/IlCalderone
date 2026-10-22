@@ -136,7 +136,6 @@ export const it = {
   'recipe.title': 'Ricetta',
   'recipe.minutes': '{n} min',
   'recipe.cook': "Cucina",
-  'recipe.details': "Dettagli",
   'cook.ingredients': "Ingredienti ({n})",
   'cook.next': "Avanti",
   'cook.prev': "Indietro",
@@ -442,6 +441,7 @@ export const it = {
   // menus
   'menus.one': 'Menu',
   'menus.plan': 'In programma',
+  'menus.plan_week': "In programma (settimana {n})",
   'menus.from_today': 'Da oggi',
   'menus.nothing_planned': 'Niente in programma: crea un menu qui sotto.',
   'menus.list': 'I menu',
