@@ -157,11 +157,8 @@ button.icon { padding: .3rem .5rem; line-height: 1; }
 button:disabled { color: var(--muted); border-color: var(--line); cursor: default; }
 button.primary:disabled { background: var(--surface-2); border-color: var(--line); }
 .search { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
-.search-field { position: relative; flex: 1 1 100%; }
-.search input[name="q"] { margin: 0 !important; padding-right: calc(var(--hit) + 4px) !important; }
-.search input[name="q"]::-webkit-search-cancel-button { display: none; }
-/* the magnifier sits inside the field, at its right end (one control less than a separate button) */
-.search-go { z-index: 1; position: absolute; top: 0; right: 0; bottom: 0; width: var(--hit); min-height: 0; padding: 0; justify-content: center; border: 0; background: none; color: var(--text); border-radius: 0 var(--r-1) var(--r-1) 0; }
+.search input[name="q"] { flex: 1 1 100%; margin: 0 !important; font-size: var(--t-sm) !important; }
+.search input[name="q"]::placeholder { font-size: var(--t-sm); }
 
 /* badges, chips, tags */
 .badge { display: inline-block; font-size: var(--t-xs); padding: .05rem .5rem; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
@@ -669,3 +666,8 @@ button.danger-fill { background: var(--danger); border-color: var(--danger); col
 .rate-filters label { margin: 0; }
 .rate-filters select { width: auto; }
 .sort-pick { margin-left: auto; }
+
+/* the landing page's search button: a yellow (--primary) square with the lens in --lens (basil; the text colour where basil would not read on the button) */
+.search .search-btn { flex: none; width: var(--hit); min-height: var(--hit); padding: 0; justify-content: center; color: var(--lens); }
+.hero .search input[name="q"] { flex: 1 1 0; min-width: 0; font-size: var(--t-md) !important; }
+.hero .search input[name="q"]::placeholder { font-size: var(--t-md); }

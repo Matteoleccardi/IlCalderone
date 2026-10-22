@@ -145,7 +145,7 @@ PAIRS = [('text', ('bg', 'surface', 'surface2', 'accent_soft')), ('muted', ('bg'
          ('danger', ('bg', 'surface', 'surface2')), ('accent_text', ('accent',)), ('on_danger', ('danger',)),
          ('placeholder', ('bg', 'surface', 'surface2')), ('primary_text', ('primary',))]
 # Borders of controls and icons need 3:1 (WCAG 1.4.11), not 4.5:1.
-UI_PAIRS = [('line_strong', ('bg', 'surface'))]
+UI_PAIRS = [('line_strong', ('bg', 'surface')), ('lens', ('primary',))]
 
 
 def gate(t, soft=None):
@@ -191,6 +191,8 @@ def extras(tok, dark):
     tok.setdefault('primary_text', tok['accent_text'])
     tok.setdefault('line_strong', push(tok['line'], (tok['bg'], tok['surface']), 3.0, tok['text']))
     tok.setdefault('placeholder', tok['muted'])
+    # a glyph on the main button (the search lens): the accent when it reads at 3:1 on the button, else the button's text colour
+    tok.setdefault('lens', tok['accent'] if contrast(tok['accent'], tok['primary']) >= 3.0 else tok['primary_text'])
     return tok
 
 
@@ -218,7 +220,7 @@ def css(tid, kind, tok, on_danger, header):
     names = [('bg', 'bg'), ('surface', 'surface'), ('surface2', 'surface-2'), ('text', 'text'), ('muted', 'muted'),
              ('line', 'line'), ('accent', 'accent'), ('accent_text', 'accent-text'), ('accent_soft', 'accent-soft'),
              ('ok', 'ok'), ('danger', 'danger'), ('shadow', 'shadow'), ('primary', 'primary'),
-             ('primary_text', 'primary-text'), ('line_strong', 'line-strong'), ('placeholder', 'placeholder')]
+             ('primary_text', 'primary-text'), ('line_strong', 'line-strong'), ('placeholder', 'placeholder'), ('lens', 'lens')]
     body = '\n'.join(f'  --{css_name}: {tok[k]};' for k, css_name in names)
     backdrop = 'rgb(0 0 0 / 45%)' if kind == 'light' else 'rgb(0 0 0 / 60%)'
     return (f'{header}\n[data-theme="{tid}"] {{\n{body}\n  --on-danger: {on_danger};\n  --backdrop: {backdrop};\n'

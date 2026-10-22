@@ -24,7 +24,10 @@ import { RecipeIcon } from '../../shared/recipe-icon';
           [placeholder]="'recipes.search_placeholder' | t"
           [attr.aria-label]="'recipes.search' | t"
         />
-        <button type="submit" class="primary">{{ 'recipes.search' | t }}</button>
+        <button type="submit" class="primary search-btn" [attr.aria-label]="'recipes.search' | t">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 21 21" /></svg>
+        </button>
       </form>
       <p class="actions">
         <a routerLink="/ricette/nuova" class="button">+ {{ 'recipes.new' | t }}</a>

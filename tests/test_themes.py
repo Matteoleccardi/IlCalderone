@@ -24,7 +24,7 @@ PAIRS = [
     ("primary-text", ("primary",)),
 ]
 # borders of controls: 3:1 (WCAG 1.4.11)
-UI_PAIRS = [("line-strong", ("bg", "surface"))]
+UI_PAIRS = [("line-strong", ("bg", "surface")), ("lens", ("primary",))]
 
 
 def luminance(hex_colour: str) -> float:
