@@ -163,7 +163,7 @@ SFTP, no rsync).
 ./deploy-altervista.sh              # builds, then only SHOWS what would change (dry run)
 ./deploy-altervista.sh --apply      # does it
 ```
-- It asks for the FTP host (`ftp.<name>.altervista.org`), user and password every time. Nothing is stored; the
+- It asks for the FTP host (`ftp.<name>.altervista.org`; just `<name>` is enough), user and password every time. Nothing is stored; the
   password is never put on a command line. It tries an encrypted (explicit TLS) connection first; if the server
   refuses, it asks you to type `plain` before sending anything unencrypted.
 - With `--apply` it first saves `api/config.local.php` and `data/` (without sessions and photos; `--backup-media` adds

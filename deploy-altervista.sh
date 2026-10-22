@@ -108,6 +108,10 @@ if [[ -z "$TEST_TARGET" ]]; then
   [[ -n "$HOST" ]] || read -r -p "FTP host (e.g. ftp.myname.altervista.org): " HOST
   [[ -n "$FTP_USER" ]] || read -r -p "FTP user: " FTP_USER
   [[ -n "$HOST" && -n "$FTP_USER" ]] || die "host and user are needed"
+  # a bare site name ("calderone") or the site's own address ("calderone.altervista.org") means Altervista's FTP host
+  if [[ "$HOST" != *.* ]]; then HOST="ftp.$HOST.altervista.org"
+  elif [[ "$HOST" == *.altervista.org && "$HOST" != ftp.* ]]; then HOST="ftp.$HOST"; fi
+  echo "    FTP host: $HOST"
   read -r -s -p "FTP password for $FTP_USER (not shown, not stored): " FTP_PASS; echo
   [[ -n "$FTP_PASS" ]] || die "no password given"
   q() { local s="${1//\\/\\\\}"; printf '"%s"' "${s//\"/\\\"}"; }
@@ -152,9 +156,9 @@ if ! REMOTE_LIST="$(lf 'cls -1 .' | names)"; then
     read -r -p "> " ans
     [[ "$ans" == plain ]] || die "stopped"
     TLS=plain
-    REMOTE_LIST="$(lf 'cls -1 .' | names)" || die "could not connect"
+    REMOTE_LIST="$(lf 'cls -1 .' | names)" || die "could not connect to $HOST (check host, user and password)"
   else
-    die "could not connect"
+    die "could not connect to ${HOST:-the server}: check the host (ftp.<name>.altervista.org), user and password"
   fi
 fi
 has() { grep -qx -- "$1" <<<"$REMOTE_LIST"; }
