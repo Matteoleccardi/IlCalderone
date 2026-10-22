@@ -8,6 +8,7 @@ import { NavService } from '../../core/nav';
 import { I18n, LANGS, Lang, TPipe } from '../../core/i18n';
 import { Notify } from '../../core/notify';
 import { SessionService } from '../../core/session';
+import { TimerSide } from '../../core/timer-side';
 import { User } from '../../core/models';
 import { NavIcon } from '../../shared/nav-icon';
 import { ThemePicker } from '../../shared/theme-picker';
@@ -50,6 +51,19 @@ import { ThemePicker } from '../../shared/theme-picker';
           }
         </select>
       </label>
+    </section>
+    <section class="card narrow">
+      <h2>{{ 'timer.title' | t }}</h2>
+      <fieldset class="side-pick">
+        <legend>{{ 'timer.side' | t }}</legend>
+        @for (o of sides; track o.value) {
+          <label class="check">
+            <input type="radio" name="timer-side" [value]="o.value" [checked]="timerSide.side() === o.value" (change)="timerSide.set(o.value)" />
+            {{ o.label | t }}
+          </label>
+        }
+      </fieldset>
+      <p class="muted small">{{ 'timer.side_hint' | t }}</p>
     </section>
     <section class="card narrow">
       <h2>{{ 'theme.title' | t }}</h2>
@@ -98,6 +112,11 @@ export class Account {
   protected old = '';
   protected pw = '';
   protected busy = signal(false);
+  protected timerSide = inject(TimerSide);
+  protected sides = [
+    { value: 'right', label: 'timer.side_right' },
+    { value: 'left', label: 'timer.side_left' },
+  ] as const;
   private nav = inject(NavService);
   private confirm = inject(ConfirmService);
   private households = inject(HouseholdsService);

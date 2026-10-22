@@ -129,7 +129,7 @@ ul.plain li { padding: .25rem 0; }
 /* forms */
 label { display: block; margin-bottom: .75rem; font-weight: 500; }
 label.check { display: inline-flex; align-items: center; gap: .35rem; font-weight: 400; margin: 0; white-space: nowrap; }
-input:not([type="checkbox"]):not([type="file"]), select, textarea {
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea {
   display: block; width: 100%; margin-top: .25rem; padding: .55rem .7rem; font: inherit; color: var(--text);
   background: var(--surface-2); border: 2px solid var(--line-strong); border-radius: var(--r-1);
 }
@@ -430,26 +430,56 @@ ul.batch-list button { grid-column: 2; grid-row: 1 / span 2; }
 ul.batch-list li.bad .muted { color: var(--danger); }
 progress.batch { width: 100%; }
 
-/* kitchen timers: a strip above the bottom tabs while at least one timer exists (shared/timer-dock.ts) */
-:root { --strip-h: 0px; --bottom-h: calc(var(--nav-h) + var(--strip-h)); }
-.timer-strip { position: fixed; left: 0; right: 0; bottom: var(--nav-h); z-index: 30; height: 3.5rem; display: flex; align-items: center; gap: 8px;
-  padding: 0 max(8px, calc((100vw - 560px) / 2)); background: var(--bg); border-top: 2px solid var(--line-strong); }
-.timer-strip ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.timer-chip { flex: none; display: inline-flex; border: 2px solid var(--line-strong); border-radius: 999px; overflow: hidden; background: var(--surface); }
-.timer-chip button { border: 0; border-radius: 0; min-height: var(--hit); justify-content: center; background: none; }
-.timer-time { flex-direction: column; gap: 0; line-height: 1.05; padding: 0 .75rem; }
-.timer-time .big { font-family: var(--font-figure); font-size: var(--t-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+/* kitchen timers: a thin tab on the screen edge (left or right, Account → Timer) that slides out a narrow column of up to
+   5 timers (shared/timer-dock.ts). A touch in the 24px edge band makes the tab bigger for 1.5s (shared/timer-assist.ts). */
+:root { --bottom-h: var(--nav-h); }
+.timer-dock {
+  --tab-w: 28px; --tab-h: 64px; --panel: 9.5rem; --reach: 16px;
+  position: fixed; top: 34dvh; z-index: 40; display: flex; align-items: flex-start; touch-action: pan-y;
+  transition: transform .2s ease;
+}
+.timer-dock[data-side="right"] { right: 0; transform: translateX(var(--panel)); }
+.timer-dock[data-side="left"] { left: 0; flex-direction: row-reverse; transform: translateX(calc(-1 * var(--panel))); }
+.timer-dock.open { transform: none !important; }
+.timer-dock.big { --tab-w: 56px; --tab-h: 112px; }
+.timer-dock.help { --reach: 44px; }
+.timer-tab {
+  width: var(--tab-w); height: var(--tab-h); min-height: 0; padding: 0; flex: none; flex-direction: column; justify-content: center; gap: 6px;
+  background: var(--accent); color: var(--accent-text); border: 2px solid var(--accent); position: relative;
+  transition: width .25s ease, height .25s ease;
+}
+.timer-dock[data-side="right"] .timer-tab { border-radius: var(--r-2) 0 0 var(--r-2); border-right: 0; }
+.timer-dock[data-side="left"] .timer-tab { border-radius: 0 var(--r-2) var(--r-2) 0; border-left: 0; }
+/* the visible tab is 28px wide; the tappable area reaches further into the page (and further still after a second miss) */
+.timer-tab::before { content: ""; position: absolute; top: calc(-1 * var(--reach) / 2); bottom: calc(-1 * var(--reach) / 2); }
+.timer-dock[data-side="right"] .timer-tab::before { left: calc(-1 * var(--reach)); right: 0; }
+.timer-dock[data-side="left"] .timer-tab::before { right: calc(-1 * var(--reach)); left: 0; }
+.timer-tab svg { transition: transform .25s ease; }
+.timer-dock.big .timer-tab svg { transform: scale(1.3); }
+.timer-tab-left { writing-mode: vertical-rl; font-family: var(--font-figure); font-weight: 800; font-variant-numeric: tabular-nums; font-size: var(--t-xs); }
+.timer-dock.big .timer-tab-left { font-size: var(--t-sm); }
+.timer-dock.ringing .timer-tab { animation: timer-ring 1s steps(1) infinite; }
+@keyframes timer-ring { 50% { background: var(--primary); border-color: var(--primary); color: var(--primary-text); } }
+.timer-panel {
+  width: var(--panel); background: var(--surface); border: 2px solid var(--line-strong); padding: 6px; display: flex; flex-direction: column; gap: 6px;
+}
+.timer-dock[data-side="right"] .timer-panel { border-right: 0; border-radius: 0 0 0 var(--r-2); }
+.timer-dock[data-side="left"] .timer-panel { border-left: 0; border-radius: 0 0 var(--r-2) 0; }
+.timer-row { display: grid; grid-template-columns: minmax(0, 1fr) var(--hit); gap: 4px; align-items: stretch; margin: 0; }
+.timer-row button { min-height: var(--hit); padding: 2px; justify-content: center; }
+.timer-time { flex-direction: column; gap: 0; line-height: 1.1; }
+.timer-time .big { font-family: var(--font-figure); font-size: var(--t-md); font-weight: 800; font-variant-numeric: tabular-nums; }
 .timer-time .small { font-size: var(--t-xs); color: var(--muted); font-weight: 600; }
-.timer-x { min-width: var(--hit); padding: 0; border-left: 2px solid var(--line) !important; }
-.timer-chip.paused .big { color: var(--muted); }
-.timer-chip.done { background: var(--primary); border-color: var(--primary); animation: timer-ring 1s steps(1) infinite; }
-.timer-chip.done button { color: var(--primary-text); }
-.timer-chip.done .small, .timer-chip.done .big { color: var(--primary-text); }
-@keyframes timer-ring { 50% { background: var(--surface); } }
-.timer-chip.done .timer-time { font-weight: 700; }
-button.timer-add { flex: none; min-width: var(--hit); min-height: var(--hit); justify-content: center; padding: 0; font-size: var(--t-lg); }
-@media (prefers-reduced-motion: reduce) { .timer-chip.done { animation: none; } }
-@media print { .timer-strip, .wheel-overlay { display: none !important; } }
+.timer-row.paused .big { color: var(--muted); }
+.timer-row.done .timer-time { background: var(--primary); border-color: var(--primary); color: var(--primary-text); animation: timer-flash 1s steps(1) infinite; }
+.timer-row.done .timer-time .big, .timer-row.done .timer-time .small { color: inherit; }
+@keyframes timer-flash { 50% { background: var(--surface); color: var(--text); } }
+button.timer-row.timer-add { display: flex; justify-content: center; height: var(--hit); font-size: var(--t-lg); color: var(--muted); border-style: dashed; background: transparent; }
+@media (prefers-reduced-motion: reduce) {
+  .timer-dock, .timer-tab, .timer-tab svg { transition: none; }
+  .timer-dock.ringing .timer-tab, .timer-row.done .timer-time { animation: none; }
+}
+@media print { .timer-dock, .wheel-overlay { display: none !important; } }
 
 /* new timer: full-screen wheels (shared/duration-wheel.ts); one row = 44px */
 .wheel-overlay {

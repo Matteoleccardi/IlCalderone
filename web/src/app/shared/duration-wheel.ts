@@ -95,7 +95,7 @@ export class DurationWheel implements AfterViewInit, OnDestroy {
     { key: 'm', max: 59, label: 'timer.min_label' },
     { key: 's', max: 59, label: 'timer.sec_label' },
   ];
-  protected presets = [1, 3, 5, 10, 15, 20, 30, 45, 60];
+  protected presets = [1, 3, 5, 9, 10, 11, 15, 20, 30, 45, 60];
   protected values = signal<[number, number, number]>(splitDuration(readLast()));
   protected total = computed(() => joinDuration(...this.values()));
   protected fmt = formatLeft;
