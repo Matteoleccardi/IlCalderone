@@ -452,7 +452,7 @@ progress.batch { width: 100%; }
 body.cooking .timer-dock { bottom: calc(var(--nav-h) + 6.5rem); } /* above the Weiter bar */
 .timer-dock.help { --reach: 44px; }
 .timer-tab {
-  width: var(--tab-w); height: var(--tab-h); min-height: 0; padding: 0; flex: none; flex-direction: column; justify-content: center; gap: 6px;
+  width: var(--tab-w); height: var(--tab-h); min-height: 0; padding: 0 3px; flex: none; flex-direction: column; justify-content: center; gap: 6px; overflow: hidden;
   background: var(--accent); color: var(--accent-text); border: 2px solid var(--accent); position: relative;
   transition: width .25s ease;
 }
@@ -462,8 +462,8 @@ body.cooking .timer-dock { bottom: calc(var(--nav-h) + 6.5rem); } /* above the W
 .timer-tab::before { content: ""; position: absolute; top: calc(-1 * var(--reach) / 2); bottom: calc(-1 * var(--reach) / 2); }
 .timer-dock[data-side="right"] .timer-tab::before { left: calc(-1 * var(--reach)); right: 0; }
 .timer-dock[data-side="left"] .timer-tab::before { right: calc(-1 * var(--reach)); left: 0; }
-.timer-tab svg { transition: transform .25s ease; }
-.timer-dock.big .timer-tab svg { transform: scale(1.2); }
+.timer-dock[data-side="right"] .timer-tab { align-items: flex-start; }
+.timer-dock[data-side="left"] .timer-tab { align-items: flex-end; }
 .timer-tab-left { writing-mode: vertical-rl; font-family: var(--font-figure); font-weight: 800; font-variant-numeric: tabular-nums; font-size: var(--t-xs); }
 .timer-dock.big .timer-tab-left { font-size: var(--t-sm); }
 .timer-dock.ringing .timer-tab { animation: timer-ring 1s steps(1) infinite; }
